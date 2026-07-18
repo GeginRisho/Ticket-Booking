@@ -26,18 +26,21 @@ const app = express();
 app.use(helmet());
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, postman, curl)
     if (!origin) return callback(null, true);
+
     const allowedOrigins = process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
       : [];
-    const isAllowed = allowedOrigins.includes('*') || 
-                      allowedOrigins.includes(origin) || 
-                      allowedOrigins.length === 0 ||
-                      (process.env.NODE_ENV !== 'production' && (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')));
-    if (isAllowed) {
+
+    const isLocal = origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
+    const isVercel = origin.endsWith('.vercel.app') || /vercel\.app$/.test(origin);
+    const isExplicit = allowedOrigins.includes('*') || allowedOrigins.includes(origin);
+
+    if (isLocal || isVercel || isExplicit || allowedOrigins.length === 0) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
     }
   },
   credentials: true
