@@ -143,9 +143,9 @@ const Login = () => {
           <div className="grid grid-cols-1 gap-3">
             {[
               { label: 'Super Admin', email: 'superadmin@ticketshow.com', pass: 'Admin@123', color: 'bg-red-50 border-red-200 text-red-800' },
-              { label: 'Platform Admin', email: 'admin@ticketshow.com', pass: 'Admin@123', color: 'bg-blue-50 border-blue-200 text-blue-800' },
+              { label: 'Admin', email: 'admin@ticketshow.com', pass: 'Admin@123', color: 'bg-blue-50 border-blue-200 text-blue-800' },
               { label: 'Theatre Owner', email: 'owner@ticketshow.com', pass: 'Owner@123', color: 'bg-purple-50 border-purple-200 text-purple-800' },
-              { label: 'Customer User', email: 'customer@ticketshow.com', pass: 'Customer@123', color: 'bg-emerald-50 border-emerald-200 text-emerald-800' }
+              { label: 'Customer', email: 'customer@ticketshow.com', pass: 'Customer@123', color: 'bg-emerald-50 border-emerald-200 text-emerald-800' }
             ].map((role) => (
               <button
                 key={role.label}

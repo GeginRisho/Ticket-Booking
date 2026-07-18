@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FiSearch, FiMenu, FiX, FiUser, FiLogOut, FiHeart, FiBell, FiMapPin } from 'react-icons/fi';
+import { FiSearch, FiMenu, FiX, FiUser, FiLogOut, FiHeart, FiBell, FiMapPin, FiSettings } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../context/AuthContext';
@@ -12,8 +12,8 @@ const navLinks = [
   { name: 'Events', path: '/events' },
   { name: 'Theatres', path: '/theatres' },
   { name: 'Offers', path: '/offers' },
-  { name: 'About', path: '/about', hideOnAuth: true },
-  { name: 'Contact', path: '/contact', hideOnAuth: true }
+  { name: 'About', path: '/about' },
+  { name: 'Contact', path: '/contact' }
 ];
 
 const Navbar = () => {
@@ -37,7 +37,6 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile drawer on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsProfileDropdownOpen(false);
@@ -49,7 +48,7 @@ const Navbar = () => {
     localStorage.setItem('selectedCity', cityId);
     window.dispatchEvent(new Event('cityChanged'));
     const cityName = CITIES.find(c => c.id === cityId)?.city_name || '';
-    toast.success(`Location updated to ${cityName}`);
+    toast.success(`Location set to ${cityName}`);
   };
 
   const handleNavSearchSubmit = (e) => {
@@ -66,11 +65,13 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const dashboardPath = user?.role === 'Super Admin' || user?.role === 'Admin'
+  const userRole = user?.role?.role_name || user?.role;
+
+  const dashboardPath = userRole === 'Super Admin' || userRole === 'Admin'
     ? '/dashboard/admin'
-    : user?.role === 'Theatre Owner'
+    : userRole === 'Theatre Owner'
       ? '/dashboard/theatre-owner'
-      : user?.role === 'Event Organizer'
+      : userRole === 'Event Organizer'
         ? '/dashboard/organizer'
         : '/dashboard/customer';
 
@@ -83,14 +84,14 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-4 md:px-8 flex items-center justify-between gap-4">
         
-        {/* LOGO AREA */}
+        {/* LOGO */}
         <div className="flex items-center gap-6">
-          <Link to="/" className="text-2xl font-black tracking-tighter text-amber-500">
+          <Link to="/" className="text-2xl font-black tracking-tighter text-amber-500 flex items-center">
             Ticket<span className="text-gray-900">Show</span>
           </Link>
         </div>
 
-        {/* DESKTOP NAVIGATION (Visible on large screens and standard laptops) */}
+        {/* DESKTOP NAV */}
         <nav className="hidden lg:flex items-center gap-6">
           <Link
             to="/"
@@ -101,26 +102,23 @@ const Navbar = () => {
           >
             Home
           </Link>
-          {navLinks
-            .filter(link => !link.hideOnAuth || !isAuthenticated)
-            .map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={cn(
-                  'text-xs uppercase tracking-wider font-extrabold transition-colors hover:text-amber-500',
-                  location.pathname.startsWith(link.path) ? 'text-amber-500' : 'text-gray-600'
-                )}
-              >
-                {link.name}
-              </Link>
-            ))}
+          {navLinks.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={cn(
+                'text-xs uppercase tracking-wider font-extrabold transition-colors hover:text-amber-500',
+                location.pathname.startsWith(link.path) ? 'text-amber-500' : 'text-gray-600'
+              )}
+            >
+              {link.name}
+            </Link>
+          ))}
         </nav>
 
-        {/* DESKTOP ACTIONS (Search, Location Selector, Login Buttons or Profile Dropdown) */}
+        {/* DESKTOP ACTIONS */}
         <div className="hidden lg:flex items-center gap-4">
-          
-          {/* Search Bar */}
+          {/* Search */}
           <form onSubmit={handleNavSearchSubmit} className="relative">
             <input
               type="text"
@@ -132,7 +130,7 @@ const Navbar = () => {
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={13} />
           </form>
 
-          {/* Location Selector */}
+          {/* Location Dropdown */}
           <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-full">
             <FiMapPin className="text-amber-500" size={14} />
             <select
@@ -148,7 +146,7 @@ const Navbar = () => {
             </select>
           </div>
 
-          {/* Authentication Conditional Views */}
+          {/* User Auth Buttons */}
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
               <Link to="/dashboard/customer/wishlist" className="p-2 text-gray-600 hover:text-amber-500 transition-colors" title="My Wishlist">
@@ -163,15 +161,15 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center gap-2 px-3.5 py-2 bg-gray-100 hover:bg-amber-100 hover:text-amber-600 text-gray-800 rounded-xl border border-gray-200 transition-colors font-black text-xs cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-gray-100 hover:bg-amber-100 hover:text-amber-600 text-gray-800 rounded-xl border border-gray-200 transition-colors font-black text-xs cursor-pointer"
                 >
                   <FiUser />
-                  <span>Profile</span>
+                  <span>Profile ▼</span>
                 </button>
                 {isProfileDropdownOpen && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setIsProfileDropdownOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-2xl shadow-xl z-20 overflow-hidden text-xs font-extrabold text-gray-700">
+                    <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl z-20 overflow-hidden text-xs font-extrabold text-gray-700">
                       <Link 
                         to="/dashboard/customer/profile" 
                         onClick={() => setIsProfileDropdownOpen(false)}
@@ -180,12 +178,65 @@ const Navbar = () => {
                         My Profile
                       </Link>
                       <Link 
-                        to={dashboardPath} 
+                        to="/dashboard/customer" 
                         onClick={() => setIsProfileDropdownOpen(false)}
                         className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100"
                       >
-                        Dashboard
+                        My Bookings
                       </Link>
+                      <Link 
+                        to="/dashboard/customer/wishlist" 
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                        className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100"
+                      >
+                        Wishlist
+                      </Link>
+                      
+                      {userRole === 'Theatre Owner' && (
+                        <Link 
+                          to="/dashboard/theatre-owner" 
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                          className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100 text-amber-600"
+                        >
+                          Theatre Dashboard
+                        </Link>
+                      )}
+                      {userRole === 'Admin' && (
+                        <Link 
+                          to="/dashboard/admin" 
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                          className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100 text-amber-600"
+                        >
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      {userRole === 'Super Admin' && (
+                        <>
+                          <Link 
+                            to="/dashboard/admin" 
+                            onClick={() => setIsProfileDropdownOpen(false)}
+                            className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100 text-amber-600"
+                          >
+                            Super Admin Dashboard
+                          </Link>
+                          <Link 
+                            to="/dashboard/theatre-owner" 
+                            onClick={() => setIsProfileDropdownOpen(false)}
+                            className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100 text-amber-600"
+                          >
+                            Theatre Dashboard
+                          </Link>
+                        </>
+                      )}
+                      
+                      <Link 
+                        to="/dashboard/customer/profile" 
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                        className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100"
+                      >
+                        Settings
+                      </Link>
+                      
                       <button 
                         onClick={() => { setIsProfileDropdownOpen(false); handleLogout(); }}
                         className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-500 font-extrabold"
@@ -209,9 +260,8 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* MOBILE LAYOUT & TOGGLE MENU (Visible on tablet and mobile viewports) */}
+        {/* MOBILE LAYOUT & HAMBURGER */}
         <div className="lg:hidden flex items-center gap-3">
-          {/* Mobile Select dropdown */}
           <select
             value={selectedCity}
             onChange={handleCityChange}
@@ -224,10 +274,9 @@ const Navbar = () => {
             ))}
           </select>
 
-          {/* Hamburger Icon */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 text-gray-700 hover:bg-gray-100 rounded-xl"
+            className="p-2 text-gray-700 hover:bg-gray-100 rounded-xl cursor-pointer"
           >
             {isMobileMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
           </button>
@@ -235,7 +284,7 @@ const Navbar = () => {
 
       </div>
 
-      {/* MOBILE DRAWER CONTAINER */}
+      {/* MOBILE DRAWER */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -244,9 +293,7 @@ const Navbar = () => {
             exit={{ opacity: 0, height: 0 }}
             className="lg:hidden bg-white border-t border-gray-100 overflow-hidden"
           >
-            <div className="px-4 py-6 space-y-4 flex flex-col font-black text-sm">
-              
-              {/* Search Bar for Mobile */}
+            <div className="px-4 py-6 space-y-4 flex flex-col font-black text-sm text-left">
               <form onSubmit={handleNavSearchSubmit} className="relative mb-2">
                 <input
                   type="text"
@@ -258,40 +305,55 @@ const Navbar = () => {
                 <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
               </form>
 
-              {/* Navigation links */}
               <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-700 hover:text-amber-500 py-1">
                 Home
               </Link>
-              {navLinks
-                .filter(link => !link.hideOnAuth || !isAuthenticated)
-                .map((link) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-gray-700 hover:text-amber-500 py-1"
-                  >
-                    {link.name}
-                  </Link>
-                ))}
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-gray-700 hover:text-amber-500 py-1"
+                >
+                  {link.name}
+                </Link>
+              ))}
 
               <div className="h-px bg-gray-100 my-2" />
 
-              {/* Auth conditional action items */}
               {isAuthenticated ? (
                 <div className="flex flex-col gap-3">
-                  <Link to="/dashboard/customer/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
-                    My Wishlist
-                  </Link>
-                  <Link to="/dashboard/customer/notifications" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
-                    Notifications
-                  </Link>
                   <Link to="/dashboard/customer/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
                     My Profile
                   </Link>
-                  <Link to={dashboardPath} onClick={() => setIsMobileMenuOpen(false)} className="w-full py-2.5 text-center rounded-xl bg-gray-100 text-gray-800 border border-gray-200">
-                    Dashboard
+                  <Link to="/dashboard/customer" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
+                    My Bookings
                   </Link>
+                  <Link to="/dashboard/customer/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
+                    Wishlist
+                  </Link>
+                  
+                  {userRole === 'Theatre Owner' && (
+                    <Link to="/dashboard/theatre-owner" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
+                      Theatre Dashboard
+                    </Link>
+                  )}
+                  {userRole === 'Admin' && (
+                    <Link to="/dashboard/admin" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  {userRole === 'Super Admin' && (
+                    <>
+                      <Link to="/dashboard/admin" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
+                        Super Admin Dashboard
+                      </Link>
+                      <Link to="/dashboard/theatre-owner" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
+                        Theatre Dashboard
+                      </Link>
+                    </>
+                  )}
+
                   <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full py-2.5 text-center text-red-500 bg-red-50 rounded-xl">
                     Logout
                   </button>

@@ -157,38 +157,6 @@ const LandingPage = () => {
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen text-text-primary text-left">
-      {/* Top Banner Search */}
-      <div className="bg-white border-b border-border sticky top-0 z-40 py-4 shadow-sm">
-        <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <Link to="/" className="text-2xl font-black text-amber-500 tracking-tighter">
-            Ticket<span className="text-text-primary">Show</span>
-          </Link>
-          
-          <form onSubmit={handleSearchSubmit} className="relative w-full md:max-w-lg">
-            <input
-              type="text"
-              placeholder="Search for movies, events, concert bookings, theatres..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 text-sm rounded-2xl border border-border bg-gray-50 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
-            />
-            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-          </form>
-
-          <div className="flex items-center gap-2">
-            <FiMapPin className="text-amber-500" />
-            <select
-              value={selectedCity}
-              onChange={e => handleCityChange(e.target.value)}
-              className="text-sm border-0 font-black bg-transparent focus:outline-none text-text-primary cursor-pointer hover:text-amber-500 transition-colors"
-            >
-              {CITIES.map(c => (
-                <option key={c.id} value={c.id} className="text-text-primary bg-white">{c.city_name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
 
       {/* Large Hero Carousel */}
       {nowShowingMovies.length > 0 && (

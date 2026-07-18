@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from '../components/layout/ProtectedRoute';
 import Loader from '../components/ui/Loader';
+import MainLayout from '../layouts/MainLayout';
 
 // Lazy load pages for code splitting & performance optimization
 const LandingPage = lazy(() => import('../pages/LandingPage'));
@@ -40,17 +41,20 @@ const AppRoutes = () => {
       }
     >
       <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<LandingPage />} />
+        {/* Public routes wrapped in MainLayout */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/movies" element={<MoviesPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/movie/:id" element={<MovieDetails />} />
+          <Route path="/event/:id" element={<EventDetails />} />
+          <Route path="/offers" element={<Offers />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+        </Route>
+
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/movies" element={<MoviesPage />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/movie/:id" element={<MovieDetails />} />
-        <Route path="/event/:id" element={<EventDetails />} />
-        <Route path="/offers" element={<Offers />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
