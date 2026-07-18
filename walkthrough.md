@@ -42,7 +42,7 @@ Result: App booted successfully and connected to PostgreSQL database instance.
 
 ### Health Endpoint Check
 ```powershell
-Invoke-RestMethod -Uri http://localhost:5000/health
+Invoke-RestMethod -Uri http://127.0.0.1:5000/health
 ```
 Output:
 ```json
@@ -55,7 +55,7 @@ Output:
 
 ### Authentication Test
 ```powershell
-Invoke-RestMethod -Method Post -Uri http://localhost:5000/api/auth/login -ContentType "application/json" -Body '{"email":"admin@ticketbooking.com","password":"Password123!"}'
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:5000/api/auth/login -ContentType "application/json" -Body '{"email":"admin@ticketbooking.com","password":"Password123!"}'
 ```
 Output:
 ```json

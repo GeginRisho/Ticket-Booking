@@ -693,7 +693,7 @@
     }
   ],
   "variable": [
-    { "key": "base_url", "value": "http://localhost:5000", "type": "string" },
+    { "key": "base_url", "value": "http://127.0.0.1:5000", "type": "string" },
     { "key": "access_token", "value": "", "type": "string" },
     { "key": "refresh_token", "value": "", "type": "string" },
     { "key": "reset_token", "value": "", "type": "string" }

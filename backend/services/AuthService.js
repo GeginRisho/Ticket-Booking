@@ -173,7 +173,7 @@ class AuthService {
     const resetToken = jwtSignForgotPasswordToken(user.id);
     
     // In production, send email. Here, we log it and return it in response for API verification.
-    console.log(`[PASSWORD RESET LINK]: http://localhost:5000/api/auth/reset-password?token=${resetToken}`);
+    console.log(`[PASSWORD RESET LINK]: /api/auth/reset-password?token=${resetToken}`);
 
     return {
       message: 'Password reset link generated successfully (check server logs/response)',

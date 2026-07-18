@@ -92,7 +92,7 @@ Ticket-Booking/
 ```env
 PORT=5000
 NODE_ENV=development
-DB_HOST=localhost
+DB_HOST=127.0.0.1
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=your_db_password
@@ -104,7 +104,7 @@ BCRYPT_SALT_ROUNDS=12
 
 ### Frontend Configuration (`/frontend/.env`)
 ```env
-VITE_API_BASE_URL=http://localhost:5000/api
+VITE_API_URL=http://127.0.0.1:5000/api
 ```
 
 ---
@@ -116,7 +116,7 @@ Launch the database, backend services, and frontend app in one command:
 ```bash
 docker-compose up --build
 ```
-This runs the client on `http://localhost:3000` and the backend on `http://localhost:5000`.
+This runs the client on `http://127.0.0.1:3000` and the backend on `http://127.0.0.1:5000`.
 
 ### Option 2: Local Manual Setup
 
