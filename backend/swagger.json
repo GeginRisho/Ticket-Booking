@@ -1,0 +1,1162 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Online Movie & Event Ticket Booking Platform - DB & Auth API Documentation",
+    "description": "Enterprise-ready database schema APIs and session JWT Authentication/Authorization system resembling BookMyShow.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "description": "Creates a new user profile with Customer, Theatre Owner, or Event Organizer roles.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "full_name": { "type": "string", "example": "Jane Doe" },
+                  "email": { "type": "string", "example": "jane.doe@example.com" },
+                  "phone": { "type": "string", "example": "+15555551234" },
+                  "password": { "type": "string", "example": "SecurePass123!" },
+                  "role_name": { "type": "string", "enum": ["Customer", "Theatre Owner", "Event Organizer"], "example": "Customer" },
+                  "city_id": { "type": "string", "format": "uuid", "example": "a1111111-1111-1111-1111-111111111111" }
+                },
+                "required": ["full_name", "email", "phone", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User created successfully" },
+          "400": { "description": "Validation or email duplicate error" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login and authenticate a user",
+        "description": "Authenticates user credentials and returns JWT access token and refreshes cookies.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "admin@ticketbooking.com" },
+                  "password": { "type": "string", "example": "Password123!" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful, tokens returned" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "Logout a user",
+        "description": "Removes and invalidates the secure refresh token session.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": { "type": "string", "example": "eyJhbGciOi..." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Logged out successfully" }
+        }
+      }
+    },
+    "/api/auth/refresh-token": {
+      "post": {
+        "summary": "Refresh expired access token",
+        "description": "Generates a new access token and rotates the refresh token using database stored session.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": { "type": "string", "example": "eyJhbGciOi..." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Access token refreshed" },
+          "401": { "description": "Invalid refresh session" }
+        }
+      }
+    },
+    "/api/auth/forgot-password": {
+      "post": {
+        "summary": "Request forgot password reset link",
+        "description": "Logs reset link and returns temporary token for user simulation.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "admin@ticketbooking.com" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Link generated" }
+        }
+      }
+    },
+    "/api/auth/reset-password": {
+      "post": {
+        "summary": "Reset password using reset token",
+        "description": "Verifies the reset token and updates the user's password.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": { "type": "string", "example": "eyJhb..." },
+                  "password": { "type": "string", "example": "NewStrongPass123!" }
+                },
+                "required": ["token", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password updated successfully" },
+          "400": { "description": "Expired or invalid token" }
+        }
+      }
+    },
+    "/api/auth/change-password": {
+      "put": {
+        "summary": "Change current password",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currentPassword": { "type": "string", "example": "Password123!" },
+                  "newPassword": { "type": "string", "example": "NewSecurePass999!" }
+                },
+                "required": ["currentPassword", "newPassword"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password changed successfully" }
+        }
+      }
+    },
+    "/api/auth/profile": {
+      "get": {
+        "summary": "Get logged in user profile",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Profile data returned" }
+        }
+      },
+      "put": {
+        "summary": "Update user profile details",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "full_name": { "type": "string", "example": "John Customer Modified" },
+                  "profile_image": { "type": "string", "example": "https://example.com/avatar.jpg" },
+                  "city_id": { "type": "string", "format": "uuid", "example": "a2222222-2222-2222-2222-222222222222" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Profile updated" }
+        }
+      }
+    },
+    "/api/movies": {
+      "get": {
+        "summary": "Get all movies",
+        "description": "Retrieve list of movies with optional filtering by genre, language, status, city_id, and search query.",
+        "parameters": [
+          { "name": "genre", "in": "query", "schema": { "type": "string" } },
+          { "name": "language", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["coming_soon", "now_showing", "ended"] } },
+          { "name": "city_id", "in": "query", "schema": { "type": "string", "format": "uuid" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Successful retrieval of movies" }
+        }
+      },
+      "post": {
+        "summary": "Create a new movie",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "poster": { "type": "string", "format": "url" },
+                  "banner": { "type": "string", "format": "url" },
+                  "language": { "type": "string" },
+                  "genre": { "type": "string" },
+                  "duration": { "type": "integer" },
+                  "age_rating": { "type": "string", "enum": ["U", "UA", "A", "R", "PG", "PG-13"] },
+                  "release_date": { "type": "string", "format": "date" },
+                  "trailer_url": { "type": "string", "format": "url" },
+                  "status": { "type": "string", "enum": ["coming_soon", "now_showing", "ended"] }
+                },
+                "required": ["title", "language", "genre", "duration", "age_rating", "release_date"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Movie created successfully" }
+        }
+      }
+    },
+    "/api/movies/{id}": {
+      "get": {
+        "summary": "Get movie details by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Detailed movie info returned" }
+        }
+      },
+      "put": {
+        "summary": "Update movie details",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "poster": { "type": "string", "format": "url" },
+                  "banner": { "type": "string", "format": "url" },
+                  "language": { "type": "string" },
+                  "genre": { "type": "string" },
+                  "duration": { "type": "integer" },
+                  "age_rating": { "type": "string" },
+                  "release_date": { "type": "string", "format": "date" },
+                  "trailer_url": { "type": "string", "format": "url" },
+                  "status": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Movie updated successfully" }
+        }
+      },
+      "delete": {
+        "summary": "Delete movie",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Movie deleted successfully" }
+        }
+      }
+    },
+    "/api/movies/{id}/cast": {
+      "post": {
+        "summary": "Add cast member to movie",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "actor_name": { "type": "string" },
+                  "character_name": { "type": "string" },
+                  "photo": { "type": "string", "format": "url" }
+                },
+                "required": ["actor_name", "character_name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Cast member added" }
+        }
+      }
+    },
+    "/api/movies/{id}/cast/{castId}": {
+      "delete": {
+        "summary": "Remove cast member from movie",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "castId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Cast member removed" }
+        }
+      }
+    },
+    "/api/theatres": {
+      "get": {
+        "summary": "Get all theatres",
+        "description": "Retrieve list of theatres with optional filtering by city_id, status, and owner_id.",
+        "parameters": [
+          { "name": "city_id", "in": "query", "schema": { "type": "string", "format": "uuid" } },
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["active", "inactive", "pending_approval"] } },
+          { "name": "owner_id", "in": "query", "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Successful retrieval of theatres" }
+        }
+      },
+      "post": {
+        "summary": "Create a new theatre",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "city_id": { "type": "string", "format": "uuid" },
+                  "theatre_name": { "type": "string" },
+                  "address": { "type": "string" },
+                  "latitude": { "type": "number" },
+                  "longitude": { "type": "number" },
+                  "phone": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "description": { "type": "string" }
+                },
+                "required": ["city_id", "theatre_name", "address"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Theatre created successfully" }
+        }
+      }
+    },
+    "/api/theatres/{id}": {
+      "get": {
+        "summary": "Get theatre details by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Detailed theatre info returned" }
+        }
+      },
+      "put": {
+        "summary": "Update theatre details",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "city_id": { "type": "string", "format": "uuid" },
+                  "theatre_name": { "type": "string" },
+                  "address": { "type": "string" },
+                  "latitude": { "type": "number" },
+                  "longitude": { "type": "number" },
+                  "phone": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Theatre updated successfully" }
+        }
+      },
+      "delete": {
+        "summary": "Delete theatre",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Theatre deleted successfully" }
+        }
+      }
+    },
+    "/api/theatres/{id}/status": {
+      "patch": {
+        "summary": "Approve or reject a theatre (Admin only)",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": { "type": "string", "enum": ["active", "inactive"] }
+                },
+                "required": ["status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Theatre status updated successfully" }
+        }
+      }
+    },
+    "/api/theatres/{theatreId}/screens": {
+      "get": {
+        "summary": "Get screens for a theatre",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "theatreId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Successful retrieval of screens" }
+        }
+      },
+      "post": {
+        "summary": "Create a new screen in a theatre",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "theatreId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "screen_name": { "type": "string" },
+                  "rows": { "type": "integer" },
+                  "columns": { "type": "integer" }
+                },
+                "required": ["screen_name", "rows", "columns"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Screen created successfully" }
+        }
+      }
+    },
+    "/api/screens/{id}": {
+      "get": {
+        "summary": "Get screen details by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Detailed screen info returned" }
+        }
+      },
+      "put": {
+        "summary": "Update screen details",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "screen_name": { "type": "string" },
+                  "rows": { "type": "integer" },
+                  "columns": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Screen updated successfully" }
+        }
+      },
+      "delete": {
+        "summary": "Delete screen",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Screen deleted successfully" }
+        }
+      }
+    },
+    "/api/shows": {
+      "get": {
+        "summary": "Get all shows",
+        "description": "Retrieve scheduled shows with filtering by movie_id, screen_id, date, and city_id.",
+        "parameters": [
+          { "name": "movie_id", "in": "query", "schema": { "type": "string", "format": "uuid" } },
+          { "name": "screen_id", "in": "query", "schema": { "type": "string", "format": "uuid" } },
+          { "name": "city_id", "in": "query", "schema": { "type": "string", "format": "uuid" } },
+          { "name": "date", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "Successful retrieval of shows" }
+        }
+      },
+      "post": {
+        "summary": "Create a new show schedule",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "movie_id": { "type": "string", "format": "uuid" },
+                  "screen_id": { "type": "string", "format": "uuid" },
+                  "show_date": { "type": "string", "format": "date" },
+                  "start_time": { "type": "string", "example": "14:30:00" },
+                  "end_time": { "type": "string", "example": "17:00:00" },
+                  "language": { "type": "string" },
+                  "format": { "type": "string" }
+                },
+                "required": ["movie_id", "screen_id", "show_date", "start_time", "end_time", "language", "format"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Show created successfully" }
+        }
+      }
+    },
+    "/api/shows/{id}": {
+      "get": {
+        "summary": "Get show details by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Detailed show info returned" }
+        }
+      },
+      "put": {
+        "summary": "Update show details",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "movie_id": { "type": "string", "format": "uuid" },
+                  "screen_id": { "type": "string", "format": "uuid" },
+                  "show_date": { "type": "string", "format": "date" },
+                  "start_time": { "type": "string" },
+                  "end_time": { "type": "string" },
+                  "language": { "type": "string" },
+                  "format": { "type": "string" },
+                  "status": { "type": "string", "enum": ["active", "cancelled", "sold_out"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Show updated successfully" }
+        }
+      },
+      "delete": {
+        "summary": "Delete show",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Show deleted successfully" }
+        }
+      }
+    },
+    "/api/shows/{id}/seats": {
+      "get": {
+        "summary": "Get seats layout and availability for a show",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Seat layout details with availability flags returned" }
+        }
+      }
+    },
+    "/api/events/categories": {
+      "get": {
+        "summary": "Get all event categories",
+        "responses": {
+          "200": { "description": "Successful retrieval of categories" }
+        }
+      },
+      "post": {
+        "summary": "Create a new event category (Admin only)",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category_name": { "type": "string" }
+                },
+                "required": ["category_name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Category created successfully" }
+        }
+      }
+    },
+    "/api/events": {
+      "get": {
+        "summary": "Get all events",
+        "description": "Retrieve list of events with filtering by city_id, category_id, status, and search query.",
+        "parameters": [
+          { "name": "city_id", "in": "query", "schema": { "type": "string", "format": "uuid" } },
+          { "name": "category_id", "in": "query", "schema": { "type": "string", "format": "uuid" } },
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["active", "cancelled", "completed"] } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Successful retrieval of events" }
+        }
+      },
+      "post": {
+        "summary": "Create a new event",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category_id": { "type": "string", "format": "uuid" },
+                  "city_id": { "type": "string", "format": "uuid" },
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "venue": { "type": "string" },
+                  "banner": { "type": "string", "format": "url" },
+                  "start_date": { "type": "string", "format": "date-time" },
+                  "end_date": { "type": "string", "format": "date-time" },
+                  "tickets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ticket_type": { "type": "string" },
+                        "price": { "type": "number" },
+                        "available_quantity": { "type": "integer" }
+                      },
+                      "required": ["ticket_type", "price", "available_quantity"]
+                    }
+                  }
+                },
+                "required": ["category_id", "city_id", "title", "venue", "start_date", "end_date"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Event created successfully" }
+        }
+      }
+    },
+    "/api/events/{id}": {
+      "get": {
+        "summary": "Get event details by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Detailed event info with tickets returned" }
+        }
+      },
+      "put": {
+        "summary": "Update event details",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category_id": { "type": "string", "format": "uuid" },
+                  "city_id": { "type": "string", "format": "uuid" },
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "venue": { "type": "string" },
+                  "banner": { "type": "string", "format": "url" },
+                  "start_date": { "type": "string", "format": "date-time" },
+                  "end_date": { "type": "string", "format": "date-time" },
+                  "status": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Event updated successfully" }
+        }
+      },
+      "delete": {
+        "summary": "Delete event",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Event deleted successfully" }
+        }
+      }
+    },
+    "/api/wishlist": {
+      "get": {
+        "summary": "Get logged in user wishlist",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Wishlist retrieval successful" }
+        }
+      },
+      "post": {
+        "summary": "Add item to wishlist",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "movie_id": { "type": "string", "format": "uuid" },
+                  "event_id": { "type": "string", "format": "uuid" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Wishlist item added successfully" }
+        }
+      }
+    },
+    "/api/wishlist/{id}": {
+      "delete": {
+        "summary": "Remove item from wishlist",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Wishlist item removed successfully" }
+        }
+      }
+    },
+    "/api/coupons/validate": {
+      "post": {
+        "summary": "Validate coupon code against purchase total",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "coupon_code": { "type": "string" },
+                  "total_amount": { "type": "number" }
+                },
+                "required": ["coupon_code", "total_amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Coupon is valid, returns discount values" }
+        }
+      }
+    },
+    "/api/coupons": {
+      "get": {
+        "summary": "Get all coupons (Admin only)",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List of all coupons returned" }
+        }
+      },
+      "post": {
+        "summary": "Create a new coupon (Admin only)",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "coupon_code": { "type": "string" },
+                  "discount_type": { "type": "string", "enum": ["percentage", "flat"] },
+                  "discount_value": { "type": "number" },
+                  "minimum_amount": { "type": "number" },
+                  "expiry_date": { "type": "string", "format": "date-time" },
+                  "usage_limit": { "type": "integer" }
+                },
+                "required": ["coupon_code", "discount_type", "discount_value", "expiry_date", "usage_limit"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Coupon created successfully" }
+        }
+      }
+    },
+    "/api/coupons/{id}": {
+      "get": {
+        "summary": "Get coupon details by ID (Admin only)",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Coupon details returned" }
+        }
+      },
+      "put": {
+        "summary": "Update coupon details (Admin only)",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "coupon_code": { "type": "string" },
+                  "discount_type": { "type": "string" },
+                  "discount_value": { "type": "number" },
+                  "minimum_amount": { "type": "number" },
+                  "expiry_date": { "type": "string", "format": "date-time" },
+                  "usage_limit": { "type": "integer" },
+                  "status": { "type": "string", "enum": ["active", "inactive"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Coupon updated successfully" }
+        }
+      },
+      "delete": {
+        "summary": "Delete coupon (Admin only)",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Coupon deleted successfully" }
+        }
+      }
+    },
+    "/api/notifications": {
+      "get": {
+        "summary": "Get logged in user notifications",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List of notifications returned" }
+        }
+      }
+    },
+    "/api/notifications/read-all": {
+      "patch": {
+        "summary": "Mark all notifications as read",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Notifications marked as read successfully" }
+        }
+      }
+    },
+    "/api/notifications/{id}/read": {
+      "patch": {
+        "summary": "Mark specific notification as read",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Notification marked as read successfully" }
+        }
+      }
+    },
+    "/api/bookings/my-bookings": {
+      "get": {
+        "summary": "Get logged in user bookings list",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "User bookings returned successfully" }
+        }
+      }
+    },
+    "/api/bookings/{id}": {
+      "get": {
+        "summary": "Get booking details by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Booking details returned successfully" }
+        }
+      }
+    },
+    "/api/bookings/movie": {
+      "post": {
+        "summary": "Create a movie show booking",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "show_id": { "type": "string", "format": "uuid" },
+                  "seat_ids": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "uuid" }
+                  },
+                  "coupon_code": { "type": "string" }
+                },
+                "required": ["show_id", "seat_ids"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Movie booking created, pending payment" }
+        }
+      }
+    },
+    "/api/bookings/event": {
+      "post": {
+        "summary": "Create an event ticket booking",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "event_ticket_id": { "type": "string", "format": "uuid" },
+                  "quantity": { "type": "integer" },
+                  "coupon_code": { "type": "string" }
+                },
+                "required": ["event_ticket_id", "quantity"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Event booking created, pending payment" }
+        }
+      }
+    },
+    "/api/bookings/{id}/cancel": {
+      "post": {
+        "summary": "Cancel booking by ID",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Booking cancelled successfully" }
+        }
+      }
+    },
+    "/api/payments/order": {
+      "post": {
+        "summary": "Create a Razorpay payment order for a booking",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "booking_id": { "type": "string", "format": "uuid" }
+                },
+                "required": ["booking_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Payment order created successfully" }
+        }
+      }
+    },
+    "/api/payments/verify": {
+      "post": {
+        "summary": "Verify payment transaction signature",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "booking_id": { "type": "string", "format": "uuid" },
+                  "razorpay_order_id": { "type": "string" },
+                  "razorpay_payment_id": { "type": "string" },
+                  "razorpay_signature": { "type": "string" },
+                  "payment_method": { "type": "string" }
+                },
+                "required": ["booking_id", "razorpay_order_id", "razorpay_payment_id", "razorpay_signature"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Payment verified and booking confirmed" }
+        }
+      }
+    },
+    "/api/payments/{id}/refund": {
+      "post": {
+        "summary": "Process payment refund (Admin only)",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": { "type": "number" },
+                  "reason": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Refund processed successfully" }
+        }
+      }
+    },
+    "/api/dashboard": {
+      "get": {
+        "summary": "Get dashboard statistics (Admin / Theatre Owner only)",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Dashboard statistics returned successfully" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

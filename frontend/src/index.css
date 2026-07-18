@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Premium Light Theme Colors */
+  --bg-color: #F8F9FA;
+  --bg-secondary: #FFFFFF;
+  --bg-sidebar: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-input: #FFFFFF;
+  --border-color: #E5E7EB;
+  
+  --brand-primary: #FFC107;
+  --brand-primary-hover: #FFB300;
+  --brand-primary-active: #FFD54F;
+  --brand-hover-bg: #FFF8E1;
+  
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-placeholder: #9CA3AF;
+  
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-sidebar: 2px 0 10px rgba(0, 0, 0, 0.02);
+  --shadow-navbar: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+@theme {
+  --color-primary: var(--brand-primary);
+  --color-primary-hover: var(--brand-primary-hover);
+  --color-primary-active: var(--brand-primary-active);
+  --color-primary-text: var(--text-primary);
+  
+  --color-background: var(--bg-color);
+  --color-secondary: var(--bg-secondary);
+  --color-sidebar: var(--bg-sidebar);
+  --color-card: var(--bg-card);
+  --color-input: var(--bg-input);
+  --color-border: var(--border-color);
+  --color-hover-bg: var(--brand-hover-bg);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-placeholder: var(--text-placeholder);
+  
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-error);
+  --color-accent: var(--brand-primary-hover);
+}
+
+@layer base {
+  body {
+    @apply bg-background text-text-primary antialiased selection:bg-primary selection:text-text-primary transition-colors duration-300;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Accessible focus indicators */
+  button:focus-visible, 
+  a:focus-visible, 
+  input:focus-visible, 
+  select:focus-visible, 
+  textarea:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-md border border-border rounded-[24px] transition-all duration-300;
+    box-shadow: var(--shadow-card);
+  }
+  .card-premium {
+    @apply bg-white border border-border rounded-[24px] transition-all duration-300;
+    box-shadow: var(--shadow-card);
+  }
+  .btn-gradient {
+    @apply bg-gradient-to-r from-primary to-accent hover:from-primary-hover hover:to-accent text-text-primary font-semibold rounded-full shadow-sm hover:shadow transition-all duration-300;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
