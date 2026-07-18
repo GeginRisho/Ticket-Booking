@@ -48,11 +48,13 @@ const restrictTo = (...roles) => {
       return next(new AppError('User role not identified.', 403));
     }
 
-    if (!roles.includes(req.user.role)) {
-      return next(new AppError('You do not have permission to perform this action.', 403));
+    const userRole = req.user.role.role_name || req.user.role;
+
+    if (userRole === 'Super Admin' || roles.includes(userRole)) {
+      return next();
     }
 
-    next();
+    return next(new AppError('You do not have permission to perform this action.', 403));
   };
 };
 

@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
   const userRole = user?.role?.role_name || user?.role;
 
-  if (requiredRole && userRole !== requiredRole) {
+  if (requiredRole && userRole !== requiredRole && userRole !== 'Super Admin') {
     // Redirect to unauthorized 403 fallback route
     return <Navigate to="/unauthorized" replace />;
   }

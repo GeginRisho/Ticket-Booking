@@ -42,7 +42,7 @@ router.get('/:id', validateId, MovieController.getMovie);
 
 // Admin-only protected routes
 router.use(protect);
-router.use(restrictTo('Admin'));
+router.use(restrictTo('Admin', 'Theatre Owner'));
 
 router.post('/', createMovieValidator, MovieController.createMovie);
 router.put('/:id', updateMovieValidator, MovieController.updateMovie);

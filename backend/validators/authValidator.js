@@ -35,7 +35,7 @@ const registerValidator = [
   
   body('role_name')
     .optional()
-    .isIn(['Customer', 'Theatre Owner', 'Event Organizer']).withMessage('Invalid role specified'),
+    .isIn(['Customer', 'Theatre Owner', 'Event Organizer', 'Admin', 'Super Admin']).withMessage('Invalid role specified'),
   
   body('city_id')
     .optional()

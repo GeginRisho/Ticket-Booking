@@ -13,7 +13,7 @@ const Role = sequelize.define('Role', {
     unique: true,
     validate: {
       notEmpty: true,
-      isIn: [['Admin', 'Customer', 'Theatre Owner', 'Event Organizer']]
+      isIn: [['Admin', 'Customer', 'Theatre Owner', 'Event Organizer', 'Super Admin']]
     }
   }
 }, {

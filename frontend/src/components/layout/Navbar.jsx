@@ -1,183 +1,256 @@
-import React, { useState, useEffect } from'react';
-import { Link, useLocation, useNavigate } from'react-router-dom';
-import { FiSearch, FiMenu, FiX, FiUser, FiLogOut, FiSun, FiMoon } from'react-icons/fi';
-import { motion, AnimatePresence } from'framer-motion';
-import { cn } from'../../utils/cn';
-import { useAuth } from'../../context/AuthContext';
-import { useTheme } from'../../context/ThemeContext';
-import UserSidebar from '../dashboard/UserSidebar';
-import { toast } from'react-hot-toast';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { FiSearch, FiMenu, FiX, FiUser, FiLogOut, FiHeart, FiBell, FiMapPin } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../../utils/cn';
+import { useAuth } from '../../context/AuthContext';
+import { CITIES } from '../../utils/constants';
+import toast from 'react-hot-toast';
 
 const navLinks = [
- { name:'Movies', path:'/movies' },
- { name:'Events', path:'/events' },
- { name:'Theatres', path:'/theatres' },
+  { name: 'Home', path: '/' },
+  { name: 'Movies', path: '/movies' },
+  { name: 'Events', path: '/events' },
+  { name: 'Theatres', path: '/theatres' },
+  { name: 'Offers', path: '/offers' },
+  { name: 'About', path: '/about' },
+  { name: 'Contact', path: '/contact' }
 ];
 
 const Navbar = () => {
- const [isScrolled, setIsScrolled] = useState(false);
- const [isDrawerOpen, setIsDrawerOpen] = useState(false);
- const location = useLocation();
- const navigate = useNavigate();
- const { isAuthenticated, user, logout } = useAuth();
- const { theme, toggleTheme } = useTheme();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [navSearch, setNavSearch] = useState('');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
 
- useEffect(() => {
- const handleScroll = () => {
- setIsScrolled(window.scrollY > 20);
- };
- window.addEventListener('scroll', handleScroll);
- return () => window.removeEventListener('scroll', handleScroll);
- }, []);
+  const [selectedCity, setSelectedCity] = useState(
+    localStorage.getItem('selectedCity') || CITIES[0]?.id || ''
+  );
 
- useEffect(() => {
- setIsDrawerOpen(false);
- }, [location.pathname]);
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
- const handleLogout = async () => {
- await logout();
- toast.success('Logged out successfully');
- navigate('/');
- };
+  const handleCityChange = (e) => {
+    const cityId = e.target.value;
+    setSelectedCity(cityId);
+    localStorage.setItem('selectedCity', cityId);
+    window.dispatchEvent(new Event('cityChanged'));
+    const cityName = CITIES.find(c => c.id === cityId)?.city_name || '';
+    toast.success(`Location set to ${cityName}`);
+  };
 
-  const isDashboardRoute = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/profile');
-  const showSidebar = isAuthenticated && isDashboardRoute;
+  const handleNavSearchSubmit = (e) => {
+    e.preventDefault();
+    if (navSearch.trim()) {
+      navigate(`/search?query=${encodeURIComponent(navSearch.trim())}`);
+      setNavSearch('');
+    }
+  };
 
- return (
- <>
-  <header
-  className={cn(
-  'fixed top-0 right-0 z-50 transition-all duration-300 border-b border-transparent',
-  showSidebar ? 'md:left-72 left-0' : 'left-0',
-  isScrolled ?'bg-secondary/90 backdrop-blur-md border-border shadow-lg py-4' :'bg-transparent py-6'
-  )}
-  >
- <div className="container mx-auto px-4 md:px-8 flex items-center justify-between">
-  <div className="flex items-center gap-4">
-      <button 
-        onClick={() => setIsDrawerOpen(true)}
-        className="md:hidden p-2 -ml-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+  const handleLogout = async () => {
+    await logout();
+    toast.success('Logged out successfully');
+    navigate('/');
+  };
+
+  const dashboardPath = user?.role === 'Super Admin' || user?.role === 'Admin'
+    ? '/dashboard/admin'
+    : user?.role === 'Theatre Owner'
+      ? '/dashboard/theatre-owner'
+      : user?.role === 'Event Organizer'
+        ? '/dashboard/organizer'
+        : '/dashboard/customer';
+
+  return (
+    <>
+      <header
+        className={cn(
+          'fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-transparent bg-white text-gray-900',
+          isScrolled ? 'border-gray-200 shadow-md py-3' : 'py-4'
+        )}
       >
-        <FiMenu size={24} />
-      </button>
-    <Link to="/" className={cn("text-2xl font-bold tracking-tighter text-primary", isAuthenticated ? "md:hidden" : "")}>
-    Ticket<span className="dark:text-white text-gray-900">Show</span>
-    </Link>
-  </div>
+        <div className="container mx-auto px-4 md:px-8 flex items-center justify-between gap-4">
+          
+          {/* Logo & Location */}
+          <div className="flex items-center gap-6">
+            <Link to="/" className="text-2xl font-black tracking-tighter text-amber-500 flex items-center">
+              Ticket<span className="text-gray-900">Show</span>
+            </Link>
 
- {/* Desktop Nav */}
- <nav className="hidden md:flex items-center gap-8">
- {navLinks.map((link) => (
- <Link
- key={link.path}
- to={link.path}
- className={cn(
-'text-sm font-medium transition-colors hover:text-primary',
- location.pathname.startsWith(link.path) ?'text-primary' :'dark:text-gray-300 text-gray-600'
- )}
- >
- {link.name}
- </Link>
- ))}
- 
- {/* Partner with Us Dropdown */}
- <div className="relative group cursor-pointer">
-   <div className="text-sm font-medium dark:text-gray-300 text-gray-600 hover:text-primary transition-colors py-2 flex items-center gap-1">
-     Partner with Us
-     <svg className="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-   </div>
-   <div className="absolute left-0 top-full w-56 bg-white dark:bg-gray-900/95 border dark:border-gray-700 border-gray-300 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden transform origin-top-left scale-95 group-hover:scale-100">
-     <div className="px-2 py-2 flex flex-col gap-1">
-       <Link to="/register" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:dark:bg-gray-800 hover:bg-gray-100 text-sm transition-colors dark:text-white text-gray-900 font-medium">
-         Become an Event Organizer
-       </Link>
-       <Link to="/register" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:dark:bg-gray-800 hover:bg-gray-100 text-sm transition-colors dark:text-white text-gray-900 font-medium">
-         Become a Theatre Owner
-       </Link>
-       <div className="h-px dark:bg-gray-800 bg-gray-200 my-1"></div>
-       <Link to="/login" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:dark:bg-gray-800 hover:bg-gray-100 text-sm transition-colors dark:text-white text-gray-900 font-medium">
-         Partner Login
-       </Link>
-     </div>
-   </div>
- </div>
- </nav>
+            {/* City Dropdown */}
+            <div className="hidden sm:flex items-center gap-1 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-full">
+              <FiMapPin className="text-amber-500" size={14} />
+              <select
+                value={selectedCity}
+                onChange={handleCityChange}
+                className="bg-transparent border-0 font-extrabold text-xs text-gray-700 focus:ring-0 focus:outline-none cursor-pointer pr-2"
+              >
+                {CITIES.map(city => (
+                  <option key={city.id} value={city.id} className="text-gray-800">
+                    {city.city_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-  {/* Desktop Actions */}
-  <div className="hidden md:flex items-center gap-4">
-  <button onClick={toggleTheme} className="text-text-secondary hover:text-primary transition-colors p-2">
-  {theme ==='dark' ? <FiSun size={20} /> : <FiMoon size={20} />}
-  </button>
-  
-  <Link to="/search" className="flex items-center gap-2 bg-input px-4 py-2 rounded-full border border-border text-text-secondary hover:border-primary transition-colors">
-    <FiSearch size={16} />
-    <span className="text-sm">Search...</span>
-  </Link>
+          {/* Center Links (Desktop) */}
+          <nav className="hidden xl:flex items-center gap-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={cn(
+                  'text-xs uppercase tracking-wider font-extrabold transition-colors hover:text-amber-500',
+                  (link.path === '/' ? location.pathname === '/' : location.pathname.startsWith(link.path))
+                    ? 'text-amber-500'
+                    : 'text-gray-600'
+                )}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </nav>
 
-  <button className="relative text-text-secondary hover:text-primary transition-colors p-2">
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-    <span className="absolute top-1.5 right-2 w-2 h-2 bg-primary rounded-full"></span>
-  </button>
-  {isAuthenticated ? (
-  <div className="relative group">
-  <div className="flex items-center gap-2 cursor-pointer py-2">
-  <div className="w-9 h-9 rounded-full overflow-hidden bg-card border border-border">
-  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.fullName ||'User'}`} alt="avatar" className="w-full h-full object-cover" />
-  </div>
-  </div>
- 
- {/* Dropdown Menu */}
- <div className="absolute right-0 top-full w-56 bg-gray-900/95 border dark:border-gray-700 border-gray-300 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden transform origin-top-right scale-95 group-hover:scale-100">
- <div className="p-2 border-b border-gray-800 mb-1">
- <p className="text-xs dark:text-gray-400 text-gray-500 px-3">{user?.email}</p>
- </div>
- <div className="px-2 pb-2 flex flex-col gap-1">
- <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:dark:bg-gray-800 bg-gray-100 text-sm transition-colors dark:text-white text-gray-900 font-medium">
- Dashboard
- </Link>
- <Link to="/profile" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:dark:bg-gray-800 bg-gray-100 text-sm transition-colors dark:text-white text-gray-900 font-medium">
- Profile Settings
- </Link>
-  {user?.role === 'theatre_owner' && (
-  <Link to="/admin" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-yellow-200 dark:bg-yellow-900/40 text-sm transition-colors text-primary font-medium">
-  Admin Dashboard
-  </Link>
-  )}
-  {user?.role === 'event_organizer' && (
-  <Link to="/organizer/dashboard" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-yellow-200 dark:bg-yellow-900/40 text-sm transition-colors text-primary font-medium">
-  Organizer Dashboard
-  </Link>
-  )}
- <div className="h-px dark:bg-gray-800 bg-gray-100 my-1"></div>
- <button onClick={handleLogout} className="flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-xl hover:bg-red-500/20 text-sm transition-colors text-red-500 font-medium">
- <FiLogOut /> Logout
- </button>
- </div>
- </div>
- </div>
- ) : (
- <Link
- to="/login"
- className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white px-4 py-2 rounded-full text-sm font-medium transition-colors"
- >
- <FiUser /> Sign In
- </Link>
- )}
- </div>
+          {/* Search & Actions */}
+          <div className="hidden md:flex items-center gap-4">
+            <form onSubmit={handleNavSearchSubmit} className="relative">
+              <input
+                type="text"
+                placeholder="Search movies, events..."
+                value={navSearch}
+                onChange={e => setNavSearch(e.target.value)}
+                className="bg-gray-100 text-xs font-semibold px-4 py-2 pl-9 rounded-full border border-gray-200 text-gray-800 focus:outline-none focus:border-amber-400 w-44 focus:w-56 transition-all"
+              />
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+            </form>
 
- {/* Mobile Menu Toggle */}
- <div className="md:hidden flex items-center gap-2">
- <button onClick={toggleTheme} className="dark:text-gray-300 text-gray-600 p-2">
- {theme ==='dark' ? <FiSun size={24} /> : <FiMoon size={24} />}
- </button>
- </div>
- </div>
- </header>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <Link to="/dashboard/customer/wishlist" className="p-2 text-gray-600 hover:text-amber-500 transition-colors" title="My Wishlist">
+                  <FiHeart size={18} />
+                </Link>
+                <Link to="/dashboard/customer/notifications" className="relative p-2 text-gray-600 hover:text-amber-500 transition-colors" title="Notifications">
+                  <FiBell size={18} />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full"></span>
+                </Link>
+                <Link to={dashboardPath} className="flex items-center gap-1.5 text-xs font-black bg-gray-100 hover:bg-amber-100 hover:text-amber-600 text-gray-800 px-3.5 py-2 rounded-xl border border-gray-200 transition-colors">
+                  <FiUser /> Dashboard
+                </Link>
+                <button onClick={handleLogout} className="text-xs font-black text-red-500 hover:bg-red-50 px-3 py-2 rounded-xl transition-colors cursor-pointer">
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link to="/login" className="text-xs font-extrabold text-gray-700 hover:text-amber-500 transition-colors px-3 py-2">
+                  Sign In
+                </Link>
+                <Link to="/register" className="text-xs font-black bg-amber-400 hover:bg-amber-500 text-gray-900 px-4 py-2 rounded-xl shadow-xs transition-all">
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
 
-  {/* Global Drawer (Mobile) & Permanent Sidebar (Desktop if Auth) */}
-  <UserSidebar isOpen={isDrawerOpen} setIsOpen={setIsDrawerOpen} isAuthenticated={isAuthenticated} showPermanent={showSidebar} />
-  </>
- );
+          {/* Toggle Menu (Mobile) */}
+          <div className="md:hidden flex items-center gap-3">
+            {/* Mobile city selector */}
+            <select
+              value={selectedCity}
+              onChange={handleCityChange}
+              className="bg-transparent border-0 font-extrabold text-xs text-gray-700 focus:ring-0 focus:outline-none cursor-pointer pr-1"
+            >
+              {CITIES.map(city => (
+                <option key={city.id} value={city.id}>
+                  📍 {city.city_name.slice(0,3)}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-gray-700 hover:bg-gray-100 rounded-xl"
+            >
+              {isMobileMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
+            </button>
+          </div>
+
+        </div>
+
+        {/* Mobile Dropdown Panel */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-white border-t border-gray-100 overflow-hidden"
+            >
+              <div className="px-4 py-6 space-y-4 flex flex-col font-black text-sm">
+                <form onSubmit={handleNavSearchSubmit} className="relative mb-2">
+                  <input
+                    type="text"
+                    placeholder="Search movies, events..."
+                    value={navSearch}
+                    onChange={e => setNavSearch(e.target.value)}
+                    className="w-full bg-gray-100 text-xs font-semibold px-4 py-2.5 pl-9 rounded-xl border border-gray-200 text-gray-800"
+                  />
+                  <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                </form>
+
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-gray-700 hover:text-amber-500 py-1"
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+
+                <div className="h-px bg-gray-100 my-2" />
+
+                {isAuthenticated ? (
+                  <div className="flex flex-col gap-3">
+                    <Link to="/dashboard/customer/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
+                      My Wishlist
+                    </Link>
+                    <Link to="/dashboard/customer/notifications" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
+                      Notifications
+                    </Link>
+                    <Link to={dashboardPath} onClick={() => setIsMobileMenuOpen(false)} className="w-full py-2 text-center rounded-xl bg-gray-100 text-gray-800 border border-gray-200">
+                      Dashboard
+                    </Link>
+                    <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full py-2 text-center text-red-500 bg-red-50 rounded-xl">
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 pt-2">
+                    <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="w-full py-2.5 text-center text-gray-700 border border-gray-200 rounded-xl">
+                      Sign In
+                    </Link>
+                    <Link to="/register" onClick={() => setIsMobileMenuOpen(false)} className="w-full py-2.5 text-center bg-amber-400 text-gray-900 rounded-xl">
+                      Sign Up
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
+    </>
+  );
 };
 
 export default Navbar;

@@ -14,6 +14,11 @@ const SeatBooking = lazy(() => import('../pages/SeatBooking'));
 const Payment = lazy(() => import('../pages/Payment'));
 const DigitalTicket = lazy(() => import('../pages/DigitalTicket'));
 const EventDetails = lazy(() => import('../pages/EventDetails'));
+const Offers = lazy(() => import('../pages/Offers'));
+const About = lazy(() => import('../pages/About'));
+const Contact = lazy(() => import('../pages/Contact'));
+const ForgotPassword = lazy(() => import('../pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('../pages/ResetPassword'));
 
 // Dashboard lazy loaded views
 const AdminDashboard = lazy(() => import('../dashboard/admin/AdminDashboard'));
@@ -43,6 +48,11 @@ const AppRoutes = () => {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/movie/:id" element={<MovieDetails />} />
         <Route path="/event/:id" element={<EventDetails />} />
+        <Route path="/offers" element={<Offers />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Protected Customer checkouts */}
         <Route
