@@ -67,13 +67,13 @@ const Navbar = () => {
 
   const userRole = user?.role?.role_name || user?.role;
 
-  const dashboardPath = userRole === 'Super Admin' || userRole === 'Admin'
-    ? '/dashboard/admin'
-    : userRole === 'Theatre Owner'
-      ? '/dashboard/theatre-owner'
-      : userRole === 'Event Organizer'
-        ? '/dashboard/organizer'
-        : '/dashboard/customer';
+  const dashboardPath = userRole === 'Super Admin'
+    ? '/super-admin/dashboard'
+    : userRole === 'Admin'
+      ? '/admin/dashboard'
+      : userRole === 'Theatre Owner'
+        ? '/owner/dashboard'
+        : '/customer/dashboard';
 
   return (
     <header
@@ -149,10 +149,10 @@ const Navbar = () => {
           {/* User Auth Buttons */}
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
-              <Link to="/dashboard/customer/wishlist" className="p-2 text-gray-600 hover:text-amber-500 transition-colors" title="My Wishlist">
+              <Link to="/wishlist" className="p-2 text-gray-600 hover:text-amber-500 transition-colors" title="My Wishlist">
                 <FiHeart size={18} />
               </Link>
-              <Link to="/dashboard/customer/notifications" className="relative p-2 text-gray-600 hover:text-amber-500 transition-colors" title="Notifications">
+              <Link to="/notifications" className="relative p-2 text-gray-600 hover:text-amber-500 transition-colors" title="Notifications">
                 <FiBell size={18} />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full"></span>
               </Link>
@@ -171,21 +171,21 @@ const Navbar = () => {
                     <div className="fixed inset-0 z-10" onClick={() => setIsProfileDropdownOpen(false)} />
                     <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl z-20 overflow-hidden text-xs font-extrabold text-gray-700">
                       <Link 
-                        to="/dashboard/customer/profile" 
+                        to="/profile" 
                         onClick={() => setIsProfileDropdownOpen(false)}
                         className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100"
                       >
                         My Profile
                       </Link>
                       <Link 
-                        to="/dashboard/customer" 
+                        to="/customer/dashboard" 
                         onClick={() => setIsProfileDropdownOpen(false)}
                         className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100"
                       >
                         My Bookings
                       </Link>
                       <Link 
-                        to="/dashboard/customer/wishlist" 
+                        to="/wishlist" 
                         onClick={() => setIsProfileDropdownOpen(false)}
                         className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100"
                       >
@@ -194,7 +194,7 @@ const Navbar = () => {
                       
                       {userRole === 'Theatre Owner' && (
                         <Link 
-                          to="/dashboard/theatre-owner" 
+                          to="/owner/dashboard" 
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100 text-amber-600"
                         >
@@ -203,7 +203,7 @@ const Navbar = () => {
                       )}
                       {userRole === 'Admin' && (
                         <Link 
-                          to="/dashboard/admin" 
+                          to="/admin/dashboard" 
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100 text-amber-600"
                         >
@@ -213,14 +213,14 @@ const Navbar = () => {
                       {userRole === 'Super Admin' && (
                         <>
                           <Link 
-                            to="/dashboard/admin" 
+                            to="/super-admin/dashboard" 
                             onClick={() => setIsProfileDropdownOpen(false)}
                             className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100 text-amber-600"
                           >
                             Super Admin Dashboard
                           </Link>
                           <Link 
-                            to="/dashboard/theatre-owner" 
+                            to="/owner/dashboard" 
                             onClick={() => setIsProfileDropdownOpen(false)}
                             className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100 text-amber-600"
                           >
@@ -230,7 +230,7 @@ const Navbar = () => {
                       )}
                       
                       <Link 
-                        to="/dashboard/customer/profile" 
+                        to="/profile" 
                         onClick={() => setIsProfileDropdownOpen(false)}
                         className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100"
                       >
@@ -323,32 +323,32 @@ const Navbar = () => {
 
               {isAuthenticated ? (
                 <div className="flex flex-col gap-3">
-                  <Link to="/dashboard/customer/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
+                  <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
                     My Profile
                   </Link>
-                  <Link to="/dashboard/customer" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
+                  <Link to="/customer/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
                     My Bookings
                   </Link>
-                  <Link to="/dashboard/customer/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
+                  <Link to="/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
                     Wishlist
                   </Link>
                   
                   {userRole === 'Theatre Owner' && (
-                    <Link to="/dashboard/theatre-owner" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
+                    <Link to="/owner/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
                       Theatre Dashboard
                     </Link>
                   )}
                   {userRole === 'Admin' && (
-                    <Link to="/dashboard/admin" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
+                    <Link to="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
                       Admin Dashboard
                     </Link>
                   )}
                   {userRole === 'Super Admin' && (
                     <>
-                      <Link to="/dashboard/admin" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
+                      <Link to="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
                         Super Admin Dashboard
                       </Link>
-                      <Link to="/dashboard/theatre-owner" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
+                      <Link to="/owner/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
                         Theatre Dashboard
                       </Link>
                     </>

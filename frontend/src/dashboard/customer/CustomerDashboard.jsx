@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FiClock, FiHeart, FiUser, FiBell } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { getMyBookings, cancelBooking } from '../../services/bookingService';
@@ -19,7 +19,20 @@ import toast from 'react-hot-toast';
 const CustomerDashboard = () => {
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('bookings');
+  const location = useLocation();
+
+  const getTabFromPathname = () => {
+    if (location.pathname.includes('wishlist')) return 'wishlist';
+    if (location.pathname.includes('notifications')) return 'notifications';
+    if (location.pathname.includes('profile')) return 'profile';
+    return 'bookings';
+  };
+
+  const [activeTab, setActiveTab] = useState(getTabFromPathname());
+
+  useEffect(() => {
+    setActiveTab(getTabFromPathname());
+  }, [location.pathname]);
   
   // States
   const [bookings, setBookings] = useState([]);

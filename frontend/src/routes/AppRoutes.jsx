@@ -15,6 +15,9 @@ const SeatBooking = lazy(() => import('../pages/SeatBooking'));
 const Payment = lazy(() => import('../pages/Payment'));
 const DigitalTicket = lazy(() => import('../pages/DigitalTicket'));
 const EventDetails = lazy(() => import('../pages/EventDetails'));
+const EventsPage = lazy(() => import('../pages/EventsPage'));
+const TheatresPage = lazy(() => import('../pages/TheatresPage'));
+const TheatreDetails = lazy(() => import('../pages/TheatreDetails'));
 const Offers = lazy(() => import('../pages/Offers'));
 const About = lazy(() => import('../pages/About'));
 const Contact = lazy(() => import('../pages/Contact'));
@@ -48,9 +51,46 @@ const AppRoutes = () => {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/movie/:id" element={<MovieDetails />} />
           <Route path="/event/:id" element={<EventDetails />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/theatres" element={<TheatresPage />} />
+          <Route path="/theatre/:id" element={<TheatreDetails />} />
           <Route path="/offers" element={<Offers />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          
+          {/* Dashboard route shortcuts mapping to unified CustomerDashboard component */}
+          <Route
+            path="/wishlist"
+            element={
+              <ProtectedRoute requiredRole="Customer">
+                <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute requiredRole="Customer">
+                <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute requiredRole="Customer">
+                <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/customer/dashboard"
+            element={
+              <ProtectedRoute requiredRole="Customer">
+                <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         <Route path="/login" element={<Login />} />
