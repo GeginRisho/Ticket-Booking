@@ -5,6 +5,8 @@ const api = axios.create({
     withCredentials: true,
 });
 
+console.log('VITE_API_URL configured baseURL:', import.meta.env.VITE_API_URL);
+
 // Request interceptor to add access token
 api.interceptors.request.use(
     (config) => {
