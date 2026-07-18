@@ -29,11 +29,13 @@ const Login = () => {
       const roleStr = userData.role?.role_name || userData.role || 'Customer';
 
       // Automatic dashboard redirection based on roles
-      let redirectPath = '/dashboard/customer';
-      if (roleStr === 'Admin' || roleStr === 'Super Admin') {
-        redirectPath = '/dashboard/admin';
+      let redirectPath = '/';
+      if (roleStr === 'Super Admin') {
+        redirectPath = '/super-admin/dashboard';
+      } else if (roleStr === 'Admin') {
+        redirectPath = '/admin/dashboard';
       } else if (roleStr === 'Theatre Owner') {
-        redirectPath = '/dashboard/theatre-owner';
+        redirectPath = '/owner/dashboard';
       } else if (roleStr === 'Event Organizer') {
         redirectPath = '/dashboard/organizer';
       }

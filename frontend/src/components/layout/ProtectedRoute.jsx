@@ -19,7 +19,15 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  const userRole = user?.role?.role_name || user?.role;
+  const getNormalizedRole = (u) => {
+    if (!u) return null;
+    if (typeof u.role === 'object' && u.role !== null) {
+      return u.role.role_name || u.role.name;
+    }
+    return u.role;
+  };
+
+  const userRole = getNormalizedRole(user);
 
   if (requiredRole && userRole !== requiredRole && userRole !== 'Super Admin') {
     // Redirect to unauthorized 403 fallback route

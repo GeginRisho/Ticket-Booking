@@ -48,7 +48,12 @@ const restrictTo = (...roles) => {
       return next(new AppError('User role not identified.', 403));
     }
 
-    const userRole = req.user.role.role_name || req.user.role;
+    let userRole = '';
+    if (typeof req.user.role === 'object' && req.user.role !== null) {
+      userRole = req.user.role.role_name || req.user.role.name || '';
+    } else {
+      userRole = req.user.role;
+    }
 
     if (userRole === 'Super Admin' || roles.includes(userRole)) {
       return next();

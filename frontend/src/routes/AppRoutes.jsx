@@ -86,7 +86,7 @@ const AppRoutes = () => {
 
         {/* Protected Role-specific Dashboards */}
         <Route
-          path="/dashboard/admin/*"
+          path="/admin/dashboard"
           element={
             <ProtectedRoute requiredRole="Admin">
               <AdminDashboard />
@@ -94,15 +94,15 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="/dashboard/customer/*"
+          path="/super-admin/dashboard"
           element={
-            <ProtectedRoute requiredRole="Customer">
-              <CustomerDashboard />
+            <ProtectedRoute requiredRole="Super Admin">
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/dashboard/theatre-owner/*"
+          path="/owner/dashboard"
           element={
             <ProtectedRoute requiredRole="Theatre Owner">
               <TheatreOwnerDashboard />
@@ -110,7 +110,15 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="/dashboard/organizer/*"
+          path="/dashboard/customer"
+          element={
+            <ProtectedRoute requiredRole="Customer">
+              <CustomerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/organizer"
           element={
             <ProtectedRoute requiredRole="Event Organizer">
               <OrganizerDashboard />
