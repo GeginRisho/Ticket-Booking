@@ -2,7 +2,8 @@ import api from './api';
 
 export const getMovieReviews = async (movieId) => {
   const response = await api.get(`/movies/${movieId}/reviews`);
-  return response.data;
+  const dataObj = response.data?.data || response.data;
+  return Array.isArray(dataObj?.reviews) ? dataObj.reviews : (Array.isArray(dataObj) ? dataObj : []);
 };
 
 export const createReview = async (movieId, reviewData) => {

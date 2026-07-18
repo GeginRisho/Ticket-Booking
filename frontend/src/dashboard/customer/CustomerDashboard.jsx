@@ -46,9 +46,9 @@ const CustomerDashboard = () => {
         getWishlist(),
         getNotifications()
       ]);
-      setBookings(bookingsRes.data || bookingsRes || []);
-      setWishlist(wishlistRes.data || wishlistRes || []);
-      setNotifications(notificationsRes.data || notificationsRes || []);
+      setBookings(Array.isArray(bookingsRes) ? bookingsRes : []);
+      setWishlist(Array.isArray(wishlistRes) ? wishlistRes : []);
+      setNotifications(Array.isArray(notificationsRes) ? notificationsRes : []);
     } catch (err) {
       toast.error('Failed to load user statistics');
     } finally {

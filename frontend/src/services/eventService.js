@@ -2,7 +2,8 @@ import api from './api';
 
 export const getEventCategories = async () => {
   const response = await api.get('/events/categories');
-  return response.data;
+  const dataObj = response.data?.data || response.data;
+  return Array.isArray(dataObj?.categories) ? dataObj.categories : (Array.isArray(dataObj) ? dataObj : []);
 };
 
 export const createEventCategory = async (categoryData) => {
@@ -12,7 +13,8 @@ export const createEventCategory = async (categoryData) => {
 
 export const getEvents = async (params = {}) => {
   const response = await api.get('/events', { params });
-  return response.data;
+  const dataObj = response.data?.data || response.data;
+  return Array.isArray(dataObj?.events) ? dataObj.events : (Array.isArray(dataObj) ? dataObj : []);
 };
 
 export const getPopularEvents = async (cityId) => {

@@ -33,7 +33,7 @@ const MoviesPage = () => {
  
  try {
  const data = await genreObj.fetcher();
- setMovies(Array.isArray(data) ? data : data.data || []);
+ setMovies(Array.isArray(data) ? data : []);
  } catch (err) {
  setError('Failed to fetch movies. Please try again later.');
  } finally {

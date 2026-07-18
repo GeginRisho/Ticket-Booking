@@ -2,7 +2,8 @@ import api from './api';
 
 export const getTheatres = async (params = {}) => {
   const response = await api.get('/theatres', { params });
-  return response.data;
+  const dataObj = response.data?.data || response.data;
+  return Array.isArray(dataObj?.theatres) ? dataObj.theatres : (Array.isArray(dataObj) ? dataObj : []);
 };
 
 export const getTheatreDetails = async (id) => {

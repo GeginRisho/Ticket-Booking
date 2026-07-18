@@ -25,9 +25,9 @@ const SearchPage = () => {
         getEvents(),
         getTheatres()
       ]);
-      setMovies(moviesRes.data?.movies || moviesRes.movies || moviesRes || []);
-      setEvents(eventsRes.data || eventsRes || []);
-      setTheatres(theatresRes.data || theatresRes || []);
+      setMovies(Array.isArray(moviesRes) ? moviesRes : []);
+      setEvents(Array.isArray(eventsRes) ? eventsRes : []);
+      setTheatres(Array.isArray(theatresRes) ? theatresRes : []);
     } catch (err) {
       console.error('Failed to load search catalogs', err);
     } finally {

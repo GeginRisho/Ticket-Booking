@@ -3,7 +3,8 @@ import api from './api';
 // Fetch all movies (optionally with filters)
 export const getMovies = async (params = {}) => {
   const response = await api.get('/movies', { params });
-  return response.data;
+  const dataObj = response.data?.data || response.data;
+  return Array.isArray(dataObj?.movies) ? dataObj.movies : (Array.isArray(dataObj) ? dataObj : []);
 };
 
 // Client-side wrappers to simulate filtered movie rows on home page using standard getMovies

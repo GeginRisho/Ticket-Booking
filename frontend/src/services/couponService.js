@@ -10,7 +10,8 @@ export const validateCoupon = async (couponCode, totalAmount) => {
 
 export const getCoupons = async () => {
   const response = await api.get('/coupons');
-  return response.data;
+  const dataObj = response.data?.data || response.data;
+  return Array.isArray(dataObj?.coupons) ? dataObj.coupons : (Array.isArray(dataObj) ? dataObj : []);
 };
 
 export const getCoupon = async (id) => {

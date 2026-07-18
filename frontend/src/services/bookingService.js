@@ -36,11 +36,10 @@ export const createEventBooking = async (bookingData) => {
 // Fetch bookings list for the logged-in user
 export const getMyBookings = async () => {
   const response = await api.get('/bookings/my-bookings');
-  const list = response.data?.data?.bookings || response.data?.bookings || [];
-  if (Array.isArray(list)) {
-    list.forEach(injectEventQuantity);
-  }
-  return response.data;
+  const dataObj = response.data?.data || response.data;
+  const list = Array.isArray(dataObj?.bookings) ? dataObj.bookings : (Array.isArray(dataObj) ? dataObj : []);
+  list.forEach(injectEventQuantity);
+  return list;
 };
 
 // Fetch single booking details

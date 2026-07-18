@@ -48,7 +48,7 @@ const MovieDetails = () => {
       ]);
       setMovie(movieRes.data?.movie || movieRes.movie || movieRes);
       
-      const showsList = showsRes.data || showsRes || [];
+      const showsList = Array.isArray(showsRes) ? showsRes : [];
       setShows(showsList);
       
       // Determine unique dates from shows in active city
@@ -58,7 +58,7 @@ const MovieDetails = () => {
         setSelectedDate(uniqueDates[0]);
       }
 
-      setReviews(reviewsRes.data || reviewsRes || []);
+      setReviews(Array.isArray(reviewsRes) ? reviewsRes : []);
     } catch (err) {
       toast.error('Failed to load movie details');
     } finally {

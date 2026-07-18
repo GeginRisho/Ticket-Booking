@@ -2,7 +2,8 @@ import api from './api';
 
 export const getScreens = async (theatreId) => {
   const response = await api.get(`/theatres/${theatreId}/screens`);
-  return response.data;
+  const dataObj = response.data?.data || response.data;
+  return Array.isArray(dataObj?.screens) ? dataObj.screens : (Array.isArray(dataObj) ? dataObj : []);
 };
 
 export const getScreenDetails = async (id) => {

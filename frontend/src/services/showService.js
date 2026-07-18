@@ -2,7 +2,8 @@ import api from './api';
 
 export const getShows = async (params = {}) => {
   const response = await api.get('/shows', { params });
-  return response.data;
+  const dataObj = response.data?.data || response.data;
+  return Array.isArray(dataObj?.shows) ? dataObj.shows : (Array.isArray(dataObj) ? dataObj : []);
 };
 
 export const getShowDetails = async (id) => {
