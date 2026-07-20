@@ -30,6 +30,9 @@ class AuthController {
       res.status(200).json({
         status: 'success',
         message: 'Login successful',
+        token: accessToken,
+        user,
+        role: user.role,
         data: {
           user,
           accessToken,

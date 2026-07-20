@@ -21,10 +21,15 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
   const getNormalizedRole = (u) => {
     if (!u) return null;
+    let r = null;
     if (typeof u.role === 'object' && u.role !== null) {
-      return u.role.role_name || u.role.name;
+      r = u.role.role_name || u.role.name;
+    } else {
+      r = u.role;
     }
-    return u.role;
+    if (r === 'Owner') return 'Theatre Owner';
+    if (r === 'Organizer') return 'Event Organizer';
+    return r;
   };
 
   const userRole = getNormalizedRole(user);

@@ -26,7 +26,10 @@ const Login = () => {
       toast.success('Successfully logged in!');
       
       const userData = res.user || res.data?.user || res.data;
-      const roleStr = userData.role?.role_name || userData.role || 'Customer';
+      const rawRole = res.role || userData?.role?.role_name || userData?.role || 'Customer';
+      let roleStr = rawRole;
+      if (rawRole === 'Owner') roleStr = 'Theatre Owner';
+      if (rawRole === 'Organizer') roleStr = 'Event Organizer';
 
       // Automatic dashboard redirection based on roles
       let redirectPath = '/';

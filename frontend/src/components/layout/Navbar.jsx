@@ -65,7 +65,8 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const userRole = user?.role?.role_name || user?.role;
+  const rawRole = user?.role?.role_name || user?.role;
+  const userRole = rawRole === 'Owner' ? 'Theatre Owner' : (rawRole === 'Organizer' ? 'Event Organizer' : rawRole);
 
   const dashboardPath = userRole === 'Super Admin'
     ? '/super-admin/dashboard'
