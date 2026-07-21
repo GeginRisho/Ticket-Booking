@@ -62,9 +62,11 @@ const DigitalTicket = () => {
   const venue = isMovie ? booking.show?.screen?.theatre?.theatre_name : booking.event_ticket?.event?.venue;
   const address = isMovie ? booking.show?.screen?.theatre?.address : booking.event_ticket?.event?.address;
   const screen = isMovie ? booking.show?.screen?.screen_name : 'General Entry';
+  const bookingSeats = booking.bookingSeats || booking.booking_seats || [];
+  const seatNumbers = bookingSeats.map(s => s.seat?.seat_number || s.seat_number || s.seat_id).filter(Boolean).join(', ');
   const seatsOrTickets = isMovie 
-    ? `Seats: ${booking.booking_seats?.map(s => s.seat?.seat_number).join(', ')}`
-    : `Qty: ${booking.event_ticket_quantity} Passes`;
+    ? `Seats: ${seatNumbers || (bookingSeats.length ? `${bookingSeats.length} Seats` : 'Reserved Seats')}`
+    : `Qty: ${booking.event_ticket_quantity || 1} Passes`;
 
   return (
     <div className="container mx-auto px-4 md:px-8 max-w-2xl text-left py-12 bg-background text-text-primary print:bg-white print:p-0">
@@ -149,9 +151,9 @@ const DigitalTicket = () => {
             <FiPrinter />
             <span>Print Pass</span>
           </Button>
-          <Link to="/dashboard/customer">
+          <Link to="/bookings">
             <Button variant="primary" className="flex items-center gap-1.5 font-bold">
-              <span>Go to Dashboard</span>
+              <span>Go to My Bookings</span>
               <FiArrowRight />
             </Button>
           </Link>

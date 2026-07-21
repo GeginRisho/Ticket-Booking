@@ -116,9 +116,11 @@ const MyBookings = () => {
     const date = isMovie ? b.show?.show_date : b.event_ticket?.event?.start_date;
     const time = isMovie ? b.show?.start_time : b.event_ticket?.event?.start_time;
     const venue = isMovie ? b.show?.screen?.theatre?.theatre_name : b.event_ticket?.event?.venue;
+    const bookingSeats = b.bookingSeats || b.booking_seats || [];
+    const seatNumbers = bookingSeats.map(s => s.seat?.seat_number || s.seat_number || s.seat_id).filter(Boolean).join(', ');
     const seatsOrTickets = isMovie 
-      ? `Seats: ${b.booking_seats?.map(s => s.seat?.seat_number).join(', ')}`
-      : `Quantity: ${b.event_ticket_quantity}`;
+      ? `Seats: ${seatNumbers || (bookingSeats.length ? `${bookingSeats.length} Seats` : 'Reserved Seats')}`
+      : `Quantity: ${b.event_ticket_quantity || 1}`;
 
     return (
       <Card key={b.id} className="p-6 border border-gray-200 rounded-3xl bg-white shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow gap-4 relative overflow-hidden">

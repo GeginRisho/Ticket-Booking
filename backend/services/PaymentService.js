@@ -123,7 +123,7 @@ class PaymentService {
           gateway: 'Razorpay',
           payment_method: payment_method || 'netbanking',
           amount: booking.total_amount,
-          status: 'paid',
+          status: 'success',
           paid_at: new Date()
         }, { transaction: t });
 
@@ -171,7 +171,7 @@ class PaymentService {
       throw new AppError('Payment record not found', 404);
     }
 
-    if (payment.status !== 'paid') {
+    if (payment.status !== 'success') {
       throw new AppError(`Cannot refund a payment with status: ${payment.status}`, 400);
     }
 

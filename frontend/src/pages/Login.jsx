@@ -106,7 +106,10 @@ const Login = () => {
         redirectPath = '/organizer/dashboard';
       }
 
-      const destination = location.state?.from?.pathname || redirectPath;
+      let destination = location.state?.from?.pathname;
+      if (roleStr === 'Customer' || !destination || (destination.startsWith('/admin') || destination.startsWith('/super-admin') || destination.startsWith('/theatre') || destination.startsWith('/organizer'))) {
+        destination = roleStr === 'Customer' ? '/' : redirectPath;
+      }
       navigate(destination, { replace: true });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed. Please verify credentials.');

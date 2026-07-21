@@ -51,9 +51,12 @@ const MovieDetails = () => {
       const showsList = Array.isArray(showsRes) ? showsRes : [];
       setShows(showsList);
       
-      // Determine unique dates from shows in active city
-      const cityShows = showsList.filter(s => s.screen?.theatre?.city_id === activeCityId);
-      const uniqueDates = [...new Set(cityShows.map(s => s.show_date))].sort();
+      // Determine unique dates from shows in active city, or fallback to all shows for this movie
+      let cityShows = showsList.filter(s => s.screen?.theatre?.city_id === activeCityId);
+      if (cityShows.length === 0) {
+        cityShows = showsList;
+      }
+      const uniqueDates = [...new Set(cityShows.map(s => s.show_date))].filter(Boolean).sort();
       if (uniqueDates.length > 0) {
         setSelectedDate(uniqueDates[0]);
       }
@@ -120,9 +123,13 @@ const MovieDetails = () => {
   }
 
   // Group shows in active city by theatre for selected date
-  const cityShows = shows.filter(s => s.screen?.theatre?.city_id === activeCityId);
-  const showDates = [...new Set(cityShows.map(s => s.show_date))].sort();
-  const filteredShows = cityShows.filter(s => s.show_date === selectedDate);
+  let activeShowsList = shows.filter(s => s.screen?.theatre?.city_id === activeCityId);
+  if (activeShowsList.length === 0) {
+    activeShowsList = shows;
+  }
+  const showDates = [...new Set(activeShowsList.map(s => s.show_date))].filter(Boolean).sort();
+  const effectiveDate = selectedDate || showDates[0];
+  const filteredShows = activeShowsList.filter(s => s.show_date === effectiveDate);
   
   // Grouping structure: { theatreName: [shows] }
   const groupedShows = {};

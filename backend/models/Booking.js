@@ -47,7 +47,7 @@ const Booking = sequelize.define('Booking', {
     type: DataTypes.STRING,
     defaultValue: 'pending',
     validate: {
-      isIn: [['pending', 'confirmed', 'cancelled', 'failed']]
+      isIn: [['pending', 'confirmed', 'cancelled', 'completed', 'failed']]
     }
   },
   payment_status: {

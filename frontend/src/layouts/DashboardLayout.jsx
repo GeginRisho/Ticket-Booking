@@ -37,9 +37,21 @@ const DashboardLayout = () => {
 
   // Role Access Enforcement Security Check
   useEffect(() => {
+    if (userRole === 'Customer') {
+      toast.error('Access Restricted: Admin or Owner privileges required.');
+      navigate('/', { replace: true });
+      return;
+    }
+
     if (location.pathname.startsWith('/super-admin') && userRole !== 'Super Admin') {
       toast.error('Access Restricted: Super Admin permissions required.');
-      navigate('/admin/dashboard', { replace: true });
+      navigate(userRole === 'Admin' ? '/admin/dashboard' : (userRole === 'Theatre Owner' ? '/theatre/dashboard' : '/'), { replace: true });
+    } else if (location.pathname.startsWith('/admin') && userRole !== 'Admin' && userRole !== 'Super Admin') {
+      toast.error('Access Restricted: Admin permissions required.');
+      navigate(userRole === 'Theatre Owner' ? '/theatre/dashboard' : '/', { replace: true });
+    } else if (location.pathname.startsWith('/theatre') && userRole !== 'Theatre Owner' && userRole !== 'Super Admin') {
+      toast.error('Access Restricted: Theatre Owner permissions required.');
+      navigate(userRole === 'Admin' ? '/admin/dashboard' : '/', { replace: true });
     }
   }, [location.pathname, userRole, navigate]);
 

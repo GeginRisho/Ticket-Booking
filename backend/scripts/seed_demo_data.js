@@ -336,17 +336,22 @@ const seedData = async () => {
     ];
 
     let showCounter = 1;
+    const baseDate = new Date();
     for (const scr of seededScreens) {
       for (let tIdx = 0; tIdx < showTimings.length; tIdx++) {
         const timeSlot = showTimings[tIdx];
         const movie = nowShowing[showCounter % nowShowing.length];
         const showId = `80000000-0000-0000-0000-${showCounter.toString().padStart(12, '0')}`;
         
+        const showDateObj = new Date(baseDate);
+        showDateObj.setDate(baseDate.getDate() + (showCounter % 7));
+        const showDateStr = showDateObj.toISOString().split('T')[0];
+
         const showData = {
           id: showId,
           movie_id: movie.id,
           screen_id: scr.id,
-          show_date: '2026-07-19',
+          show_date: showDateStr,
           start_time: timeSlot.start,
           end_time: timeSlot.end,
           language: movie.language,
@@ -354,6 +359,9 @@ const seedData = async () => {
           status: 'active'
         };
         const [show, created] = await Show.findOrCreate({ where: { id: showId }, defaults: showData });
+        if (!created) {
+          await show.update({ show_date: showDateStr });
+        }
         seededShows.push(show);
         showCounter++;
       }

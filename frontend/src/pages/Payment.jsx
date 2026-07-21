@@ -79,10 +79,18 @@ const Payment = () => {
 
   const isMovie = !!booking.show_id;
   const title = isMovie ? booking.show?.movie?.title : booking.event_ticket?.event?.title;
-  const quantity = isMovie ? booking.booking_seats?.length : booking.event_ticket_quantity;
-  const details = isMovie 
-    ? `Seats: ${booking.booking_seats?.map(s => s.seat?.seat_number).join(', ')}`
-    : `Event Passes Count: ${quantity}`;
+  const theatreName = isMovie ? booking.show?.screen?.theatre?.theatre_name : booking.event_ticket?.event?.venue;
+  const screenName = isMovie ? booking.show?.screen?.screen_name : 'General Entry';
+  const showDate = isMovie ? booking.show?.show_date : booking.event_ticket?.event?.start_date;
+  const showTime = isMovie ? booking.show?.start_time : booking.event_ticket?.event?.start_time;
+  const bookingSeats = booking.bookingSeats || booking.booking_seats || [];
+  const quantity = isMovie ? (bookingSeats.length || 1) : (booking.event_ticket_quantity || 1);
+  const seatNumbers = bookingSeats.map(s => s.seat?.seat_number || s.seat_number || s.seat_id).filter(Boolean).join(', ');
+  const seatDetails = seatNumbers || (bookingSeats.length ? `${bookingSeats.length} Seats Selected` : 'Reserved Seats');
+
+  const totalVal = parseFloat(booking.total_amount || 0);
+  const convenienceFee = quantity * 30;
+  const basePrice = Math.max(0, totalVal - convenienceFee);
 
   return (
     <div className="container mx-auto px-4 md:px-8 max-w-lg text-left py-16 bg-background text-text-primary">
@@ -96,25 +104,52 @@ const Payment = () => {
         </div>
 
         {/* Invoice details */}
-        <div className="space-y-4 text-sm font-semibold">
+        <div className="space-y-3.5 text-sm font-semibold">
           <div className="flex justify-between items-start">
-            <span className="text-text-secondary">Movie/Event</span>
-            <span className="text-text-primary text-right max-w-[200px] truncate font-bold">{title}</span>
+            <span className="text-text-secondary">{isMovie ? 'Movie Title' : 'Event Title'}</span>
+            <span className="text-text-primary text-right max-w-[200px] truncate font-bold">{title || 'Ticket Show'}</span>
           </div>
+
+          {theatreName && (
+            <div className="flex justify-between items-start">
+              <span className="text-text-secondary">Theatre & Screen</span>
+              <span className="text-text-primary text-right max-w-[220px] truncate">{theatreName} ({screenName})</span>
+            </div>
+          )}
+
+          {showDate && (
+            <div className="flex justify-between">
+              <span className="text-text-secondary">Date & Showtime</span>
+              <span className="text-text-primary">{showDate} at {showTime}</span>
+            </div>
+          )}
+
+          {isMovie && (
+            <div className="flex justify-between items-start">
+              <span className="text-text-secondary">Allocated Seats</span>
+              <span className="text-amber-600 font-extrabold text-right max-w-[200px] truncate">{seatDetails}</span>
+            </div>
+          )}
 
           <div className="flex justify-between">
-            <span className="text-text-secondary">Quantity</span>
-            <span className="text-text-primary">{quantity} tickets</span>
+            <span className="text-text-secondary">Ticket Quantity</span>
+            <span className="text-text-primary">{quantity} ticket(s)</span>
           </div>
 
-          <div className="flex justify-between">
-            <span className="text-text-secondary">Breakdown</span>
-            <span className="text-text-secondary text-right max-w-[200px] truncate">{details}</span>
+          <div className="border-t border-dashed border-border pt-3 space-y-2 text-xs">
+            <div className="flex justify-between text-text-secondary">
+              <span>Ticket Base Subtotal</span>
+              <span>₹{basePrice.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-text-secondary">
+              <span>Convenience & GST Taxes</span>
+              <span>₹{convenienceFee.toFixed(2)}</span>
+            </div>
           </div>
 
-          <div className="flex justify-between items-center text-base border-t border-border pt-4 mt-4">
-            <span className="font-bold text-text-primary">Payable Amount</span>
-            <span className="text-3xl font-black text-primary">₹{booking.total_amount}</span>
+          <div className="flex justify-between items-center text-base border-t border-border pt-4 mt-2">
+            <span className="font-bold text-text-primary">Total Payable Amount</span>
+            <span className="text-3xl font-black text-primary">₹{totalVal.toFixed(2)}</span>
           </div>
         </div>
 

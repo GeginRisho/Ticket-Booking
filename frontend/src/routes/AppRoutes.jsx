@@ -117,34 +117,20 @@ const AppRoutes = () => {
         {/* Protected Role-specific Dashboards wrapped in DashboardLayout */}
         <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           {/* Admin */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/:subtab" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute requiredRole="Admin"><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/:subtab" element={<ProtectedRoute requiredRole="Admin"><AdminDashboard /></ProtectedRoute>} />
           
           {/* Super Admin */}
-          <Route
-            path="/super-admin/dashboard"
-            element={
-              <ProtectedRoute requiredRole="Super Admin">
-                <SuperAdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/super-admin/:subtab"
-            element={
-              <ProtectedRoute requiredRole="Super Admin">
-                <SuperAdminDashboard />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/super-admin/dashboard" element={<ProtectedRoute requiredRole="Super Admin"><SuperAdminDashboard /></ProtectedRoute>} />
+          <Route path="/super-admin/:subtab" element={<ProtectedRoute requiredRole="Super Admin"><SuperAdminDashboard /></ProtectedRoute>} />
           
           {/* Theatre Owner */}
-          <Route path="/theatre/dashboard" element={<TheatreOwnerDashboard />} />
-          <Route path="/theatre/dashboard/:subtab" element={<TheatreOwnerDashboard />} />
+          <Route path="/theatre/dashboard" element={<ProtectedRoute requiredRole="Theatre Owner"><TheatreOwnerDashboard /></ProtectedRoute>} />
+          <Route path="/theatre/dashboard/:subtab" element={<ProtectedRoute requiredRole="Theatre Owner"><TheatreOwnerDashboard /></ProtectedRoute>} />
           
           {/* Event Organizer */}
-          <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
-          <Route path="/organizer/:subtab" element={<OrganizerDashboard />} />
+          <Route path="/organizer/dashboard" element={<ProtectedRoute requiredRole="Event Organizer"><OrganizerDashboard /></ProtectedRoute>} />
+          <Route path="/organizer/:subtab" element={<ProtectedRoute requiredRole="Event Organizer"><OrganizerDashboard /></ProtectedRoute>} />
         </Route>
 
         {/* Error Fallbacks */}
