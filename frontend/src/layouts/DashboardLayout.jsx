@@ -131,17 +131,17 @@ const DashboardLayout = () => {
         return [
           { name: 'Dashboard', icon: FiGrid, path: '/theatre/dashboard' },
           { name: 'My Theatres', icon: FiPlusSquare, path: '/theatre/dashboard/theatres' },
-          { name: 'Screens', icon: FiLayout, path: '/theatre/dashboard/screens' },
-          { name: 'Movies', icon: FiFilm, path: '/theatre/dashboard/movies' },
-          { name: 'Shows', icon: FiCalendar, path: '/theatre/dashboard/shows' },
+          { name: 'Screens & Seat Layout', icon: FiLayout, path: '/theatre/dashboard/screens' },
+          { name: 'Movies Catalog', icon: FiFilm, path: '/theatre/dashboard/movies' },
+          { name: 'Showtimes', icon: FiCalendar, path: '/theatre/dashboard/shows' },
           { name: 'Bookings', icon: FiCreditCard, path: '/theatre/dashboard/bookings' },
           { name: 'Food & Beverage', icon: FiGrid, path: '/theatre/dashboard/food-beverage' },
           { name: 'Staff Management', icon: FiUsers, path: '/theatre/dashboard/staff' },
-          { name: 'Promotions', icon: FiPercent, path: '/theatre/dashboard/promotions' },
+          { name: 'Coupons & Offers', icon: FiPercent, path: '/theatre/dashboard/promotions' },
           { name: 'Customer Reviews', icon: FiHeart, path: '/theatre/dashboard/reviews' },
           { name: 'Reports & Revenue', icon: FiDollarSign, path: '/theatre/dashboard/revenue' },
           { name: 'Audit Logs', icon: FiActivity, path: '/theatre/dashboard/audit-logs' },
-          { name: 'Settings', icon: FiSettings, path: '/theatre/dashboard/profile' }
+          { name: 'Profile & Settings', icon: FiUser, path: '/theatre/dashboard/profile' }
         ];
       case 'Event Organizer':
         return [
@@ -383,7 +383,7 @@ const DashboardLayout = () => {
                         <p className="text-xs text-text-secondary">{userRole}</p>
                       </div>
                       <Link 
-                        to={userRole === 'Super Admin' ? '/super-admin/platform-config' : '/admin/settings'}
+                        to={userRole === 'Super Admin' ? '/super-admin/platform-config' : (userRole === 'Theatre Owner' ? '/theatre/dashboard/profile' : (userRole === 'Event Organizer' ? '/organizer/profile' : '/admin/settings'))}
                         className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-primary hover:bg-hover-bg font-semibold min-h-[44px]"
                         onClick={() => setIsProfileOpen(false)}
                       >

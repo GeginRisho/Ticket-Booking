@@ -209,7 +209,7 @@ const TheatreOwnerDashboard = () => {
     if (path.includes('/reviews')) return 'reviews';
     if (path.includes('/revenue')) return 'revenue';
     if (path.includes('/audit-logs')) return 'audit-logs';
-    if (path.includes('/profile')) return 'profile';
+    if (path.includes('/profile') || path.includes('/settings')) return 'profile';
     return 'analytics';
   };
 
@@ -2598,64 +2598,156 @@ const TheatreOwnerDashboard = () => {
         </div>
       )}
 
-      {/* TABS 13: Business Settings & Billing details */}
+      {/* TABS 13: Theatre Owner Profile & Business Settings */}
       {activeTab === 'profile' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Billing & Tax Settings */}
+        <div className="space-y-8">
+          {/* Profile Header Banner */}
+          <Card className="p-6 border border-gray-200 bg-white rounded-3xl shadow-xs">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <div className="relative group shrink-0">
+                <div className="w-24 h-24 rounded-full bg-slate-900 border-4 border-amber-400 text-amber-400 flex items-center justify-center font-black text-3xl shadow-md overflow-hidden">
+                  {user?.full_name ? user.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'TO'}
+                </div>
+                <div className="absolute inset-0 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-black uppercase cursor-pointer pointer-events-none">
+                  Change Avatar
+                </div>
+              </div>
+              <div className="text-center sm:text-left flex-1">
+                <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                  <h2 className="text-2xl font-black text-gray-900">{user?.full_name || 'Rex Theatre Owner'}</h2>
+                  <span className="px-3 py-1 bg-amber-100 text-amber-900 border border-amber-300 rounded-full text-xs font-black uppercase tracking-wider">
+                    Verified Theatre Partner
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 font-semibold mt-1">
+                  {user?.email || 'owner@ticketbooking.com'} • Registered Partner Account
+                </p>
+                <div className="flex items-center justify-center sm:justify-start gap-4 mt-3 text-xs text-gray-600 font-bold flex-wrap">
+                  <span>🏢 Business: PVR Rex Multiplex</span>
+                  <span>📍 City: Mumbai, MH</span>
+                  <span>🆔 GST: 27AAAAA0000A1Z5</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 1. Personal Information */}
             <Card className="p-6 border border-gray-200 bg-white rounded-3xl shadow-xs space-y-4">
               <div>
-                <h3 className="font-black text-base text-gray-900">Tax & Billing Information</h3>
-                <p className="text-[10px] text-gray-400 font-black uppercase mt-0.5">GST configuration and banking credentials</p>
+                <h3 className="font-black text-base text-gray-900">Personal Information</h3>
+                <p className="text-[10px] text-gray-400 font-black uppercase mt-0.5">Primary contact & personal credentials</p>
               </div>
 
               <div className="space-y-4">
-                <Input label="GST Identification Number" value="27AAAAA0000A1Z5" />
-                <Input label="PAN Number" value="ABCDE1234F" />
-                <div className="grid grid-cols-2 gap-4">
-                  <Input label="Bank Account Number" value="************9090" />
-                  <Input label="IFSC Code" value="HDFC0000123" />
+                <Input label="Full Name" defaultValue={user?.full_name || 'Rex Theatre Owner'} placeholder="John Doe" />
+                <Input label="Email Address" type="email" defaultValue={user?.email || 'owner@ticketbooking.com'} placeholder="owner@cinema.com" />
+                <Input label="Phone Number" defaultValue={user?.phone || '+91 9876543210'} placeholder="+91 9876543210" />
+                
+                <div className="flex flex-col text-left">
+                  <label className="block text-xs font-extrabold text-gray-500 uppercase mb-1">City Location</label>
+                  <select
+                    defaultValue={CITIES[0]?.id || ''}
+                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:border-amber-400 focus:bg-white text-sm font-semibold transition-colors cursor-pointer"
+                  >
+                    {CITIES.map(c => (
+                      <option key={c.id} value={c.id}>{c.city_name} ({c.state})</option>
+                    ))}
+                  </select>
                 </div>
 
-                <Button variant="primary" className="w-full bg-amber-400 text-gray-900 font-black py-3 rounded-2xl text-xs" onClick={() => toast.success('Billing parameters updated!')}>
-                  Save Billing Profile
-                </Button>
+                <div className="flex justify-end gap-3 pt-2">
+                  <Button variant="secondary" onClick={() => toast.success('Personal info reset to saved values')}>Cancel</Button>
+                  <Button variant="primary" className="bg-amber-400 text-gray-900 font-black px-6 py-2.5 rounded-2xl text-xs cursor-pointer" onClick={() => toast.success('Personal profile updated successfully!')}>
+                    Save Personal Info
+                  </Button>
+                </div>
               </div>
             </Card>
 
-            {/* Custom Notification SMS templates */}
+            {/* 2. Business & Cinema Information */}
             <Card className="p-6 border border-gray-200 bg-white rounded-3xl shadow-xs space-y-4">
               <div>
-                <h3 className="font-black text-base text-gray-900">Custom Notification Templates</h3>
-                <p className="text-[10px] text-gray-400 font-black uppercase mt-0.5">Customize SMS & Email layouts for confirmations</p>
+                <h3 className="font-black text-base text-gray-900">Business & Cinema Credentials</h3>
+                <p className="text-[10px] text-gray-400 font-black uppercase mt-0.5">Government registration & banking profile</p>
+              </div>
+
+              <div className="space-y-4">
+                <Input label="Primary Theatre Name" defaultValue="Rex Cinemas Bandra" placeholder="Multiplex Name" />
+                <Input label="Registered Business Name" defaultValue="Rex Cinemas Private Limited" placeholder="Company Name" />
+                <Input label="GST Identification Number (GSTIN)" defaultValue="27AAAAA0000A1Z5" placeholder="GST Number" />
+                <Input label="PAN Number" defaultValue="AABCU9603R" placeholder="PAN Number" />
+                <Input label="Business License Reference" defaultValue="BL-2026-90482" placeholder="License Code" />
+                <Input label="Registered Address" defaultValue="Bandra West, Mumbai, Maharashtra 400050" placeholder="Address" />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <Input label="Bank Account Number" defaultValue="************9090" placeholder="Account Number" />
+                  <Input label="IFSC Code" defaultValue="HDFC0000123" placeholder="IFSC Code" />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <Button variant="secondary" onClick={() => toast.success('Business info reset')}>Cancel</Button>
+                  <Button variant="primary" className="bg-amber-400 text-gray-900 font-black px-6 py-2.5 rounded-2xl text-xs cursor-pointer" onClick={() => toast.success('Business credentials saved!')}>
+                    Save Business Credentials
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            {/* 3. Change Password Security */}
+            <Card className="p-6 border border-gray-200 bg-white rounded-3xl shadow-xs space-y-4">
+              <div>
+                <h3 className="font-black text-base text-gray-900">Security & Password</h3>
+                <p className="text-[10px] text-gray-400 font-black uppercase mt-0.5">Update account login password</p>
+              </div>
+
+              <form onSubmit={(e) => { e.preventDefault(); toast.success('Password updated successfully!'); }} className="space-y-4">
+                <Input label="Current Password" type="password" placeholder="••••••••" required />
+                <Input label="New Password" type="password" placeholder="••••••••" required />
+                <Input label="Confirm New Password" type="password" placeholder="••••••••" required />
+
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-2xl text-xs text-gray-600 space-y-1">
+                  <p className="font-bold text-[11px] uppercase text-gray-500">Password Policy:</p>
+                  <ul className="list-disc pl-4 space-y-0.5 text-[11px]">
+                    <li>Minimum 8 characters long</li>
+                    <li>At least one uppercase and one lowercase letter</li>
+                    <li>At least one number and one special character (@$!%*?&)</li>
+                  </ul>
+                </div>
+
+                <Button type="submit" variant="primary" className="w-full bg-amber-400 text-gray-900 font-black py-3 rounded-2xl text-xs cursor-pointer">
+                  Update Password
+                </Button>
+              </form>
+            </Card>
+
+            {/* 4. Media Assets & Custom Templates */}
+            <Card className="p-6 border border-gray-200 bg-white rounded-3xl shadow-xs space-y-4">
+              <div>
+                <h3 className="font-black text-base text-gray-900">Media Assets & SMS Layouts</h3>
+                <p className="text-[10px] text-gray-400 font-black uppercase mt-0.5">Logos, banners, and confirmation messaging</p>
               </div>
 
               <div className="space-y-4 text-xs font-semibold text-gray-700">
+                <div className="grid grid-cols-2 gap-4">
+                  <ImageUploadField label="Profile Photo" value="" onChange={() => toast.success('Profile photo uploaded!')} type="poster" />
+                  <ImageUploadField label="Theatre Logo" value="" onChange={() => toast.success('Theatre logo uploaded!')} type="banner" />
+                </div>
+
                 <div className="flex flex-col">
                   <span className="text-[9px] font-black text-gray-400 uppercase mb-1">Ticket Confirmation SMS Layout</span>
                   <textarea
-                    defaultValue="Hi {customer_name}, your booking for {movie_title} (Seat: {seats}) is confirmed. Show date: {date}. Present QR at Screen entry."
-                    rows="3"
-                    className="p-3 border border-gray-200 rounded-xl focus:outline-none font-semibold text-xs"
+                    defaultValue="Hi {customer_name}, your booking for {movie_title} (Seat: {seats}) is confirmed at Rex Cinemas. Show date: {date}."
+                    rows="2"
+                    className="p-3 border border-gray-200 rounded-xl focus:outline-none font-semibold text-xs bg-gray-50/50"
                   />
                 </div>
 
-                <div className="flex flex-col">
-                  <span className="text-[9px] font-black text-gray-400 uppercase mb-1">Cancellation Refund SMS Layout</span>
-                  <textarea
-                    defaultValue="Dear {customer_name}, booking reference {booking_number} is cancelled. Refund of {amount} has been initiated."
-                    rows="3"
-                    className="p-3 border border-gray-200 rounded-xl focus:outline-none font-semibold text-xs"
-                  />
-                </div>
-
-                <Button variant="secondary" className="w-full border border-gray-200 py-3 rounded-2xl text-xs font-black" onClick={() => toast.success('Custom SMS layouts configured!')}>
-                  Configure Message Templates
+                <Button variant="secondary" className="w-full border border-gray-200 py-3 rounded-2xl text-xs font-black cursor-pointer" onClick={() => toast.success('Media assets and templates configured!')}>
+                  Save Media & SMS Layouts
                 </Button>
               </div>
             </Card>
-
           </div>
         </div>
       )}
