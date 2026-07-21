@@ -19,19 +19,21 @@ const GENRES = [
 ];
 
 import { CITIES } from '../utils/constants';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 const MoviesPage = () => {
- const [activeGenre, setActiveGenre] = useState('all');
- const [movies, setMovies] = useState([]);
- const [loading, setLoading] = useState(true);
- const [error, setError] = useState(null);
+  useDocumentTitle('Movies Now Showing & Coming Soon', 'Browse currently running movies, filter by genre, check showtimes, and reserve tickets online.');
+  const [activeGenre, setActiveGenre] = useState('all');
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
- const [selectedState, setSelectedState] = useState(localStorage.getItem('selectedState') || '');
- const [selectedCityName, setSelectedCityName] = useState(() => {
-   const cityId = localStorage.getItem('selectedCity') || '';
-   const cityObj = CITIES.find(c => c.id === cityId);
-   return cityObj ? cityObj.city_name : '';
- });
+  const [selectedState, setSelectedState] = useState(localStorage.getItem('selectedState') || '');
+  const [selectedCityName, setSelectedCityName] = useState(() => {
+    const cityId = localStorage.getItem('selectedCity') || '';
+    const cityObj = CITIES.find(c => c.id === cityId);
+    return cityObj ? cityObj.city_name : '';
+  });
 
  useEffect(() => {
    const handleLocationChange = () => {

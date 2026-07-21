@@ -13,6 +13,7 @@ import Input from '../components/ui/Input';
 import Loader from '../components/ui/Loader';
 import EmptyState from '../components/ui/EmptyState';
 import Modal from '../components/ui/Modal';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import toast from 'react-hot-toast';
 
 const FALLBACK_POSTER = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500';
@@ -23,6 +24,7 @@ const MovieDetails = () => {
   const { isAuthenticated } = useAuth();
   
   const [movie, setMovie] = useState(null);
+  useDocumentTitle(movie?.title ? movie.title : 'Movie Details', movie?.description?.text || movie?.description);
   const [shows, setShows] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { FiCheck, FiX, FiLoader } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { CITIES } from '../utils/constants';
 import Card from '../components/ui/Card';
@@ -18,6 +19,13 @@ const Register = () => {
     cityId: CITIES[0]?.id || ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [inlineErrors, setInlineErrors] = useState({});
+
+  const nameRef = useRef(null);
+  const emailRef = useRef(null);
+  const phoneRef = useRef(null);
+  const passwordRef = useRef(null);
+  const confirmPasswordRef = useRef(null);
 
   const navigate = useNavigate();
   const { register, isAuthenticated, user } = useAuth();
@@ -43,35 +51,99 @@ const Register = () => {
     }
   }, [isAuthenticated, user, navigate]);
 
+  // Live Password Criteria Checks
+  const passwordRules = [
+    { label: 'Minimum 8 characters', valid: formData.password.length >= 8 },
+    { label: 'One uppercase letter (A-Z)', valid: /[A-Z]/.test(formData.password) },
+    { label: 'One lowercase letter (a-z)', valid: /[a-z]/.test(formData.password) },
+    { label: 'One number (0-9)', valid: /\d/.test(formData.password) },
+    { label: 'One special character (@$!%*?&)', valid: /[@$!%*?&]/.test(formData.password) },
+  ];
+
+  const isPasswordValid = passwordRules.every(r => r.valid);
+
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.fullName.trim()) {
+      errors.fullName = 'Full name is required';
+    }
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Please provide a valid email address';
+    }
+    const cleanPhone = formData.phone.trim();
+    if (!cleanPhone || !/^(?:\+91|91)?[6-9]\d{9}$/.test(cleanPhone)) {
+      errors.phone = 'Please enter a valid 10-digit Indian mobile number';
+    }
+    if (!formData.cityId) {
+      errors.cityId = 'Please select a valid city.';
+    }
+    if (!isPasswordValid) {
+      errors.password = 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.';
+    }
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+    return errors;
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      return toast.error('Passwords do not match');
-    }
-    if (formData.password.length < 8) {
-      return toast.error('Password must be at least 8 characters');
+    setInlineErrors({});
+
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setInlineErrors(errors);
+      const firstErrKey = Object.keys(errors)[0];
+      toast.error(errors[firstErrKey]);
+
+      // Autofocus first invalid field
+      if (firstErrKey === 'fullName' && nameRef.current) nameRef.current.focus();
+      else if (firstErrKey === 'email' && emailRef.current) emailRef.current.focus();
+      else if (firstErrKey === 'phone' && phoneRef.current) phoneRef.current.focus();
+      else if (firstErrKey === 'password' && passwordRef.current) passwordRef.current.focus();
+      else if (firstErrKey === 'confirmPassword' && confirmPasswordRef.current) confirmPasswordRef.current.focus();
+      return;
     }
 
     setIsSubmitting(true);
     try {
       await register({
-        full_name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
+        full_name: formData.fullName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
         password: formData.password,
         city_id: formData.cityId
       });
-      toast.success('Account created successfully! Please sign in.');
+      toast.success('Account created successfully. Please sign in.');
       navigate('/login');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Registration failed. Check validator requirements.');
+      const serverMsg = err.response?.data?.message || err.message || '';
+      let userFriendlyMsg = 'Registration failed. Please check your information.';
+      
+      if (serverMsg.toLowerCase().includes('city')) {
+        userFriendlyMsg = 'Please select a valid city.';
+        setInlineErrors(prev => ({ ...prev, cityId: userFriendlyMsg }));
+      } else if (serverMsg.toLowerCase().includes('password')) {
+        userFriendlyMsg = 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.';
+        setInlineErrors(prev => ({ ...prev, password: userFriendlyMsg }));
+      } else if (serverMsg.toLowerCase().includes('phone')) {
+        userFriendlyMsg = 'Please enter a valid 10-digit Indian mobile number.';
+        setInlineErrors(prev => ({ ...prev, phone: userFriendlyMsg }));
+      } else if (serverMsg.toLowerCase().includes('email')) {
+        userFriendlyMsg = serverMsg.includes('already registered') ? 'Email is already registered. Please login.' : 'Please enter a valid email address.';
+        setInlineErrors(prev => ({ ...prev, email: userFriendlyMsg }));
+      } else if (serverMsg) {
+        userFriendlyMsg = serverMsg;
+      }
+      
+      toast.error(userFriendlyMsg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 relative overflow-hidden text-left">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 relative overflow-hidden text-left sm:safe-top sm:safe-bottom">
       {/* Background Orbs */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-amber-400/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
@@ -80,89 +152,182 @@ const Register = () => {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-[500px] z-10"
+        className="w-full max-w-[520px] z-10"
       >
-        <Card className="p-6 md:p-8 shadow-md bg-white border border-gray-200 rounded-3xl">
-          <div className="text-center mb-8">
-            <Link to="/" className="inline-block text-2xl font-black tracking-tighter text-amber-500 mb-3">
+        <Card className="p-6 sm:p-8 shadow-md bg-white border border-gray-200 rounded-3xl">
+          <div className="text-center mb-6">
+            <Link to="/" className="inline-block text-2xl font-black tracking-tighter text-amber-500 mb-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded-lg">
               Ticket<span className="text-gray-900">Show</span>
             </Link>
-            <h2 className="text-2xl font-black text-gray-900 tracking-tight">Create Account</h2>
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Create Account</h1>
             <p className="text-xs text-gray-500 font-semibold mt-1">Join TicketShow to browse movies and reserve seats</p>
           </div>
 
-          <form onSubmit={handleRegister} className="space-y-4">
-            <Input
-              label="Full Name"
-              placeholder="John Doe"
-              value={formData.fullName}
-              onChange={e => setFormData({ ...formData, fullName: e.target.value })}
-              required
-            />
+          <form onSubmit={handleRegister} className="space-y-4" noValidate>
+            <div>
+              <Input
+                ref={nameRef}
+                label="Full Name"
+                placeholder="John Doe"
+                value={formData.fullName}
+                onChange={e => {
+                  setFormData({ ...formData, fullName: e.target.value });
+                  if (inlineErrors.fullName) setInlineErrors({ ...inlineErrors, fullName: null });
+                }}
+                className={`min-h-[44px] ${inlineErrors.fullName ? 'border-red-500 bg-red-50/20' : ''}`}
+                aria-label="Full Name"
+                required
+              />
+              {inlineErrors.fullName && (
+                <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.fullName}</p>
+              )}
+            </div>
 
-            <Input
-              label="Email Address"
-              type="email"
-              placeholder="john@doe.com"
-              value={formData.email}
-              onChange={e => setFormData({ ...formData, email: e.target.value })}
-              required
-            />
+            <div>
+              <Input
+                ref={emailRef}
+                label="Email Address"
+                type="email"
+                placeholder="john@doe.com"
+                value={formData.email}
+                onChange={e => {
+                  setFormData({ ...formData, email: e.target.value });
+                  if (inlineErrors.email) setInlineErrors({ ...inlineErrors, email: null });
+                }}
+                className={`min-h-[44px] ${inlineErrors.email ? 'border-red-500 bg-red-50/20' : ''}`}
+                aria-label="Email Address"
+                required
+              />
+              {inlineErrors.email && (
+                <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.email}</p>
+              )}
+            </div>
 
-            <Input
-              label="Phone Number (E.164 format)"
-              placeholder="+919876543210"
-              value={formData.phone}
-              onChange={e => setFormData({ ...formData, phone: e.target.value })}
-              required
-            />
+            <div>
+              <Input
+                ref={phoneRef}
+                label="Phone Number (Indian Mobile)"
+                placeholder="+91 9876543210"
+                value={formData.phone}
+                onChange={e => {
+                  setFormData({ ...formData, phone: e.target.value });
+                  if (inlineErrors.phone) setInlineErrors({ ...inlineErrors, phone: null });
+                }}
+                className={`min-h-[44px] ${inlineErrors.phone ? 'border-red-500 bg-red-50/20' : ''}`}
+                aria-label="Phone Number"
+                required
+              />
+              {inlineErrors.phone && (
+                <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.phone}</p>
+              )}
+            </div>
 
             <div className="flex flex-col text-left">
-              <label className="block text-xs font-extrabold text-gray-500 uppercase mb-1">City Location</label>
+              <label htmlFor="citySelect" className="block text-xs font-extrabold text-gray-500 uppercase mb-1">
+                City Location
+              </label>
               <select
+                id="citySelect"
                 value={formData.cityId}
-                onChange={e => setFormData({ ...formData, cityId: e.target.value })}
-                className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:border-amber-400 focus:bg-white text-sm font-semibold transition-colors"
+                onChange={e => {
+                  setFormData({ ...formData, cityId: e.target.value });
+                  if (inlineErrors.cityId) setInlineErrors({ ...inlineErrors, cityId: null });
+                }}
+                className={`w-full min-h-[44px] px-4 py-2.5 rounded-2xl border ${inlineErrors.cityId ? 'border-red-500 bg-red-50/20' : 'border-gray-200 bg-gray-50'} text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white text-sm font-semibold transition-colors cursor-pointer`}
+                aria-label="Select City"
               >
                 {CITIES.map(c => (
-                  <option key={c.id} value={c.id}>{c.city_name}</option>
+                  <option key={c.id} value={c.id}>{c.city_name} ({c.state})</option>
                 ))}
               </select>
+              {inlineErrors.cityId && (
+                <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.cityId}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                label="Password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={e => setFormData({ ...formData, password: e.target.value })}
-                required
-              />
+              <div>
+                <Input
+                  ref={passwordRef}
+                  label="Password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={e => {
+                    setFormData({ ...formData, password: e.target.value });
+                    if (inlineErrors.password) setInlineErrors({ ...inlineErrors, password: null });
+                  }}
+                  className={`min-h-[44px] ${inlineErrors.password ? 'border-red-500 bg-red-50/20' : ''}`}
+                  aria-label="Password"
+                  required
+                />
+              </div>
 
-              <Input
-                label="Confirm Password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
-                required
-              />
+              <div>
+                <Input
+                  ref={confirmPasswordRef}
+                  label="Confirm Password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.confirmPassword}
+                  onChange={e => {
+                    setFormData({ ...formData, confirmPassword: e.target.value });
+                    if (inlineErrors.confirmPassword) setInlineErrors({ ...inlineErrors, confirmPassword: null });
+                  }}
+                  className={`min-h-[44px] ${inlineErrors.confirmPassword ? 'border-red-500 bg-red-50/20' : ''}`}
+                  aria-label="Confirm Password"
+                  required
+                />
+                {inlineErrors.confirmPassword && (
+                  <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.confirmPassword}</p>
+                )}
+              </div>
             </div>
+
+            {/* Live Password Rules Feedback Checklist */}
+            <div className="p-3.5 bg-gray-50/80 border border-gray-200 rounded-2xl text-left space-y-1.5 mt-2">
+              <p className="text-[11px] font-extrabold uppercase text-gray-500 tracking-wider mb-1">
+                Password Requirements
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-1 text-xs">
+                {passwordRules.map((rule, idx) => (
+                  <div key={idx} className="flex items-center gap-1.5">
+                    <span className={`p-0.5 rounded-full ${rule.valid ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-400'}`}>
+                      {rule.valid ? <FiCheck size={12} /> : <FiX size={12} />}
+                    </span>
+                    <span className={`font-semibold text-[11px] ${rule.valid ? 'text-green-700 font-bold' : 'text-gray-500'}`}>
+                      {rule.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {inlineErrors.password && (
+              <p className="text-xs text-red-600 font-semibold">{inlineErrors.password}</p>
+            )}
 
             <Button
               type="submit"
               variant="primary"
-              className="w-full py-3.5 font-black rounded-2xl bg-amber-400 hover:bg-amber-500 text-gray-900 shadow-sm mt-4 transition-all"
+              className="w-full min-h-[44px] py-3.5 font-black rounded-2xl bg-amber-400 hover:bg-amber-500 text-gray-900 shadow-sm mt-4 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-amber-500"
               disabled={isSubmitting}
+              aria-label="Create Account"
             >
-              {isSubmitting ? 'Creating Account...' : 'Create Account'}
+              {isSubmitting ? (
+                <>
+                  <FiLoader size={18} className="animate-spin text-gray-900" />
+                  <span>Creating Account...</span>
+                </>
+              ) : (
+                'Create Account'
+              )}
             </Button>
           </form>
 
           <p className="text-xs text-gray-500 font-semibold mt-6 text-center">
             Already have an account?{' '}
-            <Link to="/login" className="font-bold text-amber-500 hover:underline">
+            <Link to="/login" className="font-bold text-amber-500 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded">
               Sign In
             </Link>
           </p>

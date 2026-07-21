@@ -7,9 +7,11 @@ import { getMe } from '../services/authService';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import toast from 'react-hot-toast';
 
 const Login = () => {
+  useDocumentTitle('Sign In', 'Log in to your TicketShow account to reserve tickets and manage bookings.');
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -6,9 +6,11 @@ import { createPaymentOrder, verifyPayment } from '../services/paymentService';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Loader from '../components/ui/Loader';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import toast from 'react-hot-toast';
 
 const Payment = () => {
+  useDocumentTitle('Secure Checkout & Payment', 'Complete your ticket purchase securely via Razorpay or card payment.');
   const { id } = useParams(); // Booking ID
   const navigate = useNavigate();
   

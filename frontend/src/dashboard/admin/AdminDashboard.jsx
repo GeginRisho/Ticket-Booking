@@ -47,7 +47,10 @@ const mockSupportTickets = [
   { id: 't3', customer: 'Rajesh Owner', email: 'rajesh@pvr.com', subject: 'Showtime scheduling status delay', priority: 'HIGH', status: 'RESOLVED', assigned: 'Super Admin' },
 ];
 
+import useDocumentTitle from '../../hooks/useDocumentTitle';
+
 const AdminDashboard = () => {
+  useDocumentTitle('Admin Control Operations', 'Manage theatre onboarding, movies catalog, customers, coupons, and platform operations.');
   const { user, switchRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -279,7 +282,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Tabs navigation bar */}
-      <div className="flex border-b border-border overflow-x-auto gap-2 hide-scrollbar">
+      <div className="flex border-b border-border overflow-x-auto gap-2 hide-scrollbar py-1">
         {adminTabs.map(tab => (
           <button
             key={tab.id}
@@ -287,16 +290,17 @@ const AdminDashboard = () => {
               setActiveTab(tab.id);
               navigate(`/admin/${tab.id === 'analytics' ? 'dashboard' : tab.id}`);
             }}
-            className={`flex items-center gap-2 px-4 py-3 border-b-2 font-bold text-xs transition-all whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-3 border-b-2 font-extrabold text-xs transition-all whitespace-nowrap cursor-pointer min-h-[44px] focus-visible:ring-2 focus-visible:ring-primary ${
               activeTab === tab.id
-                ? 'border-primary text-text-primary font-black'
-                : 'border-transparent text-text-secondary hover:text-text-primary'
+                ? 'border-primary text-text-primary font-black bg-amber-50/30 rounded-t-xl'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-hover-bg'
             }`}
+            aria-label={`View ${tab.label}`}
           >
-            <tab.icon size={15} />
+            <tab.icon size={16} />
             <span>{tab.label}</span>
             {tab.count > 0 && (
-              <span className="px-1.5 py-0.2 bg-danger text-white text-[10px] font-black rounded-full">
+              <span className="px-2 py-0.5 bg-danger text-white text-[10px] font-black rounded-full shadow-xs">
                 {tab.count}
               </span>
             )}
@@ -313,7 +317,7 @@ const AdminDashboard = () => {
           {activeTab === 'analytics' && (
             <div className="space-y-6">
               {/* 12 KPI Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 {[
                   { title: 'Total Users', val: stats?.users?.total || 22000, color: 'border-blue-200 bg-blue-50/40 text-blue-700' },
                   { title: 'Customers', val: stats?.users?.active || 18400, color: 'border-indigo-200 bg-indigo-50/40 text-indigo-700' },
@@ -328,9 +332,9 @@ const AdminDashboard = () => {
                   { title: 'Refund Requests', val: 2, color: 'border-rose-200 bg-rose-50/40 text-rose-700' },
                   { title: 'Support Tickets', val: tickets.filter(t => t.status === 'OPEN').length, color: 'border-cyan-200 bg-cyan-50/40 text-cyan-700' },
                 ].map((card, idx) => (
-                  <div key={idx} className={`p-3 rounded-2xl border ${card.color} space-y-1`}>
-                    <p className="text-[10px] font-black uppercase text-text-secondary truncate">{card.title}</p>
-                    <p className="text-xl font-black text-text-primary">{card.val}</p>
+                  <div key={idx} className={`p-3.5 rounded-2xl border ${card.color} space-y-1 shadow-xs hover:shadow-sm transition-all`}>
+                    <p className="text-[10px] font-extrabold uppercase text-text-secondary truncate">{card.title}</p>
+                    <p className="text-lg sm:text-xl font-black text-text-primary truncate">{card.val}</p>
                   </div>
                 ))}
               </div>

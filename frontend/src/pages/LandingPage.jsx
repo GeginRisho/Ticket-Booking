@@ -19,9 +19,12 @@ import {
   FiStar, FiCalendar, FiMapPin, FiCompass, FiShield, FiSliders,
   FiSearch, FiTrendingUp, FiCheckCircle, FiClock, FiVideo, FiMap
 } from 'react-icons/fi';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import toast from 'react-hot-toast';
 
 const LandingPage = () => {
+  useDocumentTitle('Book Movie & Event Tickets Online', 'Discover latest movies, reserve cinema seats, book live events, and download digital tickets instantly with TicketShow.');
+
   const navigate = useNavigate();
   const [selectedCity, setSelectedCity] = useState(
     localStorage.getItem('selectedCity') || CITIES[0]?.id || ''

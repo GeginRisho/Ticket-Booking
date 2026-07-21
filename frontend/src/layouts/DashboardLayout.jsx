@@ -299,15 +299,15 @@ const DashboardLayout = () => {
         {/* Right Content Frame */}
         <div className="flex-1 md:pl-64 flex flex-col min-h-screen">
           {/* Top Navbar */}
-          <header className="h-16 bg-white border-b border-border sticky top-0 z-35 flex items-center justify-between px-6 shadow-sm">
-            <div className="flex items-center gap-4">
+          <header className="h-16 bg-white border-b border-border sticky top-0 z-35 flex items-center justify-between px-4 sm:px-6 shadow-sm">
+            <div className="flex items-center gap-3">
               {/* Hamburger toggle */}
               <button 
-                aria-label="Toggle Navigation SidebarMenu"
-                className="md:hidden text-text-primary p-1 rounded-full hover:bg-hover-bg transition-colors"
+                aria-label="Toggle Navigation Sidebar Menu"
+                className="md:hidden text-text-primary p-2 rounded-2xl hover:bg-hover-bg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
                 onClick={() => setIsMobileOpen(true)}
               >
-                <FiMenu size={24} />
+                <FiMenu size={22} />
               </button>
 
               {/* Breadcrumb section */}
@@ -316,15 +316,16 @@ const DashboardLayout = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 ml-auto">
+            <div className="flex items-center gap-2 sm:gap-3 ml-auto">
               {/* Global Search Ctrl + K Trigger Button */}
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="flex items-center gap-2 bg-hover-bg/60 border border-border px-3 py-1.5 rounded-xl text-xs font-semibold text-text-secondary hover:border-primary transition-all cursor-pointer"
+                className="flex items-center gap-2 bg-hover-bg/60 border border-border px-3 py-2 rounded-2xl text-xs font-bold text-text-secondary hover:border-primary transition-all cursor-pointer min-h-[44px] focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label="Open Global Search"
               >
-                <FiSearch size={14} className="text-primary" />
-                <span className="hidden sm:inline">Global Search...</span>
-                <kbd className="px-1.5 py-0.5 bg-white border border-border rounded text-[10px] font-bold text-text-primary shadow-xs">
+                <FiSearch size={16} className="text-primary" />
+                <span className="hidden sm:inline">Search...</span>
+                <kbd className="hidden sm:inline px-1.5 py-0.5 bg-white border border-border rounded-md text-[10px] font-black text-text-primary shadow-xs">
                   Ctrl + K
                 </kbd>
               </button>
@@ -336,10 +337,11 @@ const DashboardLayout = () => {
                     e.stopPropagation();
                     setIsNotificationsOpen(!isNotificationsOpen);
                   }}
-                  className="p-2 text-text-secondary hover:bg-hover-bg hover:text-text-primary rounded-full relative transition-colors cursor-pointer"
+                  className="p-2.5 text-text-secondary hover:bg-hover-bg hover:text-text-primary rounded-2xl relative transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label="Toggle Notifications"
                 >
                   <FiBell size={20} />
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-danger rounded-full ring-2 ring-white animate-pulse" />
+                  <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-danger rounded-full ring-2 ring-white animate-pulse" />
                 </button>
 
                 <NotificationsCenter
@@ -355,9 +357,10 @@ const DashboardLayout = () => {
                     e.stopPropagation();
                     setIsProfileOpen(!isProfileOpen);
                   }}
-                  className="flex items-center gap-2 p-1.5 hover:bg-hover-bg rounded-xl transition-all text-left cursor-pointer"
+                  className="flex items-center gap-2 p-1.5 hover:bg-hover-bg rounded-2xl transition-all text-left cursor-pointer min-h-[44px] focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label="User Profile Menu"
                 >
-                  <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary flex items-center justify-center text-primary font-bold text-sm">
+                  <div className="w-8 h-8 rounded-full bg-amber-100 border border-amber-400 flex items-center justify-center text-amber-900 font-extrabold text-sm shadow-xs">
                     {fullName.charAt(0).toUpperCase()}
                   </div>
                   <div className="hidden lg:block">
@@ -381,7 +384,7 @@ const DashboardLayout = () => {
                       </div>
                       <Link 
                         to={userRole === 'Super Admin' ? '/super-admin/platform-config' : '/admin/settings'}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-text-primary hover:bg-hover-bg font-semibold"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-primary hover:bg-hover-bg font-semibold min-h-[44px]"
                         onClick={() => setIsProfileOpen(false)}
                       >
                         <FiUser size={16} />
@@ -389,7 +392,7 @@ const DashboardLayout = () => {
                       </Link>
                       <button 
                         onClick={handleLogout}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-danger hover:bg-red-50 font-semibold w-full text-left cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-danger hover:bg-red-50 font-semibold w-full text-left cursor-pointer min-h-[44px]"
                       >
                         <FiLogOut size={16} />
                         <span>Logout</span>
@@ -402,7 +405,7 @@ const DashboardLayout = () => {
           </header>
 
           {/* Dashboard Area */}
-          <main className="p-6 md:p-8 flex-1 max-w-7xl w-full mx-auto">
+          <main className="p-4 sm:p-6 md:p-8 flex-1 max-w-7xl w-full mx-auto overflow-x-hidden">
             <ErrorBoundary fallbackMessage="An issue occurred rendering this dashboard panel. Navigate to another section using the sidebar navigation.">
               <Outlet />
             </ErrorBoundary>

@@ -8,9 +8,11 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Loader from '../components/ui/Loader';
 import EmptyState from '../components/ui/EmptyState';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import toast from 'react-hot-toast';
 
 const SeatBooking = () => {
+  useDocumentTitle('Select Seats', 'Choose your preferred cinema seats, apply coupon codes, and reserve tickets.');
   const { id } = useParams(); // Showtime ID
   const navigate = useNavigate();
   

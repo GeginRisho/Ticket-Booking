@@ -44,7 +44,10 @@ const mockAuditLogs = [
   { id: 'au3', user: 'super@ticketshow.com', role: 'Super Admin', action: 'Updated convenience fee rate to 10%', target: 'System Config', ip: '182.73.94.12', browser: 'Chrome 126 / Windows', date: '2026-07-20 17:45:00' }
 ];
 
+import useDocumentTitle from '../../hooks/useDocumentTitle';
+
 const SuperAdminDashboard = () => {
+  useDocumentTitle('Super Admin Control Center', 'Global governance, platform configuration, admin management, role matrix, and system analytics.');
   const { user, impersonateUser, featureFlags } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -140,7 +143,7 @@ const SuperAdminDashboard = () => {
       </div>
 
       {/* Tabs Sub-navigation bar */}
-      <div className="flex border-b border-border overflow-x-auto gap-2 hide-scrollbar">
+      <div className="flex border-b border-border overflow-x-auto gap-2 hide-scrollbar py-1">
         {superAdminTabs.map(tab => (
           <button
             key={tab.id}
@@ -148,13 +151,14 @@ const SuperAdminDashboard = () => {
               setActiveTab(tab.id);
               navigate(`/super-admin/${tab.id === 'overview' ? 'dashboard' : tab.id}`);
             }}
-            className={`flex items-center gap-2 px-4 py-3 border-b-2 font-bold text-xs transition-all whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-3 border-b-2 font-extrabold text-xs transition-all whitespace-nowrap cursor-pointer min-h-[44px] focus-visible:ring-2 focus-visible:ring-primary ${
               activeTab === tab.id
-                ? 'border-primary text-text-primary font-black'
-                : 'border-transparent text-text-secondary hover:text-text-primary'
+                ? 'border-primary text-text-primary font-black bg-amber-50/30 rounded-t-xl'
+                : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-hover-bg'
             }`}
+            aria-label={`Switch to ${tab.label}`}
           >
-            <tab.icon size={15} />
+            <tab.icon size={16} />
             <span>{tab.label}</span>
           </button>
         ))}

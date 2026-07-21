@@ -7,9 +7,11 @@ import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { updateProfile, changePassword } from '../services/authService';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import toast from 'react-hot-toast';
 
 const UserProfile = () => {
+  useDocumentTitle('User Profile & Settings', 'Manage your TicketShow account settings, personal details, and preferences.');
   const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -188,7 +188,10 @@ const GalleryUploader = ({ label, value = [], onChange }) => {
   );
 };
 
+import useDocumentTitle from '../../hooks/useDocumentTitle';
+
 const TheatreOwnerDashboard = () => {
+  useDocumentTitle('Theatre Owner Partner Dashboard', 'Manage your multiplex screens, movie shows, seat layouts, F&B menu, and revenue telemetry.');
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

@@ -4,7 +4,7 @@ const AppError = require('../utils/appError');
 const validateResult = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const errorMsgs = errors.array().map(err => `${err.path}: ${err.msg}`).join('. ');
+    const errorMsgs = errors.array().map(err => err.msg).join('. ');
     return next(new AppError(errorMsgs, 400));
   }
   next();
@@ -25,13 +25,13 @@ const registerValidator = [
   body('phone')
     .trim()
     .notEmpty().withMessage('Phone number is required')
-    .matches(/^\+?[1-9]\d{1,14}$/).withMessage('Please provide a valid E.164 phone number'),
+    .matches(/^(?:\+91|91)?[6-9]\d{9}$/).withMessage('Please provide a valid 10-digit mobile number'),
   
   body('password')
     .notEmpty().withMessage('Password is required')
     .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
-    .withMessage('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
+    .withMessage('Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character'),
   
   body('role_name')
     .optional()
@@ -39,7 +39,7 @@ const registerValidator = [
   
   body('city_id')
     .optional()
-    .isUUID(4).withMessage('Invalid city ID format'),
+    .isUUID().withMessage('Please select a valid city'),
     
   validateResult
 ];
@@ -111,7 +111,7 @@ const updateProfileValidator = [
   
   body('city_id')
     .optional()
-    .isUUID(4).withMessage('Invalid city ID format'),
+    .isUUID().withMessage('Please select a valid city'),
     
   validateResult
 ];

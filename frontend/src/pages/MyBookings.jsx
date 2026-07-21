@@ -8,10 +8,12 @@ import EmptyState from '../components/ui/EmptyState';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import Modal from '../components/ui/Modal';
 import { QRCodeSVG } from 'qrcode.react';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 
 const MyBookings = () => {
+  useDocumentTitle('My Bookings & Passes', 'Manage your upcoming movie and event reservations.');
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('upcoming'); // upcoming, completed, cancelled
   const [bookings, setBookings] = useState([]);

@@ -7,9 +7,11 @@ import Button from '../components/ui/Button';
 import Loader from '../components/ui/Loader';
 import EmptyState from '../components/ui/EmptyState';
 import { QRCodeSVG } from 'qrcode.react';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import toast from 'react-hot-toast';
 
 const DigitalTicket = () => {
+  useDocumentTitle('Your Digital Ticket', 'View and print your digital ticket QR code for entry.');
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);

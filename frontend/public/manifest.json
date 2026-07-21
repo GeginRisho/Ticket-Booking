@@ -1,0 +1,17 @@
+{
+  "short_name": "TicketShow",
+  "name": "TicketShow - Online Movie & Event Tickets",
+  "description": "Discover movies, reserve cinema seats, book live events, and download digital tickets instantly.",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0F172A",
+  "theme_color": "#F59E0B",
+  "display": "standalone",
+  "orientation": "portrait"
+}
