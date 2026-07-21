@@ -10,6 +10,16 @@ const Offers = () => {
   const [loading, setLoading] = useState(true);
   const [copiedCode, setCopiedCode] = useState('');
 
+  const [locationTrigger, setLocationTrigger] = useState(0);
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      setLocationTrigger(prev => prev + 1);
+    };
+    window.addEventListener('locationChanged', handleLocationChange);
+    return () => window.removeEventListener('locationChanged', handleLocationChange);
+  }, []);
+
   useEffect(() => {
     const fetchOffers = async () => {
       try {
@@ -22,7 +32,7 @@ const Offers = () => {
       }
     };
     fetchOffers();
-  }, []);
+  }, [locationTrigger]);
 
   const handleCopyCode = (code) => {
     navigator.clipboard.writeText(code);

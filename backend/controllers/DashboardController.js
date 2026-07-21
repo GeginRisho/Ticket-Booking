@@ -3,12 +3,19 @@ const DashboardService = require('../services/DashboardService');
 class DashboardController {
   async getDashboardStats(req, res, next) {
     try {
-      const userRole = req.user.role.role_name;
-      let stats;
+      let userRole = '';
+      if (req.user && req.user.role) {
+        if (typeof req.user.role === 'object') {
+          userRole = req.user.role.role_name || req.user.role.name || '';
+        } else {
+          userRole = req.user.role;
+        }
+      }
 
-      if (userRole === 'Admin') {
+      let stats;
+      if (userRole === 'Admin' || userRole === 'Super Admin') {
         stats = await DashboardService.getAdminStats();
-      } else if (userRole === 'Theatre Owner') {
+      } else if (userRole === 'Theatre Owner' || userRole === 'Owner') {
         stats = await DashboardService.getTheatreOwnerStats(req.user.id);
       } else {
         // Customers/Event Organizers get access denied

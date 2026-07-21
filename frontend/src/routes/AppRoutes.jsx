@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from '../components/layout/ProtectedRoute';
 import Loader from '../components/ui/Loader';
 import MainLayout from '../layouts/MainLayout';
+const DashboardLayout = lazy(() => import('../layouts/DashboardLayout'));
 
 // Lazy load pages for code splitting & performance optimization
 const LandingPage = lazy(() => import('../pages/LandingPage'));
@@ -26,9 +27,14 @@ const ResetPassword = lazy(() => import('../pages/ResetPassword'));
 
 // Dashboard lazy loaded views
 const AdminDashboard = lazy(() => import('../dashboard/admin/AdminDashboard'));
-const CustomerDashboard = lazy(() => import('../dashboard/customer/CustomerDashboard'));
+const SuperAdminDashboard = lazy(() => import('../dashboard/super-admin/SuperAdminDashboard'));
 const TheatreOwnerDashboard = lazy(() => import('../dashboard/theatre-owner/TheatreOwnerDashboard'));
 const OrganizerDashboard = lazy(() => import('../dashboard/organizer/OrganizerDashboard'));
+
+// Customer lazy loaded views
+const MyBookings = lazy(() => import('../pages/MyBookings'));
+const BookingHistory = lazy(() => import('../pages/BookingHistory'));
+const UserProfile = lazy(() => import('../pages/UserProfile'));
 
 // Error lazy loaded views
 const Unauthorized = lazy(() => import('../pages/Unauthorized'));
@@ -58,39 +64,23 @@ const AppRoutes = () => {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           
-          {/* Dashboard route shortcuts mapping to unified CustomerDashboard component */}
-          <Route
-            path="/wishlist"
-            element={
-              <ProtectedRoute requiredRole="Customer">
-                <CustomerDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              <ProtectedRoute requiredRole="Customer">
-                <CustomerDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute requiredRole="Customer">
-                <CustomerDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/customer/dashboard"
-            element={
-              <ProtectedRoute requiredRole="Customer">
-                <CustomerDashboard />
-              </ProtectedRoute>
-            }
-          />
+          {/* Redesigned Standalone Customer Routes */}
+          <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+          <Route path="/history" element={<ProtectedRoute><BookingHistory /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+          
+          {/* Dashboard route redirects */}
+          <Route path="/wishlist" element={<Navigate to="/bookings" replace />} />
+          <Route path="/notifications" element={<Navigate to="/bookings" replace />} />
+          <Route path="/customer/dashboard" element={<Navigate to="/bookings" replace />} />
+          <Route path="/dashboard/customer" element={<Navigate to="/bookings" replace />} />
+          <Route path="/dashboard/bookings" element={<Navigate to="/bookings" replace />} />
+          <Route path="/dashboard/history" element={<Navigate to="/history" replace />} />
+          <Route path="/dashboard/profile" element={<Navigate to="/profile" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/bookings" replace />} />
+          <Route path="/dashboard/:subtab" element={<Navigate to="/bookings" replace />} />
+          <Route path="/dashboard/organizer" element={<Navigate to="/organizer/dashboard" replace />} />
+          <Route path="/owner/dashboard" element={<Navigate to="/theatre/dashboard" replace />} />
         </Route>
 
         <Route path="/login" element={<Login />} />
@@ -124,47 +114,38 @@ const AppRoutes = () => {
           }
         />
 
-        {/* Protected Role-specific Dashboards */}
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute requiredRole="Admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/super-admin/dashboard"
-          element={
-            <ProtectedRoute requiredRole="Super Admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/owner/dashboard"
-          element={
-            <ProtectedRoute requiredRole="Theatre Owner">
-              <TheatreOwnerDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/customer"
-          element={
-            <ProtectedRoute requiredRole="Customer">
-              <CustomerDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/organizer"
-          element={
-            <ProtectedRoute requiredRole="Event Organizer">
-              <OrganizerDashboard />
-            </ProtectedRoute>
-          }
-        />
+        {/* Protected Role-specific Dashboards wrapped in DashboardLayout */}
+        <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+          {/* Admin */}
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/:subtab" element={<AdminDashboard />} />
+          
+          {/* Super Admin */}
+          <Route
+            path="/super-admin/dashboard"
+            element={
+              <ProtectedRoute requiredRole="Super Admin">
+                <SuperAdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/super-admin/:subtab"
+            element={
+              <ProtectedRoute requiredRole="Super Admin">
+                <SuperAdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Theatre Owner */}
+          <Route path="/theatre/dashboard" element={<TheatreOwnerDashboard />} />
+          <Route path="/theatre/dashboard/:subtab" element={<TheatreOwnerDashboard />} />
+          
+          {/* Event Organizer */}
+          <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
+          <Route path="/organizer/:subtab" element={<OrganizerDashboard />} />
+        </Route>
 
         {/* Error Fallbacks */}
         <Route path="/unauthorized" element={<Unauthorized />} />

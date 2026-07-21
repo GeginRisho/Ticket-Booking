@@ -135,6 +135,20 @@ class AuthController {
     }
   }
 
+  async getMe(req, res, next) {
+    try {
+      const user = await AuthService.getProfile(req.user.id);
+      res.status(200).json({
+        status: 'success',
+        user,
+        role: user.role,
+        profile: user
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async updateProfile(req, res, next) {
     try {
       const user = await AuthService.updateProfile(req.user.id, req.body);

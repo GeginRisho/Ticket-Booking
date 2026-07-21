@@ -33,13 +33,20 @@ const LandingPage = () => {
   const [theatres, setTheatres] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async () => {
+  const [selectedState, setSelectedState] = useState(localStorage.getItem('selectedState') || '');
+  const [selectedCityName, setSelectedCityName] = useState(() => {
+    const cityId = localStorage.getItem('selectedCity') || '';
+    const cityObj = CITIES.find(c => c.id === cityId);
+    return cityObj ? cityObj.city_name : '';
+  });
+
+  const fetchData = async (stateVal, cityVal) => {
     setLoading(true);
     try {
       const [moviesRes, eventsRes, theatresRes] = await Promise.all([
-        getMovies(),
-        getEvents(),
-        getTheatres()
+        getMovies({ state: stateVal, city: cityVal }),
+        getEvents({ state: stateVal, city: cityVal }),
+        getTheatres({ state: stateVal, city: cityVal })
       ]);
       setMovies(Array.isArray(moviesRes) ? moviesRes : []);
       setEvents(Array.isArray(eventsRes) ? eventsRes : []);
@@ -53,12 +60,30 @@ const LandingPage = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [selectedCity]);
+    const handleLocationChange = () => {
+      const cityId = localStorage.getItem('selectedCity') || '';
+      const cityObj = CITIES.find(c => c.id === cityId);
+      const cityName = cityObj ? cityObj.city_name : '';
+      const stateName = localStorage.getItem('selectedState') || '';
+      
+      setSelectedCity(cityId);
+      setSelectedCityName(cityName);
+      setSelectedState(stateName);
+      fetchData(stateName, cityName);
+    };
+
+    window.addEventListener('locationChanged', handleLocationChange);
+    
+    // Initial fetch
+    fetchData(selectedState, selectedCityName);
+
+    return () => window.removeEventListener('locationChanged', handleLocationChange);
+  }, []);
 
   const handleCityChange = (cityId) => {
     setSelectedCity(cityId);
     localStorage.setItem('selectedCity', cityId);
+    window.dispatchEvent(new Event('locationChanged'));
     toast.success(`Switched ticketing zone successfully`);
   };
 
@@ -82,7 +107,7 @@ const LandingPage = () => {
   const latestReleases = nowShowingMovies.slice(20, 25);
 
   // Filter events in selected city or standard
-  const cityEvents = events.filter(e => e.city_id === selectedCity);
+  const cityEvents = events;
   
   // Category splits for events
   const concertsList = cityEvents.filter(e => e.category?.category_name === 'Concert');
@@ -95,7 +120,7 @@ const LandingPage = () => {
   const workshopsList = cityEvents.filter(e => e.category?.category_name === 'Workshops');
 
   // Nearby theatres in selected city
-  const cityTheatres = theatres.filter(t => t.city_id === selectedCity);
+  const cityTheatres = theatres;
 
   const renderEventGrid = (list, title, icon) => {
     if (!list || list.length === 0) return null;

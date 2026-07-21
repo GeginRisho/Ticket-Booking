@@ -134,6 +134,20 @@ const MovieDetails = () => {
     groupedShows[tName].push(show);
   });
 
+  const descObj = (() => {
+    try {
+      const parsed = JSON.parse(movie.description);
+      if (parsed && typeof parsed === 'object') {
+        return {
+          text: parsed.text || '',
+          thumbnail: parsed.thumbnail || '',
+          gallery: parsed.gallery || []
+        };
+      }
+    } catch (e) {}
+    return { text: movie.description || '', thumbnail: '', gallery: [] };
+  })();
+
   return (
     <div className="bg-background min-h-screen text-text-primary text-left">
       {/* Banner / Poster Hero */}
@@ -183,7 +197,7 @@ const MovieDetails = () => {
               <span>{movie.language}</span>
             </div>
             <p className="text-sm md:text-base text-text-secondary max-w-2xl leading-relaxed">
-              {movie.description}
+              {descObj.text}
             </p>
 
             <div className="flex justify-center md:justify-start gap-3 pt-2">
@@ -295,6 +309,20 @@ const MovieDetails = () => {
                       </div>
                       <span className="text-xs font-bold text-text-primary">{c.cast_name}</span>
                       <span className="text-[10px] text-text-secondary leading-none">{c.role_in_movie}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Gallery Images block */}
+            {descObj.gallery && descObj.gallery.length > 0 && (
+              <div className="space-y-6 pt-6">
+                <h3 className="text-2xl font-extrabold text-text-primary">Movie Showcase & Gallery</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {descObj.gallery.map((img, idx) => (
+                    <div key={idx} className="aspect-video rounded-2xl overflow-hidden border border-border bg-gray-100 group relative">
+                      <img src={img} alt={`Showcase ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                     </div>
                   ))}
                 </div>

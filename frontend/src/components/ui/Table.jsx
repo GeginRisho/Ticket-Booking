@@ -55,7 +55,19 @@ const Table = ({
                     <span className="font-semibold text-text-secondary">{header}</span>
                     <span className="text-text-primary text-right font-medium">
                       {/* Assuming cells are aligned to header indexes in row rendering */}
-                      {Object.values(item)[hIdx] || '-'}
+                      {(() => {
+                        const val = Object.values(item)[hIdx];
+                        if (val === null || val === undefined) return '-';
+                        if (React.isValidElement(val)) return val;
+                        if (typeof val === 'object') {
+                          try {
+                            return val.full_name || val.name || val.title || val.email || String(val);
+                          } catch {
+                            return '-';
+                          }
+                        }
+                        return String(val);
+                      })()}
                     </span>
                   </div>
                 ))}

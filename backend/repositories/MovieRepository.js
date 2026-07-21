@@ -1,5 +1,5 @@
 const BaseRepository = require('./BaseRepository');
-const { Movie, Show, Screen, Theatre } = require('../models');
+const { Movie, Show, Screen, Theatre, City } = require('../models');
 const { Op } = require('sequelize');
 
 class MovieRepository extends BaseRepository {
@@ -7,7 +7,7 @@ class MovieRepository extends BaseRepository {
     super(Movie);
   }
 
-  async findFiltered({ genre, language, status, city_id, search }, options = {}) {
+  async findFiltered({ genre, language, status, city_id, search, state, city }, options = {}) {
     const where = {};
     
     if (genre) {
@@ -28,7 +28,14 @@ class MovieRepository extends BaseRepository {
 
     const include = [];
 
-    if (city_id) {
+    if ((city_id || city || state) && status !== 'coming_soon') {
+      const theatreWhere = {};
+      if (city_id) theatreWhere.city_id = city_id;
+
+      const cityWhere = {};
+      if (state) cityWhere.state = state;
+      if (city) cityWhere.city_name = city;
+
       include.push({
         model: Show,
         as: 'shows',
@@ -41,7 +48,13 @@ class MovieRepository extends BaseRepository {
             model: Theatre,
             as: 'theatre',
             required: true,
-            where: { city_id }
+            where: Object.keys(theatreWhere).length > 0 ? theatreWhere : undefined,
+            include: [{
+              model: City,
+              as: 'city',
+              required: true,
+              where: Object.keys(cityWhere).length > 0 ? cityWhere : undefined
+            }]
           }]
         }]
       });

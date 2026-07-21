@@ -8,13 +8,15 @@ export const getMovies = async (params = {}) => {
 };
 
 // Client-side wrappers to simulate filtered movie rows on home page using standard getMovies
-export const getPopularMovies = async (cityId) => {
+export const getPopularMovies = async (params = {}) => {
   // Query all active movies
-  return await getMovies({ status: 'now_showing', city_id: cityId });
+  const finalParams = typeof params === 'string' ? { city_id: params } : params;
+  return await getMovies({ status: 'now_showing', ...finalParams });
 };
 
-export const getTrendingMovies = async (cityId) => {
-  return await getMovies({ status: 'now_showing', city_id: cityId });
+export const getTrendingMovies = async (params = {}) => {
+  const finalParams = typeof params === 'string' ? { city_id: params } : params;
+  return await getMovies({ status: 'now_showing', ...finalParams });
 };
 
 export const getLatestMovies = async () => {
@@ -51,10 +53,10 @@ export const removeMovieCast = async (movieId, castId) => {
   return response.data;
 };
 
-export const getActionMovies = async () => getMovies({ genre: 'action' });
-export const getComedyMovies = async () => getMovies({ genre: 'comedy' });
-export const getDramaMovies = async () => getMovies({ genre: 'drama' });
-export const getScifiMovies = async () => getMovies({ genre: 'scifi' });
-export const getHorrorMovies = async () => getMovies({ genre: 'horror' });
-export const getAnimationMovies = async () => getMovies({ genre: 'animation' });
+export const getActionMovies = async (params = {}) => getMovies({ genre: 'action', ...params });
+export const getComedyMovies = async (params = {}) => getMovies({ genre: 'comedy', ...params });
+export const getDramaMovies = async (params = {}) => getMovies({ genre: 'drama', ...params });
+export const getScifiMovies = async (params = {}) => getMovies({ genre: 'scifi', ...params });
+export const getHorrorMovies = async (params = {}) => getMovies({ genre: 'horror', ...params });
+export const getAnimationMovies = async (params = {}) => getMovies({ genre: 'animation', ...params });
 export const searchMovies = async (query) => getMovies({ search: query });

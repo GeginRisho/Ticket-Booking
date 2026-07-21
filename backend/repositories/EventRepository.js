@@ -7,7 +7,7 @@ class EventRepository extends BaseRepository {
     super(Event);
   }
 
-  async findFiltered({ city_id, category_id, status, search }, options = {}) {
+  async findFiltered({ city_id, category_id, status, search, state, city }, options = {}) {
     const where = {};
     if (city_id) where.city_id = city_id;
     if (category_id) where.category_id = category_id;
@@ -16,11 +16,20 @@ class EventRepository extends BaseRepository {
       where.title = { [Op.iLike]: `%${search}%` };
     }
 
+    const cityWhere = {};
+    if (state) cityWhere.state = state;
+    if (city) cityWhere.city_name = city;
+
     return await this.findAll({
       where,
       include: [
         { model: EventCategory, as: 'category' },
-        { model: City, as: 'city' }
+        { 
+          model: City, 
+          as: 'city',
+          where: Object.keys(cityWhere).length > 0 ? cityWhere : undefined,
+          required: Object.keys(cityWhere).length > 0
+        }
       ],
       ...options
     });

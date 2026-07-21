@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -15,13 +15,33 @@ const Register = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    roleName: 'Customer',
     cityId: CITIES[0]?.id || ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, isAuthenticated, user } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const rawRole = user.role?.role_name || user.role || 'Customer';
+      let roleStr = rawRole;
+      if (rawRole === 'Owner') roleStr = 'Theatre Owner';
+      if (rawRole === 'Organizer') roleStr = 'Event Organizer';
+
+      let redirectPath = '/dashboard';
+      if (roleStr === 'Super Admin') {
+        redirectPath = '/super-admin/dashboard';
+      } else if (roleStr === 'Admin') {
+        redirectPath = '/admin/dashboard';
+      } else if (roleStr === 'Theatre Owner') {
+        redirectPath = '/theatre/dashboard';
+      } else if (roleStr === 'Event Organizer') {
+        redirectPath = '/organizer/dashboard';
+      }
+      navigate(redirectPath, { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -39,7 +59,6 @@ const Register = () => {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        role_name: formData.roleName,
         city_id: formData.cityId
       });
       toast.success('Account created successfully! Please sign in.');
@@ -52,51 +71,27 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12 relative overflow-hidden">
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-accent/20 rounded-full blur-[120px] pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 relative overflow-hidden text-left">
+      {/* Background Orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-amber-400/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-lg z-10"
+        className="w-full max-w-[500px] z-10"
       >
-        <Card className="p-8 shadow-md">
+        <Card className="p-6 md:p-8 shadow-md bg-white border border-gray-200 rounded-3xl">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-extrabold text-text-primary tracking-tight">Create Account</h2>
-            <p className="text-sm text-text-secondary mt-1">Join TicketShow to browse movies and reserve seats</p>
+            <Link to="/" className="inline-block text-2xl font-black tracking-tighter text-amber-500 mb-3">
+              Ticket<span className="text-gray-900">Show</span>
+            </Link>
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">Create Account</h2>
+            <p className="text-xs text-gray-500 font-semibold mt-1">Join TicketShow to browse movies and reserve seats</p>
           </div>
 
           <form onSubmit={handleRegister} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col text-left">
-                <label className="block text-sm font-semibold text-text-primary mb-2">Register As</label>
-                <select
-                  value={formData.roleName}
-                  onChange={e => setFormData({ ...formData, roleName: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-white text-text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                >
-                  <option value="Customer">Movie & Event Goer</option>
-                  <option value="Theatre Owner">Theatre Owner</option>
-                  <option value="Event Organizer">Event Organizer</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col text-left">
-                <label className="block text-sm font-semibold text-text-primary mb-2">City Location</label>
-                <select
-                  value={formData.cityId}
-                  onChange={e => setFormData({ ...formData, cityId: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-white text-text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                >
-                  {CITIES.map(c => (
-                    <option key={c.id} value={c.id}>{c.city_name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
             <Input
               label="Full Name"
               placeholder="John Doe"
@@ -116,17 +111,30 @@ const Register = () => {
 
             <Input
               label="Phone Number (E.164 format)"
-              placeholder="9876543210"
+              placeholder="+919876543210"
               value={formData.phone}
               onChange={e => setFormData({ ...formData, phone: e.target.value })}
               required
             />
 
+            <div className="flex flex-col text-left">
+              <label className="block text-xs font-extrabold text-gray-500 uppercase mb-1">City Location</label>
+              <select
+                value={formData.cityId}
+                onChange={e => setFormData({ ...formData, cityId: e.target.value })}
+                className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:border-amber-400 focus:bg-white text-sm font-semibold transition-colors"
+              >
+                {CITIES.map(c => (
+                  <option key={c.id} value={c.id}>{c.city_name}</option>
+                ))}
+              </select>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 label="Password"
                 type="password"
-                placeholder="Password123!"
+                placeholder="••••••••"
                 value={formData.password}
                 onChange={e => setFormData({ ...formData, password: e.target.value })}
                 required
@@ -135,7 +143,7 @@ const Register = () => {
               <Input
                 label="Confirm Password"
                 type="password"
-                placeholder="Confirm password"
+                placeholder="••••••••"
                 value={formData.confirmPassword}
                 onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
                 required
@@ -145,16 +153,16 @@ const Register = () => {
             <Button
               type="submit"
               variant="primary"
-              className="w-full py-3.5 font-bold mt-4"
-              isLoading={isSubmitting}
+              className="w-full py-3.5 font-black rounded-2xl bg-amber-400 hover:bg-amber-500 text-gray-900 shadow-sm mt-4 transition-all"
+              disabled={isSubmitting}
             >
-              Get Started
+              {isSubmitting ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
 
-          <p className="text-sm text-text-secondary mt-8 text-center">
+          <p className="text-xs text-gray-500 font-semibold mt-6 text-center">
             Already have an account?{' '}
-            <Link to="/login" className="font-bold text-primary hover:underline">
+            <Link to="/login" className="font-bold text-amber-500 hover:underline">
               Sign In
             </Link>
           </p>

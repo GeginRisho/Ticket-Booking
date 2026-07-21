@@ -155,41 +155,49 @@ const SeatBooking = () => {
                   <div className="w-8 font-bold text-sm text-text-secondary text-center">{row}</div>
                   
                   <div className="flex gap-2">
-                    {groupedSeats[row].map(seat => {
-                      const isSelected = selectedSeats.some(s => s.id === seat.id);
-                      
-                      // Add aisles gap representation
-                      const colNum = parseInt(seat.seat_number.split('-')[1] || 0, 10);
-                      const isAisle = colNum === 4 || colNum === 12;
+                    {(() => {
+                      const rowSeats = groupedSeats[row];
+                      const cols = rowSeats.map(s => parseInt(s.seat_number.split('-')[1] || 0, 10));
+                      const maxCol = Math.max(...cols, 0);
 
-                      return (
-                        <React.Fragment key={seat.id}>
+                      return Array.from({ length: maxCol }).map((_, cIdx) => {
+                        const colNum = cIdx + 1;
+                        const seat = rowSeats.find(s => parseInt(s.seat_number.split('-')[1] || 0, 10) === colNum);
+
+                        if (!seat) {
+                          // Dynamic Aisle / Empty space gap
+                          return <div key={`empty-${colNum}`} className="w-8 h-8 flex-shrink-0" />;
+                        }
+
+                        const isSelected = selectedSeats.some(s => s.id === seat.id);
+
+                        return (
                           <button
+                            key={seat.id}
                             disabled={!seat.is_available}
                             onClick={() => toggleSeatSelection(seat)}
                             title={`${seat.seat_number} (${seat.seat_type}) - ₹${seat.price}`}
-                            className={`w-8 h-8 rounded-t-xl rounded-b-md transition-all duration-200 border text-xs font-bold ${
+                            className={`w-8 h-8 rounded-t-xl rounded-b-md transition-all duration-200 border text-[10px] font-bold flex-shrink-0 flex items-center justify-center ${
                               !seat.is_available 
                                 ? 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed opacity-40 line-through' 
                                 : isSelected
                                   ? 'bg-amber-400 border-amber-500 text-text-primary transform scale-110 shadow-md font-extrabold'
                                   : seat.seat_type?.toLowerCase() === 'vip'
-                                    ? 'bg-purple-50 border-purple-300 hover:bg-purple-100 text-purple-700'
-                                    : seat.seat_type?.toLowerCase() === 'premium'
-                                      ? 'bg-amber-50/60 border-amber-200 hover:bg-amber-100 text-amber-700'
+                                    ? 'bg-blue-50 border-blue-300 hover:bg-blue-100 text-blue-700'
+                                    : seat.seat_type?.toLowerCase() === 'recliner'
+                                      ? 'bg-purple-50 border-purple-300 hover:bg-purple-100 text-purple-700'
                                       : seat.seat_type?.toLowerCase() === 'couple'
-                                        ? 'bg-rose-50 border-rose-300 hover:bg-rose-100 text-rose-700'
-                                        : seat.seat_type?.toLowerCase() === 'accessible'
+                                        ? 'bg-yellow-50 border-yellow-300 hover:bg-yellow-100 text-yellow-700'
+                                        : seat.seat_type?.toLowerCase() === 'wheelchair'
                                           ? 'bg-teal-50 border-teal-300 hover:bg-teal-100 text-teal-700'
                                           : 'bg-white border-border hover:bg-amber-50 text-text-primary'
                             }`}
                           >
                             {isSelected ? <FiCheck className="mx-auto" size={14} /> : colNum}
                           </button>
-                          {isAisle && <div className="w-6" />}
-                        </React.Fragment>
-                      );
-                    })}
+                        );
+                      });
+                    })()}
                   </div>
 
                   <div className="w-8 font-bold text-sm text-text-secondary text-center">{row}</div>
@@ -212,15 +220,15 @@ const SeatBooking = () => {
                 <span>Booked / Unavailable</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-t-lg rounded-b-sm bg-purple-50 border border-purple-300"></div>
+                <div className="w-5 h-5 rounded-t-lg rounded-b-sm bg-blue-50 border border-blue-300"></div>
                 <span>VIP Seats</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-t-lg rounded-b-sm bg-amber-50/60 border border-amber-200"></div>
-                <span>Premium Seats</span>
+                <div className="w-5 h-5 rounded-t-lg rounded-b-sm bg-purple-50 border border-purple-300"></div>
+                <span>Recliner Seats</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-t-lg rounded-b-sm bg-rose-50 border border-rose-300"></div>
+                <div className="w-5 h-5 rounded-t-lg rounded-b-sm bg-yellow-50 border border-yellow-300"></div>
                 <span>Couple Seats</span>
               </div>
               <div className="flex items-center gap-2">

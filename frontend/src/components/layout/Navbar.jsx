@@ -25,9 +25,28 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
 
+  const getNavLinks = () => {
+    return [
+      { name: 'Home', path: '/' },
+      { name: 'Movies', path: '/movies' },
+      { name: 'Events', path: '/events' },
+      { name: 'Theatres', path: '/theatres' },
+      { name: 'Offers', path: '/offers' },
+      { name: 'About', path: '/about' },
+      { name: 'Contact', path: '/contact' }
+    ];
+  };
+
   const [selectedCity, setSelectedCity] = useState(
     localStorage.getItem('selectedCity') || CITIES[0]?.id || ''
   );
+  
+  const [selectedState, setSelectedState] = useState(
+    localStorage.getItem('selectedState') || CITIES.find(c => c.id === (localStorage.getItem('selectedCity') || CITIES[0]?.id))?.state || 'Maharashtra'
+  );
+
+  const statesList = Array.from(new Set(CITIES.map(c => c.state))).sort();
+  const filteredCities = CITIES.filter(c => c.state === selectedState);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,13 +61,35 @@ const Navbar = () => {
     setIsProfileDropdownOpen(false);
   }, [location.pathname]);
 
+  const handleStateChange = (e) => {
+    const stateName = e.target.value;
+    setSelectedState(stateName);
+    localStorage.setItem('selectedState', stateName);
+
+    // Find first city in this state
+    const firstCity = CITIES.find(c => c.state === stateName);
+    if (firstCity) {
+      setSelectedCity(firstCity.id);
+      localStorage.setItem('selectedCity', firstCity.id);
+    }
+    window.dispatchEvent(new Event('locationChanged'));
+    toast.success(`State set to ${stateName}`);
+  };
+
   const handleCityChange = (e) => {
     const cityId = e.target.value;
     setSelectedCity(cityId);
     localStorage.setItem('selectedCity', cityId);
-    window.dispatchEvent(new Event('cityChanged'));
-    const cityName = CITIES.find(c => c.id === cityId)?.city_name || '';
-    toast.success(`Location set to ${cityName}`);
+    
+    // Auto-sync state if city changed
+    const cityObj = CITIES.find(c => c.id === cityId);
+    if (cityObj) {
+      setSelectedState(cityObj.state);
+      localStorage.setItem('selectedState', cityObj.state);
+    }
+
+    window.dispatchEvent(new Event('locationChanged'));
+    toast.success(`City set to ${cityObj?.city_name || ''}`);
   };
 
   const handleNavSearchSubmit = (e) => {
@@ -73,8 +114,10 @@ const Navbar = () => {
     : userRole === 'Admin'
       ? '/admin/dashboard'
       : userRole === 'Theatre Owner'
-        ? '/owner/dashboard'
-        : '/customer/dashboard';
+        ? '/theatre/dashboard'
+        : userRole === 'Event Organizer'
+          ? '/organizer/dashboard'
+          : '/dashboard';
 
   return (
     <header
@@ -94,22 +137,13 @@ const Navbar = () => {
 
         {/* DESKTOP NAV */}
         <nav className="hidden lg:flex items-center gap-6">
-          <Link
-            to="/"
-            className={cn(
-              'text-xs uppercase tracking-wider font-extrabold transition-colors hover:text-amber-500',
-              location.pathname === '/' ? 'text-amber-500' : 'text-gray-600'
-            )}
-          >
-            Home
-          </Link>
-          {navLinks.map((link) => (
+          {getNavLinks().map((link) => (
             <Link
               key={link.path}
               to={link.path}
               className={cn(
                 'text-xs uppercase tracking-wider font-extrabold transition-colors hover:text-amber-500',
-                location.pathname.startsWith(link.path) ? 'text-amber-500' : 'text-gray-600'
+                location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path)) ? 'text-amber-500' : 'text-gray-600'
               )}
             >
               {link.name}
@@ -131,7 +165,23 @@ const Navbar = () => {
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={13} />
           </form>
 
-          {/* Location Dropdown */}
+          {/* State Dropdown */}
+          <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-full">
+            <span className="text-[9px] uppercase text-gray-400 font-black px-1">State</span>
+            <select
+              value={selectedState}
+              onChange={handleStateChange}
+              className="bg-transparent border-0 font-extrabold text-xs text-gray-700 focus:ring-0 focus:outline-none cursor-pointer pr-2"
+            >
+              {statesList.map(st => (
+                <option key={st} value={st} className="text-gray-800">
+                  {st}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* City Dropdown */}
           <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-full">
             <FiMapPin className="text-amber-500" size={14} />
             <select
@@ -139,7 +189,7 @@ const Navbar = () => {
               onChange={handleCityChange}
               className="bg-transparent border-0 font-extrabold text-xs text-gray-700 focus:ring-0 focus:outline-none cursor-pointer pr-2"
             >
-              {CITIES.map(city => (
+              {filteredCities.map(city => (
                 <option key={city.id} value={city.id} className="text-gray-800">
                   {city.city_name}
                 </option>
@@ -149,105 +199,22 @@ const Navbar = () => {
 
           {/* User Auth Buttons */}
           {isAuthenticated ? (
-            <div className="flex items-center gap-3">
-              <Link to="/wishlist" className="p-2 text-gray-600 hover:text-amber-500 transition-colors" title="My Wishlist">
-                <FiHeart size={18} />
+            <div className="flex items-center gap-4">
+              <Link to="/bookings" className="text-xs uppercase tracking-wider font-extrabold text-gray-600 hover:text-amber-500 transition-colors">
+                My Bookings
               </Link>
-              <Link to="/notifications" className="relative p-2 text-gray-600 hover:text-amber-500 transition-colors" title="Notifications">
-                <FiBell size={18} />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full"></span>
+              <Link to="/history" className="text-xs uppercase tracking-wider font-extrabold text-gray-600 hover:text-amber-500 transition-colors">
+                History
               </Link>
-              
-              {/* Profile Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 bg-gray-100 hover:bg-amber-100 hover:text-amber-600 text-gray-800 rounded-xl border border-gray-200 transition-colors font-black text-xs cursor-pointer"
-                >
-                  <FiUser />
-                  <span>Profile ▼</span>
-                </button>
-                {isProfileDropdownOpen && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setIsProfileDropdownOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl z-20 overflow-hidden text-xs font-extrabold text-gray-700">
-                      <Link 
-                        to="/profile" 
-                        onClick={() => setIsProfileDropdownOpen(false)}
-                        className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100"
-                      >
-                        My Profile
-                      </Link>
-                      <Link 
-                        to="/customer/dashboard" 
-                        onClick={() => setIsProfileDropdownOpen(false)}
-                        className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100"
-                      >
-                        My Bookings
-                      </Link>
-                      <Link 
-                        to="/wishlist" 
-                        onClick={() => setIsProfileDropdownOpen(false)}
-                        className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100"
-                      >
-                        Wishlist
-                      </Link>
-                      
-                      {userRole === 'Theatre Owner' && (
-                        <Link 
-                          to="/owner/dashboard" 
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100 text-amber-600"
-                        >
-                          Theatre Dashboard
-                        </Link>
-                      )}
-                      {userRole === 'Admin' && (
-                        <Link 
-                          to="/admin/dashboard" 
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100 text-amber-600"
-                        >
-                          Admin Dashboard
-                        </Link>
-                      )}
-                      {userRole === 'Super Admin' && (
-                        <>
-                          <Link 
-                            to="/super-admin/dashboard" 
-                            onClick={() => setIsProfileDropdownOpen(false)}
-                            className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100 text-amber-600"
-                          >
-                            Super Admin Dashboard
-                          </Link>
-                          <Link 
-                            to="/owner/dashboard" 
-                            onClick={() => setIsProfileDropdownOpen(false)}
-                            className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100 text-amber-600"
-                          >
-                            Theatre Dashboard
-                          </Link>
-                        </>
-                      )}
-                      
-                      <Link 
-                        to="/profile" 
-                        onClick={() => setIsProfileDropdownOpen(false)}
-                        className="block px-4 py-3 hover:bg-gray-50 hover:text-amber-500 border-b border-gray-100"
-                      >
-                        Settings
-                      </Link>
-                      
-                      <button 
-                        onClick={() => { setIsProfileDropdownOpen(false); handleLogout(); }}
-                        className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-500 font-extrabold"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
+              <Link to="/profile" className="text-xs uppercase tracking-wider font-extrabold text-gray-600 hover:text-amber-500 transition-colors">
+                Profile
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-xs uppercase tracking-wider font-extrabold text-red-500 hover:text-red-600 transition-colors cursor-pointer focus:outline-none"
+              >
+                Logout
+              </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
@@ -264,11 +231,22 @@ const Navbar = () => {
         {/* MOBILE LAYOUT & HAMBURGER */}
         <div className="lg:hidden flex items-center gap-3">
           <select
+            value={selectedState}
+            onChange={handleStateChange}
+            className="bg-transparent border-0 font-extrabold text-xs text-gray-700 focus:ring-0 focus:outline-none cursor-pointer pr-1 w-14"
+          >
+            {statesList.map(st => (
+              <option key={st} value={st}>
+                {st.slice(0, 3)}
+              </option>
+            ))}
+          </select>
+          <select
             value={selectedCity}
             onChange={handleCityChange}
-            className="bg-transparent border-0 font-extrabold text-xs text-gray-700 focus:ring-0 focus:outline-none cursor-pointer pr-1"
+            className="bg-transparent border-0 font-extrabold text-xs text-gray-700 focus:ring-0 focus:outline-none cursor-pointer pr-1 w-14"
           >
-            {CITIES.map(city => (
+            {filteredCities.map(city => (
               <option key={city.id} value={city.id}>
                 📍 {city.city_name.slice(0,3)}
               </option>
@@ -306,10 +284,7 @@ const Navbar = () => {
                 <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
               </form>
 
-              <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-700 hover:text-amber-500 py-1">
-                Home
-              </Link>
-              {navLinks.map((link) => (
+              {getNavLinks().map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
@@ -324,38 +299,16 @@ const Navbar = () => {
 
               {isAuthenticated ? (
                 <div className="flex flex-col gap-3">
-                  <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
-                    My Profile
-                  </Link>
-                  <Link to="/customer/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
+                  <Link to="/bookings" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
                     My Bookings
                   </Link>
-                  <Link to="/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
-                    Wishlist
+                  <Link to="/history" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
+                    History
                   </Link>
-                  
-                  {userRole === 'Theatre Owner' && (
-                    <Link to="/owner/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
-                      Theatre Dashboard
-                    </Link>
-                  )}
-                  {userRole === 'Admin' && (
-                    <Link to="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
-                      Admin Dashboard
-                    </Link>
-                  )}
-                  {userRole === 'Super Admin' && (
-                    <>
-                      <Link to="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
-                        Super Admin Dashboard
-                      </Link>
-                      <Link to="/owner/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-amber-600 py-1">
-                        Theatre Dashboard
-                      </Link>
-                    </>
-                  )}
-
-                  <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full py-2.5 text-center text-red-500 bg-red-50 rounded-xl">
+                  <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 hover:text-amber-500 py-1">
+                    Profile
+                  </Link>
+                  <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full py-2.5 text-center text-red-500 bg-red-50 rounded-xl focus:outline-none">
                     Logout
                   </button>
                 </div>

@@ -20,7 +20,7 @@ class ScreenService {
   }
 
   async getScreenById(id, user) {
-    const screen = await ScreenRepository.findById(id, { include: ['theatre'] });
+    const screen = await ScreenRepository.findById(id, { include: ['theatre', 'seats'] });
     if (!screen) {
       throw new AppError('Screen not found', 404);
     }
@@ -104,7 +104,7 @@ class ScreenService {
         for (let c = 1; c <= columns; c++) {
           seats.push({
             screen_id: screen.id,
-            seat_number: `${rowLetter}${c}`,
+            seat_number: `${rowLetter}-${c}`,
             seat_type: seatType,
             price: price
           });
@@ -131,12 +131,49 @@ class ScreenService {
       throw new AppError('Access denied', 403);
     }
 
-    // Capacity is readonly / calculated from rows/columns.
-    // If rows or columns change, we must delete old seats and regenerate them under a transaction.
-    const { screen_name, rows, columns } = data;
+    const { screen_name, rows, columns, custom_seats } = data;
     const updatePayload = { screen_name };
 
-    if (rows || columns) {
+    if (custom_seats && Array.isArray(custom_seats)) {
+      // Calculate dimensions and capacity from visual custom_seats array
+      const uniqueRows = new Set();
+      let maxCol = 1;
+      custom_seats.forEach(s => {
+        const parts = s.seat_number.split('-');
+        const rowLetter = parts[0] || 'A';
+        const colNum = parseInt(parts[1] || 1, 10);
+        uniqueRows.add(rowLetter);
+        if (colNum > maxCol) maxCol = colNum;
+      });
+
+      updatePayload.rows = uniqueRows.size || 1;
+      updatePayload.columns = maxCol || 1;
+      updatePayload.capacity = custom_seats.length;
+
+      const transaction = await sequelize.transaction();
+      try {
+        const updatedScreen = await ScreenRepository.update(id, updatePayload, { transaction });
+
+        // Delete old seats
+        const SeatModel = require('../models').Seat;
+        await SeatModel.destroy({ where: { screen_id: id }, force: true, transaction });
+
+        // Insert new custom seats
+        const seatsData = custom_seats.map(s => ({
+          screen_id: id,
+          seat_number: s.seat_number,
+          seat_type: s.seat_type || 'Normal',
+          price: s.price || 150.00
+        }));
+
+        await SeatRepository.bulkCreateSeats(seatsData, { transaction });
+        await transaction.commit();
+        return updatedScreen;
+      } catch (err) {
+        await transaction.rollback();
+        throw err;
+      }
+    } else if (rows || columns) {
       const newRows = rows || screen.rows;
       const newColumns = columns || screen.columns;
       const capacity = newRows * newColumns;
@@ -147,7 +184,6 @@ class ScreenService {
 
       const transaction = await sequelize.transaction();
       try {
-        // Update screen
         const updatedScreen = await ScreenRepository.update(id, updatePayload, { transaction });
 
         // Delete old seats
@@ -189,7 +225,7 @@ class ScreenService {
           for (let c = 1; c <= newColumns; c++) {
             seats.push({
               screen_id: id,
-              seat_number: `${rowLetter}${c}`,
+              seat_number: `${rowLetter}-${c}`,
               seat_type: seatType,
               price: price
             });

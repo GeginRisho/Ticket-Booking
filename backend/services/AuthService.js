@@ -23,10 +23,10 @@ class AuthService {
       throw new AppError('Phone number is already registered', 400);
     }
 
-    // Resolve Role
-    const role = await RoleRepository.findByName(role_name || 'Customer');
+    // Resolve Role - Always assign Customer on public registration
+    const role = await RoleRepository.findByName('Customer');
     if (!role) {
-      throw new AppError('Invalid role specified', 400);
+      throw new AppError('Default Customer role configuration error', 500);
     }
 
     // Validate City if provided

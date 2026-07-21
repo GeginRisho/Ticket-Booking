@@ -18,11 +18,31 @@ const GENRES = [
  { id:'animation', label:'Animation', fetcher: getAnimationMovies },
 ];
 
+import { CITIES } from '../utils/constants';
+
 const MoviesPage = () => {
  const [activeGenre, setActiveGenre] = useState('all');
  const [movies, setMovies] = useState([]);
  const [loading, setLoading] = useState(true);
  const [error, setError] = useState(null);
+
+ const [selectedState, setSelectedState] = useState(localStorage.getItem('selectedState') || '');
+ const [selectedCityName, setSelectedCityName] = useState(() => {
+   const cityId = localStorage.getItem('selectedCity') || '';
+   const cityObj = CITIES.find(c => c.id === cityId);
+   return cityObj ? cityObj.city_name : '';
+ });
+
+ useEffect(() => {
+   const handleLocationChange = () => {
+     const cityId = localStorage.getItem('selectedCity') || '';
+     const cityObj = CITIES.find(c => c.id === cityId);
+     setSelectedCityName(cityObj ? cityObj.city_name : '');
+     setSelectedState(localStorage.getItem('selectedState') || '');
+   };
+   window.addEventListener('locationChanged', handleLocationChange);
+   return () => window.removeEventListener('locationChanged', handleLocationChange);
+ }, []);
 
  useEffect(() => {
  const fetchMovies = async () => {
@@ -32,7 +52,7 @@ const MoviesPage = () => {
  const genreObj = GENRES.find(g => g.id === activeGenre);
  
  try {
- const data = await genreObj.fetcher();
+ const data = await genreObj.fetcher({ state: selectedState, city: selectedCityName });
  setMovies(Array.isArray(data) ? data : []);
  } catch (err) {
  setError('Failed to fetch movies. Please try again later.');
@@ -42,7 +62,7 @@ const MoviesPage = () => {
  };
 
  fetchMovies();
- }, [activeGenre]);
+ }, [activeGenre, selectedState, selectedCityName]);
 
  return (
  <div className="container mx-auto px-4 md:px-8 py-12 min-h-screen">

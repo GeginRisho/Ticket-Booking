@@ -13,14 +13,23 @@ const EventsPage = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedCity, setSelectedCity] = useState(localStorage.getItem('selectedCity') || CITIES[0]?.id || '');
+
+  const [selectedState, setSelectedState] = useState(localStorage.getItem('selectedState') || '');
+  const [selectedCityName, setSelectedCityName] = useState(() => {
+    const cityId = localStorage.getItem('selectedCity') || '';
+    const cityObj = CITIES.find(c => c.id === cityId);
+    return cityObj ? cityObj.city_name : '';
+  });
 
   useEffect(() => {
-    const handleCityChange = () => {
-      setSelectedCity(localStorage.getItem('selectedCity') || CITIES[0]?.id || '');
+    const handleLocationChange = () => {
+      const cityId = localStorage.getItem('selectedCity') || '';
+      const cityObj = CITIES.find(c => c.id === cityId);
+      setSelectedCityName(cityObj ? cityObj.city_name : '');
+      setSelectedState(localStorage.getItem('selectedState') || '');
     };
-    window.addEventListener('cityChanged', handleCityChange);
-    return () => window.removeEventListener('cityChanged', handleCityChange);
+    window.addEventListener('locationChanged', handleLocationChange);
+    return () => window.removeEventListener('locationChanged', handleLocationChange);
   }, []);
 
   useEffect(() => {
@@ -28,7 +37,7 @@ const EventsPage = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getEvents({ city_id: selectedCity });
+        const data = await getEvents({ state: selectedState, city: selectedCityName });
         setEvents(Array.isArray(data) ? data : []);
       } catch (err) {
         setError('Failed to fetch events. Please try again later.');
@@ -37,7 +46,7 @@ const EventsPage = () => {
       }
     };
     fetchEvents();
-  }, [selectedCity]);
+  }, [selectedState, selectedCityName]);
 
   const filteredEvents = activeCategory === 'All'
     ? events

@@ -11,14 +11,23 @@ const TheatresPage = () => {
   const [theatres, setTheatres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedCity, setSelectedCity] = useState(localStorage.getItem('selectedCity') || CITIES[0]?.id || '');
+
+  const [selectedState, setSelectedState] = useState(localStorage.getItem('selectedState') || '');
+  const [selectedCityName, setSelectedCityName] = useState(() => {
+    const cityId = localStorage.getItem('selectedCity') || '';
+    const cityObj = CITIES.find(c => c.id === cityId);
+    return cityObj ? cityObj.city_name : '';
+  });
 
   useEffect(() => {
-    const handleCityChange = () => {
-      setSelectedCity(localStorage.getItem('selectedCity') || CITIES[0]?.id || '');
+    const handleLocationChange = () => {
+      const cityId = localStorage.getItem('selectedCity') || '';
+      const cityObj = CITIES.find(c => c.id === cityId);
+      setSelectedCityName(cityObj ? cityObj.city_name : '');
+      setSelectedState(localStorage.getItem('selectedState') || '');
     };
-    window.addEventListener('cityChanged', handleCityChange);
-    return () => window.removeEventListener('cityChanged', handleCityChange);
+    window.addEventListener('locationChanged', handleLocationChange);
+    return () => window.removeEventListener('locationChanged', handleLocationChange);
   }, []);
 
   useEffect(() => {
@@ -26,7 +35,7 @@ const TheatresPage = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getTheatres({ city_id: selectedCity });
+        const data = await getTheatres({ state: selectedState, city: selectedCityName });
         setTheatres(Array.isArray(data) ? data : []);
       } catch (err) {
         setError('Failed to fetch theatres. Please try again later.');
@@ -35,7 +44,7 @@ const TheatresPage = () => {
       }
     };
     fetchTheatres();
-  }, [selectedCity]);
+  }, [selectedState, selectedCityName]);
 
   return (
     <div className="container mx-auto px-4 md:px-8 py-12 min-h-screen">
