@@ -58,7 +58,7 @@ const SuperAdminDashboard = () => {
     if (path.includes('/admins')) return 'admins';
     if (path.includes('/owners')) return 'owners';
     if (path.includes('/roles')) return 'roles';
-    if (path.includes('/platform-config')) return 'config';
+    if (path.includes('/platform-config') || path.includes('/profile') || path.includes('/settings')) return 'config';
     if (path.includes('/cms')) return 'cms';
     if (path.includes('/ads')) return 'ads';
     if (path.includes('/payments')) return 'payments';

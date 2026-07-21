@@ -261,6 +261,14 @@ const DashboardLayout = () => {
     </div>
   );
 
+  const getProfileLink = () => {
+    if (userRole === 'Super Admin') return '/super-admin/profile';
+    if (userRole === 'Admin') return '/admin/profile';
+    if (userRole === 'Theatre Owner') return '/theatre/dashboard/profile';
+    if (userRole === 'Event Organizer') return '/organizer/profile';
+    return '/profile';
+  };
+
   return (
     <div className={cn("min-h-screen bg-background flex flex-col", compactMode && "text-xs")}>
       {/* Impersonation top notification banner */}
@@ -383,7 +391,7 @@ const DashboardLayout = () => {
                         <p className="text-xs text-text-secondary">{userRole}</p>
                       </div>
                       <Link 
-                        to={userRole === 'Super Admin' ? '/super-admin/platform-config' : (userRole === 'Theatre Owner' ? '/theatre/dashboard/profile' : (userRole === 'Event Organizer' ? '/organizer/profile' : '/admin/settings'))}
+                        to={getProfileLink()}
                         className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-primary hover:bg-hover-bg font-semibold min-h-[44px]"
                         onClick={() => setIsProfileOpen(false)}
                       >

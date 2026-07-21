@@ -753,7 +753,7 @@ const TheatreOwnerDashboard = () => {
     <div className="flex-grow p-6 bg-gray-50 text-left space-y-6">
       
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-xs">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-gray-100 shadow-xs max-w-full overflow-hidden">
         <div>
           <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Cinema Partner Portal</span>
           <h1 className="text-2xl font-black text-gray-900 mt-1">Theatre CMS Dashboard</h1>
@@ -761,13 +761,14 @@ const TheatreOwnerDashboard = () => {
         </div>
 
         {/* Global Select & Controls */}
-        <div className="flex items-center gap-3">
-          <div className="flex flex-col">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto mt-2 lg:mt-0">
+          <div className="flex flex-col flex-1 sm:flex-none">
             <span className="text-[9px] font-black text-gray-400 uppercase mb-1">Current Active Theatre</span>
             <select
               value={selectedTheatreId}
               onChange={e => setSelectedTheatreId(e.target.value)}
-              className="px-4 py-2 text-xs font-black rounded-xl border border-gray-200 bg-gray-50 focus:outline-none"
+              className="w-full sm:w-auto min-h-[44px] px-4 py-2 text-xs font-black rounded-xl border border-gray-200 bg-gray-50 focus:outline-none cursor-pointer truncate"
+              aria-label="Select Active Theatre"
             >
               {theatres.map(t => (
                 <option key={t.id} value={t.id}>{t.theatre_name}</option>
@@ -775,15 +776,16 @@ const TheatreOwnerDashboard = () => {
             </select>
           </div>
 
-          <div className="flex flex-col">
-            <span className="text-[9px] font-black text-gray-400 uppercase mb-1">Theatre Mode status</span>
+          <div className="flex flex-col flex-1 sm:flex-none">
+            <span className="text-[9px] font-black text-gray-400 uppercase mb-1">Theatre Mode Status</span>
             <select
               value={theatreStatus}
               onChange={e => {
                 setTheatreStatus(e.target.value);
                 toast.success(`Theatre Mode switched to: ${e.target.value}`);
               }}
-              className="px-4 py-2 text-xs font-black rounded-xl border border-gray-200 bg-amber-400 text-gray-900 focus:outline-none"
+              className="w-full sm:w-auto min-h-[44px] px-4 py-2 text-xs font-black rounded-xl border border-gray-200 bg-amber-400 text-gray-900 focus:outline-none cursor-pointer truncate"
+              aria-label="Select Theatre Operating Mode"
             >
               <option value="Open">🟢 Open Mode</option>
               <option value="Closed">🔴 Closed Mode</option>

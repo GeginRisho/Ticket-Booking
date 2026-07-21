@@ -66,7 +66,7 @@ const AdminDashboard = () => {
     if (path.includes('/coupons')) return 'coupons';
     if (path.includes('/reports')) return 'reports';
     if (path.includes('/support')) return 'support';
-    if (path.includes('/settings')) return 'settings';
+    if (path.includes('/settings') || path.includes('/profile')) return 'settings';
     return 'analytics';
   };
 
