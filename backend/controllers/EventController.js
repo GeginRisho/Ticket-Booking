@@ -36,7 +36,7 @@ class EventController {
       
       // If not admin/super-admin/organizer, only return active/published events
       if (userRole !== 'Admin' && userRole !== 'Super Admin' && userRole !== 'Event Organizer') {
-        filters.status = 'published';
+        filters.status = ['published', 'active'];
       }
       
       const events = await EventService.getEvents(filters);

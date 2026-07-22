@@ -32,12 +32,17 @@ const startServer = async () => {
         const { exec } = require('child_process');
         const path = require('path');
         const seederPath = path.join(__dirname, 'scripts', 'seed_demo_data.js');
-        exec(`node "${seederPath}"`, (err, stdout, stderr) => {
-          if (err) {
-            console.error('❌ Automatic seeder execution failed:', err);
-          } else {
-            console.log('✅ Database seeded successfully.');
-          }
+        await new Promise((resolve, reject) => {
+          exec(`node "${seederPath}"`, (err, stdout, stderr) => {
+            if (err) {
+              console.error('❌ Automatic seeder execution failed:', err);
+              if (stderr) console.error(stderr);
+              reject(err);
+            } else {
+              console.log('✅ Database seeded successfully.');
+              resolve();
+            }
+          });
         });
       }
     } catch (seederErr) {

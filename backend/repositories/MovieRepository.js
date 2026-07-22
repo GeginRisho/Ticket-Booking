@@ -33,8 +33,8 @@ class MovieRepository extends BaseRepository {
       if (city_id) theatreWhere.city_id = city_id;
 
       const cityWhere = {};
-      if (state) cityWhere.state = state;
-      if (city) cityWhere.city_name = city;
+      if (state) cityWhere.state = { [Op.iLike]: state };
+      if (city) cityWhere.city_name = { [Op.iLike]: city };
 
       include.push({
         model: Show,

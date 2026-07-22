@@ -13,8 +13,8 @@ class TheatreRepository extends BaseRepository {
     if (owner_id) where.owner_id = owner_id;
 
     const cityWhere = {};
-    if (state) cityWhere.state = state;
-    if (city) cityWhere.city_name = city;
+    if (state) cityWhere.state = { [Op.iLike]: state };
+    if (city) cityWhere.city_name = { [Op.iLike]: city };
 
     return await this.findAll({
       where,
