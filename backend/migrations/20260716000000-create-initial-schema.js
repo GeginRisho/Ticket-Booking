@@ -3,6 +3,66 @@
 const addIndexSafely = async (queryInterface, table, fields, options = {}) => {
   const indexName = options.name || fields.join('_');
   try {
+    // Check column existence to prevent missing column errors
+    const tableCols = await queryInterface.describeTable(table);
+    for (const field of fields) {
+      if (!tableCols[field]) {
+        // If it is one of the schema-aligned columns added later, create it first
+        if (field === 'venue_id' && table === 'events') {
+          console.log(`Adding missing column venue_id to events table.`);
+          await queryInterface.addColumn('events', 'venue_id', {
+            type: Sequelize.UUID,
+            allowNull: true,
+            references: {
+              model: 'venues',
+              key: 'id'
+            },
+            onDelete: 'SET NULL',
+            onUpdate: 'CASCADE'
+          });
+        } else if (field === 'event_id' && table === 'reviews') {
+          console.log(`Adding missing column event_id to reviews table.`);
+          await queryInterface.addColumn('reviews', 'event_id', {
+            type: Sequelize.UUID,
+            allowNull: true,
+            references: {
+              model: 'events',
+              key: 'id'
+            },
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+          });
+        } else if (field === 'event_id' && table === 'coupons') {
+          console.log(`Adding missing column event_id to coupons table.`);
+          await queryInterface.addColumn('coupons', 'event_id', {
+            type: Sequelize.UUID,
+            allowNull: true,
+            references: {
+              model: 'events',
+              key: 'id'
+            },
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+          });
+        } else if (field === 'event_id' && table === 'wishlists') {
+          console.log(`Adding missing column event_id to wishlists table.`);
+          await queryInterface.addColumn('wishlists', 'event_id', {
+            type: Sequelize.UUID,
+            allowNull: true,
+            references: {
+              model: 'events',
+              key: 'id'
+            },
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+          });
+        } else {
+          console.log(`Column ${field} does not exist in table ${table}. Skipping index ${indexName}.`);
+          return;
+        }
+      }
+    }
+
     const indexes = await queryInterface.showIndex(table);
     const exists = indexes.some(idx => idx.name === indexName);
     if (exists) {
@@ -10,7 +70,7 @@ const addIndexSafely = async (queryInterface, table, fields, options = {}) => {
       return;
     }
   } catch (err) {
-    // If showIndex fails, ignore and let it try to add it
+    // If describeTable or showIndex fails (e.g., table doesn't exist yet), fall back to direct creation
   }
 
   try {
