@@ -33,7 +33,7 @@ const Wishlist = sequelize.define('Wishlist', {
     {
       unique: true,
       fields: ['user_id', 'movie_id'],
-      name: 'unique_user_movie_wishlist',
+      name: 'wishlists_user_movie_uidx',
       where: {
         movie_id: { [require('sequelize').Op.ne]: null }
       }
@@ -41,7 +41,7 @@ const Wishlist = sequelize.define('Wishlist', {
     {
       unique: true,
       fields: ['user_id', 'event_id'],
-      name: 'unique_user_event_wishlist',
+      name: 'wishlists_user_event_uidx',
       where: {
         event_id: { [require('sequelize').Op.ne]: null }
       }

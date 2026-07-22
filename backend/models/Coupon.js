@@ -77,7 +77,7 @@ const Coupon = sequelize.define('Coupon', {
     {
       unique: true,
       fields: ['coupon_code'],
-      name: 'unique_coupon_code'
+      name: 'coupons_coupon_code_uidx'
     }
   ]
 });

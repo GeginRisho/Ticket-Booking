@@ -136,6 +136,46 @@ module.exports = {
         defaultValue: false,
         allowNull: false
       },
+      company_name: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      company_logo: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      organizer_photo: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      address: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
+      business_details: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
+      bank_account: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      gst_number: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      pan_number: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      business_license: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      social_media_links: {
+        type: Sequelize.JSON,
+        allowNull: true
+      },
       last_login: {
         type: Sequelize.DATE,
         allowNull: true
@@ -562,6 +602,76 @@ module.exports = {
       }
     });
 
+    // 11.5 Venues Table
+    await queryInterface.createTable('venues', {
+      id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.literal('uuid_generate_v4()'),
+        primaryKey: true,
+        allowNull: false
+      },
+      organizer_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'users',
+          key: 'id'
+        },
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE'
+      },
+      city_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: 'cities',
+          key: 'id'
+        },
+        onDelete: 'RESTRICT',
+        onUpdate: 'CASCADE'
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      address: {
+        type: Sequelize.TEXT,
+        allowNull: false
+      },
+      seating_capacity: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      maps_location: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      parking_information: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
+      contact_number: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      gallery_images: {
+        type: Sequelize.JSON,
+        allowNull: true
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      deleted_at: {
+        type: Sequelize.DATE,
+        allowNull: true
+      }
+    });
+
     // 12. Events Table
     await queryInterface.createTable('events', {
       id: {
@@ -629,6 +739,62 @@ module.exports = {
         defaultValue: 'active',
         allowNull: false
       },
+      venue_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'venues',
+          key: 'id'
+        },
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE'
+      },
+      gallery_images: {
+        type: Sequelize.JSON,
+        allowNull: true
+      },
+      time: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      capacity: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+      },
+      age_restriction: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      languages: {
+        type: Sequelize.JSON,
+        allowNull: true
+      },
+      tags: {
+        type: Sequelize.JSON,
+        allowNull: true
+      },
+      has_reserved_seating: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+      },
+      seating_layout: {
+        type: Sequelize.JSON,
+        allowNull: true
+      },
+      media_links: {
+        type: Sequelize.JSON,
+        allowNull: true
+      },
+      refund_policy_details: {
+        type: Sequelize.JSON,
+        allowNull: true,
+        defaultValue: {
+          cancellation_deadline: 24,
+          refund_percentage: 100,
+          non_refundable: false
+        }
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false
@@ -672,6 +838,22 @@ module.exports = {
       available_quantity: {
         type: Sequelize.INTEGER,
         allowNull: false
+      },
+      sales_window_start: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
+      sales_window_end: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
+      booking_limit: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+      },
+      refund_policy: {
+        type: Sequelize.TEXT,
+        allowNull: true
       },
       created_at: {
         type: Sequelize.DATE,
@@ -760,6 +942,19 @@ module.exports = {
       },
       ticket_pdf: {
         type: Sequelize.STRING,
+        allowNull: true
+      },
+      checked_in: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+      },
+      checked_in_at: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
+      booked_seats: {
+        type: Sequelize.JSON,
         allowNull: true
       },
       created_at: {
@@ -987,9 +1182,19 @@ module.exports = {
       },
       movie_id: {
         type: Sequelize.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'movies',
+          key: 'id'
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      },
+      event_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'events',
           key: 'id'
         },
         onDelete: 'CASCADE',
@@ -1116,6 +1321,28 @@ module.exports = {
         defaultValue: 'active',
         allowNull: false
       },
+      event_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'events',
+          key: 'id'
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      },
+      applicable_categories: {
+        type: Sequelize.JSON,
+        allowNull: true
+      },
+      group_discount_size: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+      },
+      start_date: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false
@@ -1220,6 +1447,11 @@ module.exports = {
     await queryInterface.addIndex('events', ['organizer_id'], { name: 'events_organizer_id_idx' });
     await queryInterface.addIndex('events', ['category_id'], { name: 'events_category_id_idx' });
     await queryInterface.addIndex('events', ['city_id'], { name: 'events_city_id_idx' });
+    await queryInterface.addIndex('events', ['venue_id'], { name: 'events_venue_id_idx' });
+
+    // Venues indexes
+    await queryInterface.addIndex('venues', ['city_id'], { name: 'venues_city_id_idx' });
+    await queryInterface.addIndex('venues', ['organizer_id'], { name: 'venues_organizer_id_idx' });
 
     // Event tickets index
     await queryInterface.addIndex('event_tickets', ['event_id'], { name: 'event_tickets_event_id_idx' });
@@ -1230,13 +1462,31 @@ module.exports = {
     await queryInterface.addIndex('wishlists', ['user_id', 'event_id'], { name: 'wishlists_user_event_uidx', unique: true, where: { event_id: { [Sequelize.Op.ne]: null } } });
 
     // Reviews indexes
-    await queryInterface.addIndex('reviews', ['movie_id', 'user_id'], { name: 'reviews_movie_user_uidx', unique: true });
+    await queryInterface.addIndex('reviews', ['movie_id', 'user_id'], {
+      name: 'reviews_movie_user_uidx',
+      unique: true,
+      where: {
+        movie_id: {
+          [Sequelize.Op.ne]: null
+        }
+      }
+    });
+    await queryInterface.addIndex('reviews', ['event_id', 'user_id'], {
+      name: 'reviews_event_user_uidx',
+      unique: true,
+      where: {
+        event_id: {
+          [Sequelize.Op.ne]: null
+        }
+      }
+    });
 
     // Notifications index
     await queryInterface.addIndex('notifications', ['user_id'], { name: 'notifications_user_id_idx' });
 
     // Coupons index
     await queryInterface.addIndex('coupons', ['coupon_code'], { name: 'coupons_coupon_code_uidx', unique: true });
+    await queryInterface.addIndex('coupons', ['event_id'], { name: 'coupons_event_id_idx' });
 
     // Support tickets index
     await queryInterface.addIndex('support_tickets', ['user_id'], { name: 'support_tickets_user_id_idx' });
@@ -1259,6 +1509,7 @@ module.exports = {
     await queryInterface.dropTable('bookings');
     await queryInterface.dropTable('event_tickets');
     await queryInterface.dropTable('events');
+    await queryInterface.dropTable('venues');
     await queryInterface.dropTable('event_categories');
     await queryInterface.dropTable('shows');
     await queryInterface.dropTable('seats');

@@ -39,7 +39,7 @@ const Seat = sequelize.define('Seat', {
     {
       unique: true,
       fields: ['screen_id', 'seat_number'],
-      name: 'unique_screen_seat'
+      name: 'seats_screen_id_seat_number_uidx'
     }
   ]
 });

@@ -38,7 +38,7 @@ const Review = sequelize.define('Review', {
     {
       unique: true,
       fields: ['movie_id', 'user_id'],
-      name: 'unique_movie_user_review',
+      name: 'reviews_movie_user_uidx',
       where: {
         movie_id: {
           [require('sequelize').Op.ne]: null
@@ -48,7 +48,7 @@ const Review = sequelize.define('Review', {
     {
       unique: true,
       fields: ['event_id', 'user_id'],
-      name: 'unique_event_user_review',
+      name: 'reviews_event_user_uidx',
       where: {
         event_id: {
           [require('sequelize').Op.ne]: null

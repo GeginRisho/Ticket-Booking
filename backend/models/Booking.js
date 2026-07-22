@@ -84,7 +84,7 @@ const Booking = sequelize.define('Booking', {
     {
       unique: true,
       fields: ['booking_number'],
-      name: 'unique_booking_number'
+      name: 'bookings_booking_number_uidx'
     }
   ]
 });
