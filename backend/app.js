@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 const authRoutes = require('./routes/authRoutes');
 const movieRoutes = require('./routes/movieRoutes');
 const theatreRoutes = require('./routes/theatreRoutes');
@@ -28,7 +29,8 @@ const app = express();
 // Trust proxy for Render reverse proxy support (required by express-rate-limit)
 app.set('trust proxy', 1);
 
-// --- Global Security Middlewares ---
+// --- Global Middlewares ---
+app.use(compression());
 app.use(helmet());
 app.use(cors({
   origin: (origin, callback) => {

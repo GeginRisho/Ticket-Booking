@@ -39,10 +39,7 @@ const Event = sequelize.define('Event', {
   },
   banner: {
     type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      isUrl: true
-    }
+    allowNull: true
   },
   start_date: {
     type: DataTypes.DATE,

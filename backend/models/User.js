@@ -36,10 +36,7 @@ const User = sequelize.define('User', {
   },
   profile_image: {
     type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      isUrl: true
-    }
+    allowNull: true
   },
   role_id: {
     type: DataTypes.UUID,

@@ -27,10 +27,7 @@ const MovieCast = sequelize.define('MovieCast', {
   },
   photo: {
     type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      isUrl: true
-    }
+    allowNull: true
   }
 }, {
   tableName: 'movie_casts',

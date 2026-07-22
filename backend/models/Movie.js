@@ -20,17 +20,11 @@ const Movie = sequelize.define('Movie', {
   },
   poster: {
     type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      isUrl: true
-    }
+    allowNull: true
   },
   banner: {
     type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      isUrl: true
-    }
+    allowNull: true
   },
   language: {
     type: DataTypes.STRING,
@@ -66,10 +60,7 @@ const Movie = sequelize.define('Movie', {
   },
   trailer_url: {
     type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      isUrl: true
-    }
+    allowNull: true
   },
   status: {
     type: DataTypes.STRING,
