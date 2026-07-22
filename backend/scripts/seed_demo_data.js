@@ -1,12 +1,12 @@
 const { 
   sequelize, City, Movie, MovieCast, EventCategory, 
   Event, EventTicket, Theatre, Screen, Seat, Show, 
-  Coupon, Review, Notification, Role, User, Booking, BookingSeat, Payment 
+  Coupon, Review, Notification, Role, User, Booking, BookingSeat, Payment, Venue
 } = require('../models');
 const bcrypt = require('bcrypt');
 
 const seedData = async () => {
-  console.log('Starting massive enterprise-quality idempotent demo data seeding...');
+  console.log('Starting enterprise-quality demo data seeding with expanded event/organizer workspace layouts...');
   
   try {
     await sequelize.authenticate();
@@ -25,7 +25,7 @@ const seedData = async () => {
       await Role.findOrCreate({ where: { id: r.id }, defaults: r });
     }
 
-    // 2. Seed 20+ Cities
+    // 2. Seed Cities
     console.log('Seeding cities...');
     const cityList = [
       { id: 'a1111111-1111-1111-1111-111111111111', city_name: 'Mumbai', state: 'Maharashtra', country: 'India', status: 'active' },
@@ -34,38 +34,47 @@ const seedData = async () => {
       { id: 'a4444444-4444-4444-4444-444444444444', city_name: 'Chennai', state: 'Tamil Nadu', country: 'India', status: 'active' },
       { id: 'a5555555-5555-5555-5555-555555555555', city_name: 'Hyderabad', state: 'Telangana', country: 'India', status: 'active' },
       { id: 'a6666666-6666-6666-6666-666666666666', city_name: 'Kolkata', state: 'West Bengal', country: 'India', status: 'active' },
-      { id: 'a7777777-7777-7777-7777-777777777777', city_name: 'Pune', state: 'Maharashtra', country: 'India', status: 'active' },
-      { id: 'a8888888-8888-8888-8888-888888888888', city_name: 'Coimbatore', state: 'Tamil Nadu', country: 'India', status: 'active' },
-      { id: 'a9999999-9999-9999-9999-999999999999', city_name: 'Madurai', state: 'Tamil Nadu', country: 'India', status: 'active' },
-      { id: 'b1111111-1111-1111-1111-111111111111', city_name: 'Salem', state: 'Tamil Nadu', country: 'India', status: 'active' },
-      { id: 'b2222222-2222-2222-2222-222222222222', city_name: 'Trichy', state: 'Tamil Nadu', country: 'India', status: 'active' },
-      { id: 'b3333333-3333-3333-3333-333333333333', city_name: 'Tirunelveli', state: 'Tamil Nadu', country: 'India', status: 'active' },
-      { id: 'b4444444-4444-4444-4444-444444444444', city_name: 'Erode', state: 'Tamil Nadu', country: 'India', status: 'active' },
-      { id: 'b5555555-5555-5555-5555-555555555555', city_name: 'Thoothukudi', state: 'Tamil Nadu', country: 'India', status: 'active' },
-      { id: 'b6666666-6666-6666-6666-666666666666', city_name: 'Vellore', state: 'Tamil Nadu', country: 'India', status: 'active' },
-      { id: 'b7777777-7777-7777-7777-777777777777', city_name: 'Kochi', state: 'Kerala', country: 'India', status: 'active' },
-      { id: 'b8888888-8888-8888-8888-888888888888', city_name: 'Trivandrum', state: 'Kerala', country: 'India', status: 'active' },
-      { id: 'b9999999-9999-9999-9999-999999999999', city_name: 'Mysore', state: 'Karnataka', country: 'India', status: 'active' },
-      { id: 'c1111111-2222-3333-4444-555555555555', city_name: 'Visakhapatnam', state: 'Andhra Pradesh', country: 'India', status: 'active' },
-      { id: 'c2222222-2222-3333-4444-555555555555', city_name: 'Ahmedabad', state: 'Gujarat', country: 'India', status: 'active' },
-      { id: 'c3333333-2222-3333-4444-555555555555', city_name: 'Jaipur', state: 'Rajasthan', country: 'India', status: 'active' }
+      { id: 'a7777777-7777-7777-7777-777777777777', city_name: 'Pune', state: 'Maharashtra', country: 'India', status: 'active' }
     ];
     for (const c of cityList) {
       await City.findOrCreate({ where: { id: c.id }, defaults: c });
     }
 
-    // 3. Seed Users with precise passwords
-    console.log('Seeding demo users...');
+    // 3. Seed Users with precise required passwords
+    console.log('Seeding demo user accounts...');
+    const hashSuperAdmin = await bcrypt.hash('Admin@123', 12);
     const hashAdmin = await bcrypt.hash('Admin@123', 12);
     const hashOwner = await bcrypt.hash('Owner@123', 12);
     const hashCustomer = await bcrypt.hash('Customer@123', 12);
+    const hashOrganizer = await bcrypt.hash('Organizer@123', 12);
 
     const demoUsers = [
-      { id: '50000000-5000-5000-5000-500000000000', full_name: 'Platform Super Admin', email: 'superadmin@ticketshow.com', phone: '+919876543209', password_hash: hashAdmin, role_id: '55555555-5555-5555-5555-555555555555', city_id: 'a1111111-1111-1111-1111-111111111111', status: 'active', email_verified: true, phone_verified: true },
+      { id: '50000000-5000-5000-5000-500000000000', full_name: 'Platform Super Admin', email: 'superadmin@ticketshow.com', phone: '+919876543209', password_hash: hashSuperAdmin, role_id: '55555555-5555-5555-5555-555555555555', city_id: 'a1111111-1111-1111-1111-111111111111', status: 'active', email_verified: true, phone_verified: true },
       { id: '10000000-1000-1000-1000-100000000000', full_name: 'Platform Admin', email: 'admin@ticketshow.com', phone: '+919876543210', password_hash: hashAdmin, role_id: '11111111-1111-1111-1111-111111111111', city_id: 'a1111111-1111-1111-1111-111111111111', status: 'active', email_verified: true, phone_verified: true },
       { id: '20000000-2000-2000-2000-200000000000', full_name: 'John Customer', email: 'customer@ticketshow.com', phone: '+919876543211', password_hash: hashCustomer, role_id: '22222222-2222-2222-2222-222222222222', city_id: 'a3333333-3333-3333-3333-333333333333', status: 'active', email_verified: true, phone_verified: true },
       { id: '30000000-3000-3000-3000-300000000000', full_name: 'Rex Theatre Owner', email: 'owner@ticketshow.com', phone: '+919876543212', password_hash: hashOwner, role_id: '33333333-3333-3333-3333-333333333333', city_id: 'a1111111-1111-1111-1111-111111111111', status: 'active', email_verified: true, phone_verified: true },
-      { id: '40000000-4000-4000-4000-400000000000', full_name: 'Star Event Organizer', email: 'organizer@ticketshow.com', phone: '+919876543213', password_hash: hashCustomer, role_id: '44444444-4444-4444-4444-444444444444', city_id: 'a2222222-2222-2222-2222-222222222222', status: 'active', email_verified: true, phone_verified: true }
+      { 
+        id: '40000000-4000-4000-4000-400000000000', 
+        full_name: 'Star Event Organizer', 
+        email: 'organizer@ticketshow.com', 
+        phone: '+919876543213', 
+        password_hash: hashOrganizer, 
+        role_id: '44444444-4444-4444-4444-444444444444', 
+        city_id: 'a3333333-3333-3333-3333-333333333333', 
+        status: 'active', 
+        email_verified: true, 
+        phone_verified: true,
+        company_name: 'Showstar Entertainment Pvt Ltd',
+        company_logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200',
+        organizer_photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
+        address: 'Penthouse A, Skyline Tech Park, Bangalore',
+        business_details: 'Prominent events agency specialing in concerts and college festivals.',
+        bank_account: 'HDFC Bank - 501002239401',
+        gst_number: '27AABCU9603R1ZN',
+        pan_number: 'AABCU9603R',
+        business_license: 'LIC-2026-ORGANIZER',
+        social_media_links: 'https://linkedin.com/company/showstar-events'
+      }
     ];
 
     for (const u of demoUsers) {
@@ -74,55 +83,161 @@ const seedData = async () => {
         await user.update({
           password_hash: u.password_hash,
           role_id: u.role_id,
-          status: 'active'
+          status: 'active',
+          company_name: u.company_name,
+          company_logo: u.company_logo,
+          organizer_photo: u.organizer_photo,
+          address: u.address,
+          business_details: u.business_details,
+          bank_account: u.bank_account,
+          gst_number: u.gst_number,
+          pan_number: u.pan_number,
+          business_license: u.business_license,
+          social_media_links: u.social_media_links
         });
       }
     }
 
-    // 4. Seed Event Categories
+    // 4. Seed Physical Venues
+    console.log('Seeding physical venues...');
+    const demoVenues = [
+      { id: '01111111-1111-1111-1111-111111111111', organizer_id: '40000000-4000-4000-4000-400000000000', city_id: 'a3333333-3333-3333-3333-333333333333', name: 'Skyline Symphony Hall', address: 'Tech Park Zone 2, Bangalore', seating_capacity: 500, maps_location: 'https://maps.google.com/?q=Bangalore+Symphony+Hall', parking_information: 'Valet parking available', contact_number: '+919988776655', gallery_images: ['https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500'] },
+      { id: '02222222-2222-2222-2222-222222222222', organizer_id: '40000000-4000-4000-4000-400000000000', city_id: 'a1111111-1111-1111-1111-111111111111', name: 'Nippon Exhibition Center', address: 'Bandra Reclamation, Mumbai', seating_capacity: 1000, maps_location: 'https://maps.google.com/?q=Mumbai+Exhibition+Center', parking_information: 'Paid public parking available', contact_number: '+919988776644', gallery_images: ['https://images.unsplash.com/photo-1533928298208-27ff66555d8d?w=500'] }
+    ];
+    for (const v of demoVenues) {
+      await Venue.findOrCreate({ where: { id: v.id }, defaults: v });
+    }
+
+    // 5. Seed Event Categories
     console.log('Seeding Event Categories...');
     const categories = [
       { id: 'c1111111-1111-1111-1111-111111111111', category_name: 'Concert' },
       { id: 'c2222222-2222-2222-2222-222222222222', category_name: 'Standup Comedy' },
-      { id: 'c3333333-3333-3333-3333-333333333333', category_name: 'Theatre Play' },
-      { id: 'c4444444-4444-4444-4444-444444444444', category_name: 'Sports' },
-      { id: 'c5555555-5555-5555-5555-555555555555', category_name: 'Music Festival' },
-      { id: 'c6666666-6666-6666-6666-666666666666', category_name: 'Technology Summit' },
-      { id: 'c7777777-7777-7777-7777-777777777777', category_name: 'College Events' },
-      { id: 'c8888888-8888-8888-8888-888888888888', category_name: 'Workshops' }
+      { id: 'c3333333-3333-3333-3333-333333333333', category_name: 'Theatre Play' }
     ];
     for (const cat of categories) {
       await EventCategory.findOrCreate({ where: { id: cat.id }, defaults: cat });
     }
 
-    // 5. Seed exactly 40 Movies
+    // 6. Seed exactly 30 Events
+    console.log('Seeding 30 Events...');
+    const eventTitles = [
+      'A.R. Rahman Symphony Tour', 'Sunburn Arena DJ Snake', 'Zakir Khan Comedy Special', 'Vir Das Mind Fool Tour',
+      'Mughal-E-Azam The Musical', 'Shakespeare Hamlet Live Play', 'IPL T20 Wankhede Match', 'Pro Kabaddi Tournament',
+      'ISL Football Derby', 'Diljit Dosanjh Dil-Luminati Tour', 'Tech Innovation Summit 2026', 'AI Frontiers Workshop',
+      'IIT Saarang Music Night', 'BITS Oasis College Fest', 'Kochi Biennale Arts Event', 'Mumbai Culinary Festival',
+      'Bangalore Standup Special', 'Chennai Fusion Concert', 'Delhi Startup TechSummit', 'Hyderabad Sports Arena Match',
+      'Salem Music Carnival', 'Kolkata Literature Fest', 'Pune Comedy Special', 'Trivandrum Classical Dance',
+      'Coimbatore Food Expo', 'Erode Handloom Workshop', 'Thoothukudi Beach Sports', 'Vellore Tech Fest',
+      'Mysore Palace Symphony', 'Visakhapatnam Arena concert'
+    ];
+
+    const categoryIds = [
+      'c1111111-1111-1111-1111-111111111111',
+      'c2222222-2222-2222-2222-222222222222',
+      'c3333333-3333-3333-3333-333333333333'
+    ];
+
+    const seatingLayout = {
+      sections: [
+        { name: 'VIP Zone', rows: ['A', 'B'], seatsPerRow: 10, price: 1499.00 },
+        { name: 'Premium Zone', rows: ['C', 'D', 'E'], seatsPerRow: 10, price: 999.00 },
+        { name: 'General Zone', rows: ['F', 'G', 'H', 'I', 'J'], seatsPerRow: 10, price: 499.00 }
+      ]
+    };
+
+    const mediaLinks = {
+      banner: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1000',
+      poster: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500',
+      gallery: [
+        'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500',
+        'https://images.unsplash.com/photo-1533928298208-27ff66555d8d?w=500'
+      ],
+      videos: ['https://www.w3schools.com/html/mov_bbb.mp4'],
+      sponsors: ['https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200']
+    };
+
+    const refundPolicyDetails = {
+      cancellation_deadline: 24,
+      refund_percentage: 100,
+      non_refundable: false,
+      automatic_refund: true
+    };
+
+    const seededEvents = [];
+    for (let e = 1; e <= 30; e++) {
+      const cityObj = cityList[e % cityList.length];
+      const eventId = `e0000000-0000-0000-0000-${e.toString().padStart(12, '0')}`;
+      const venueObj = demoVenues[e % demoVenues.length];
+
+      const eData = {
+        id: eventId,
+        organizer_id: '40000000-4000-4000-4000-400000000000',
+        category_id: categoryIds[e % categoryIds.length],
+        title: eventTitles[e - 1] || `Premium Event Tour ${e}`,
+        description: `This is the epic description for ${eventTitles[e - 1] || 'Premium Event'}. Experience premium setups and absolute live engagement.`,
+        venue: venueObj.name,
+        venue_id: venueObj.id,
+        city_id: cityObj.id,
+        banner: mediaLinks.banner,
+        start_date: new Date('2026-09-01'),
+        end_date: new Date('2026-09-01'),
+        time: '18:00',
+        capacity: venueObj.seating_capacity,
+        age_restriction: 'All Ages',
+        languages: ['English', 'Hindi'],
+        tags: ['concert', 'live', 'music'],
+        status: e % 3 === 0 ? 'published' : 'active', // Some pre-published events
+        has_reserved_seating: e % 2 === 0, // Alternate seating layouts
+        seating_layout: e % 2 === 0 ? seatingLayout : null,
+        media_links: mediaLinks,
+        refund_policy_details: refundPolicyDetails
+      };
+      
+      const [event, created] = await Event.findOrCreate({ where: { id: eventId }, defaults: eData });
+      if (!created) {
+        await event.update(eData);
+      }
+      seededEvents.push(event);
+    }
+
+    // Seed Event Tickets
+    console.log('Seeding event ticket categories...');
+    const seededTicketCategories = [];
+    for (const ev of seededEvents) {
+      if (ev.has_reserved_seating) {
+        const vipTc = await EventTicket.findOrCreate({
+          where: { event_id: ev.id, ticket_type: 'VIP Zone' },
+          defaults: { event_id: ev.id, ticket_type: 'VIP Zone', price: 1499.00, available_quantity: 20, booking_limit: 5, refund_policy: 'Refundable up to 24h prior' }
+        });
+        const premTc = await EventTicket.findOrCreate({
+          where: { event_id: ev.id, ticket_type: 'Premium Zone' },
+          defaults: { event_id: ev.id, ticket_type: 'Premium Zone', price: 999.00, available_quantity: 36, booking_limit: 5, refund_policy: 'Refundable up to 24h prior' }
+        });
+        seededTicketCategories.push(vipTc[0], premTc[0]);
+      } else {
+        const gaTc = await EventTicket.findOrCreate({
+          where: { event_id: ev.id, ticket_type: 'General Admission' },
+          defaults: { event_id: ev.id, ticket_type: 'General Admission', price: 499.00, available_quantity: 400, booking_limit: 10, refund_policy: 'Refundable up to 24h prior' }
+        });
+        seededTicketCategories.push(gaTc[0]);
+      }
+    }
+
+    // 7. Seed exactly 40 Movies
     console.log('Seeding 40 Movies...');
     const moviePosters = [
       'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500',
       'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=500',
-      'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500',
-      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500',
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500',
-      'https://images.unsplash.com/photo-1509281373149-e957c6296406?w=500',
-      'https://images.unsplash.com/photo-1598387181032-a3103a2db5b3?w=500',
-      'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500',
-      'https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=500'
+      'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500'
     ];
     const movieBanners = [
       'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1000',
-      'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1000',
-      'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1000',
-      'https://images.unsplash.com/photo-1500627869374-13cd993b1115?w=1000',
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1000',
-      'https://images.unsplash.com/photo-1533928298208-27ff66555d8d?w=1000',
-      'https://images.unsplash.com/photo-1608889175123-8ec330b86f84?w=1000',
-      'https://images.unsplash.com/photo-1542204172-e70528091867?w=1000',
-      'https://images.unsplash.com/photo-1460881680858-30d872d5b530?w=1000',
-      'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=1000'
+      'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1000'
     ];
 
-    const genresList = ['Action, Sci-Fi', 'Comedy, Romance', 'Thriller, Crime', 'Horror, Mystery', 'Drama, Family', 'Adventure, Fantasy'];
-    const languagesList = ['English', 'Hindi', 'Tamil', 'Telugu', 'Malayalam', 'Kannada'];
+    const genresList = ['Action, Sci-Fi', 'Comedy, Romance', 'Thriller, Crime', 'Drama, Family'];
+    const languagesList = ['English', 'Hindi', 'Tamil', 'Telugu'];
 
     const seededMovies = [];
     for (let i = 1; i <= 40; i++) {
@@ -144,103 +259,20 @@ const seedData = async () => {
       const [movie, created] = await Movie.findOrCreate({ where: { id: movieId }, defaults: mData });
       seededMovies.push(movie);
     }
-    console.log(`Seeded/verified ${seededMovies.length} movies.`);
 
-    // Movie cast seeding
-    for (let m = 0; m < 10; m++) {
+    // Seeding cast
+    for (let m = 0; m < 5; m++) {
       const movie_id = seededMovies[m].id;
-      
       const cast1 = {
         movie_id,
         actor_name: `Famous Actor A${m}`,
         character_name: `Protagonist X${m}`,
         photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
       };
-      await MovieCast.findOrCreate({ 
-        where: { movie_id, actor_name: cast1.actor_name }, 
-        defaults: cast1 
-      });
-
-      const cast2 = {
-        movie_id,
-        actor_name: `Supporting Actor B${m}`,
-        character_name: `Antagonist Y${m}`,
-        photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'
-      };
-      await MovieCast.findOrCreate({ 
-        where: { movie_id, actor_name: cast2.actor_name }, 
-        defaults: cast2 
-      });
+      await MovieCast.findOrCreate({ where: { movie_id, actor_name: cast1.actor_name }, defaults: cast1 });
     }
 
-    // 6. Seed exactly 30 Events
-    console.log('Seeding 30 Events...');
-    const eventTitles = [
-      'A.R. Rahman Symphony Tour', 'Sunburn Arena DJ Snake', 'Zakir Khan Comedy Special', 'Vir Das Mind Fool Tour',
-      'Mughal-E-Azam The Musical', 'Shakespeare Hamlet Live Play', 'IPL T20 Wankhede Match', 'Pro Kabaddi Tournament',
-      'ISL Football Derby', 'Diljit Dosanjh Dil-Luminati Tour', 'Tech Innovation Summit 2026', 'AI Frontiers Workshop',
-      'IIT Saarang Music Night', 'BITS Oasis College Fest', 'Kochi Biennale Arts Event', 'Mumbai Culinary Festival',
-      'Bangalore Standup Special', 'Chennai Fusion Concert', 'Delhi Startup TechSummit', 'Hyderabad Sports Arena Match',
-      'Salem Music Carnival', 'Kolkata Literature Fest', 'Pune Comedy Special', 'Trivandrum Classical Dance',
-      'Coimbatore Food Expo', 'Erode Handloom Workshop', 'Thoothukudi Beach Sports', 'Vellore Tech Fest',
-      'Mysore Palace Symphony', 'Visakhapatnam Arena concert'
-    ];
-
-    const categoryIds = [
-      'c1111111-1111-1111-1111-111111111111',
-      'c2222222-2222-2222-2222-222222222222',
-      'c3333333-3333-3333-3333-333333333333',
-      'c4444444-4444-4444-4444-444444444444',
-      'c5555555-5555-5555-5555-555555555555',
-      'c6666666-6666-6666-6666-666666666666',
-      'c7777777-7777-7777-7777-777777777777',
-      'c8888888-8888-8888-8888-888888888888'
-    ];
-
-    const seededEvents = [];
-    for (let e = 1; e <= 30; e++) {
-      const cityObj = cityList[e % cityList.length];
-      const eventId = `e0000000-0000-0000-0000-${e.toString().padStart(12, '0')}`;
-      const eData = {
-        id: eventId,
-        organizer_id: '40000000-4000-4000-4000-400000000000',
-        category_id: categoryIds[e % categoryIds.length],
-        title: eventTitles[e - 1] || `Premium Event Tour ${e}`,
-        description: `This is the epic description for ${eventTitles[e - 1] || 'Premium Event'}. Experience premium setups and absolute live engagement.`,
-        venue: `Stadium Block ${e}, ${cityObj.city_name}`,
-        city_id: cityObj.id,
-        banner: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500',
-        start_date: new Date('2026-09-01'),
-        end_date: new Date('2026-09-01'),
-        status: 'active'
-      };
-      const [event, created] = await Event.findOrCreate({ where: { id: eventId }, defaults: eData });
-      seededEvents.push(event);
-    }
-
-    // Seed Event Tickets
-    for (const ev of seededEvents) {
-      await EventTicket.findOrCreate({
-        where: { event_id: ev.id, ticket_type: 'General Admission' },
-        defaults: {
-          event_id: ev.id,
-          ticket_type: 'General Admission',
-          price: 499.00,
-          available_quantity: 400
-        }
-      });
-      await EventTicket.findOrCreate({
-        where: { event_id: ev.id, ticket_type: 'VIP Pass' },
-        defaults: {
-          event_id: ev.id,
-          ticket_type: 'VIP Pass',
-          price: 1499.00,
-          available_quantity: 100
-        }
-      });
-    }
-
-    // 7. Seed exactly 25 Theatres
+    // 8. Seed exactly 25 Theatres
     console.log('Seeding 25 Theatres...');
     const theatrePrefixes = ['PVR Cinema', 'Inox Multiplex', 'Cinemax', 'Carnival Cinemas', 'Miraj Cinemas'];
     const seededTheatres = [];
@@ -248,8 +280,8 @@ const seedData = async () => {
       const cityObj = cityList[t % cityList.length];
       const theatreId = `d0000000-0000-0000-0000-${t.toString().padStart(12, '0')}`;
       const descObj = JSON.stringify({
-        facilities: 'Parking, Food Court, Wheelchair Access, Dolby Atmos Sound',
-        gmapsLink: `https://www.google.com/maps?q=${19.0 + (t % 5) * 0.1},${72.0 + (t % 5) * 0.1}`,
+        facilities: 'Parking, Food Court, Dolby Atmos Sound',
+        gmapsLink: `https://www.google.com/maps?q=12.97,77.59`,
         customDesc: `Luxurious cinema theater ${t} located in ${cityObj.city_name}.`
       });
 
@@ -259,8 +291,8 @@ const seedData = async () => {
         city_id: cityObj.id,
         theatre_name: `${theatrePrefixes[t % theatrePrefixes.length]} ${cityObj.city_name} (${t})`,
         address: `Main Road Mall, Area ${t}, ${cityObj.city_name}`,
-        latitude: parseFloat((19.0 + (t % 5) * 0.1).toFixed(6)),
-        longitude: parseFloat((72.0 + (t % 5) * 0.1).toFixed(6)),
+        latitude: 12.97,
+        longitude: 77.59,
         phone: `+9198765400${t}`,
         email: `theatre${t}@cinemamall.com`,
         description: descObj,
@@ -276,31 +308,17 @@ const seedData = async () => {
       const screenId1 = `${th.id.slice(0, 18)}-0100-${th.id.slice(24)}`;
       const screenId2 = `${th.id.slice(0, 18)}-0200-${th.id.slice(24)}`;
       
-      const sData1 = {
-        id: screenId1,
-        theatre_id: th.id,
-        screen_name: 'Dolby Atmos Screen 1',
-        capacity: 100,
-        rows: 10,
-        columns: 10
-      };
+      const sData1 = { id: screenId1, theatre_id: th.id, screen_name: 'Dolby Atmos Screen 1', capacity: 100, rows: 10, columns: 10 };
       const [scr1, c1] = await Screen.findOrCreate({ where: { id: screenId1 }, defaults: sData1 });
       seededScreens.push(scr1);
 
-      const sData2 = {
-        id: screenId2,
-        theatre_id: th.id,
-        screen_name: 'VIP Screen 2',
-        capacity: 50,
-        rows: 5,
-        columns: 10
-      };
+      const sData2 = { id: screenId2, theatre_id: th.id, screen_name: 'VIP Screen 2', capacity: 50, rows: 5, columns: 10 };
       const [scr2, c2] = await Screen.findOrCreate({ where: { id: screenId2 }, defaults: sData2 });
       seededScreens.push(scr2);
     }
 
-    // Seed seat layout grids
-    console.log('Checking seat configurations...');
+    // Seed seats
+    console.log('Seeding theatre seat configurations...');
     for (const scr of seededScreens) {
       const seatCount = await Seat.count({ where: { screen_id: scr.id } });
       if (seatCount === 0) {
@@ -324,7 +342,7 @@ const seedData = async () => {
       }
     }
 
-    // 8. Seed exactly 200 Shows
+    // 9. Seed exactly 200 Shows
     console.log('Seeding 200 Showtimes...');
     const nowShowing = seededMovies.filter(m => m.status === 'now_showing');
     const seededShows = [];
@@ -367,8 +385,8 @@ const seedData = async () => {
       }
     }
 
-    // 9. Seed 1000 Bookings deterministically
-    console.log('Seeding 1000 bookings...');
+    // 10. Seed 1000 Bookings deterministically (Including Events)
+    console.log('Seeding 1000 bookings logs...');
     const bookingCount = await Booking.count();
     if (bookingCount < 1000) {
       const bookingsToCreate = [];
@@ -377,48 +395,82 @@ const seedData = async () => {
       
       const allSeats = await Seat.findAll();
       const targetCount = 1000 - bookingCount;
-      console.log(`Seeding ${targetCount} new bookings...`);
+      console.log(`Generating ${targetCount} bookings transactions...`);
 
       for (let b = 1; b <= targetCount; b++) {
-        const show = seededShows[b % seededShows.length];
         const bookingId = `90000000-0000-0000-0000-${(bookingCount + b).toString().padStart(12, '0')}`;
-        const bookingNo = `BK-SEED-${(bookingCount + b).toString().padStart(6, '0')}`;
         
-        bookingsToCreate.push({
-          id: bookingId,
-          booking_number: bookingNo,
-          user_id: '20000000-2000-2000-2000-200000000000',
-          show_id: show.id,
-          booking_date: new Date(`2026-07-18T10:${(b % 60).toString().padStart(2, '0')}:00Z`),
-          total_amount: 360.00,
-          discount: 0.00,
-          booking_status: b % 15 === 0 ? 'cancelled' : 'confirmed',
-          payment_status: b % 15 === 0 ? 'refunded' : 'paid',
-          qr_code: `TICKET-${bookingNo}`
-        });
-
-        paymentsToCreate.push({
-          booking_id: bookingId,
-          transaction_id: `TXN-${bookingNo}`,
-          gateway: 'stripe',
-          payment_method: 'card',
-          amount: 360.00,
-          status: b % 15 === 0 ? 'refunded' : 'success',
-          paid_at: new Date()
-        });
-
-        const matchingSeats = allSeats.filter(s => s.screen_id === show.screen_id);
-        if (matchingSeats.length >= 2) {
-          bookingSeatsToCreate.push({
-            booking_id: bookingId,
-            seat_id: matchingSeats[0].id,
-            price: 180.00
+        // 90% Movie Bookings, 10% Event Bookings for rich dashboards
+        if (b % 10 === 0) {
+          const ticketCategory = seededTicketCategories[b % seededTicketCategories.length];
+          const bookingNo = `EV-SEED-${(bookingCount + b).toString().padStart(6, '0')}`;
+          const isReserved = ticketCategory.ticket_type.includes('Zone');
+          
+          bookingsToCreate.push({
+            id: bookingId,
+            booking_number: bookingNo,
+            user_id: '20000000-2000-2000-2000-200000000000',
+            show_id: null,
+            event_ticket_id: ticketCategory.id,
+            booking_date: new Date(`2026-07-19T11:${(b % 60).toString().padStart(2, '0')}:00Z`),
+            total_amount: parseFloat(ticketCategory.price) * 2,
+            discount: 0.00,
+            booking_status: b % 15 === 0 ? 'cancelled' : 'confirmed',
+            payment_status: b % 15 === 0 ? 'refunded' : 'paid',
+            qr_code: `TICKET-${bookingNo}`,
+            booked_seats: isReserved ? ['VIP-A-1', 'VIP-A-2'] : null
           });
-          bookingSeatsToCreate.push({
+
+          paymentsToCreate.push({
             booking_id: bookingId,
-            seat_id: matchingSeats[1].id,
-            price: 180.00
+            transaction_id: `TXN-${bookingNo}`,
+            gateway: 'razorpay',
+            payment_method: 'upi',
+            amount: parseFloat(ticketCategory.price) * 2,
+            status: b % 15 === 0 ? 'refunded' : 'success',
+            paid_at: new Date()
           });
+        } else {
+          const show = seededShows[b % seededShows.length];
+          const bookingNo = `BK-SEED-${(bookingCount + b).toString().padStart(6, '0')}`;
+          
+          bookingsToCreate.push({
+            id: bookingId,
+            booking_number: bookingNo,
+            user_id: '20000000-2000-2000-2000-200000000000',
+            show_id: show.id,
+            event_ticket_id: null,
+            booking_date: new Date(`2026-07-18T10:${(b % 60).toString().padStart(2, '0')}:00Z`),
+            total_amount: 360.00,
+            discount: 0.00,
+            booking_status: b % 15 === 0 ? 'cancelled' : 'confirmed',
+            payment_status: b % 15 === 0 ? 'refunded' : 'paid',
+            qr_code: `TICKET-${bookingNo}`
+          });
+
+          paymentsToCreate.push({
+            booking_id: bookingId,
+            transaction_id: `TXN-${bookingNo}`,
+            gateway: 'stripe',
+            payment_method: 'card',
+            amount: 360.00,
+            status: b % 15 === 0 ? 'refunded' : 'success',
+            paid_at: new Date()
+          });
+
+          const matchingSeats = allSeats.filter(s => s.screen_id === show.screen_id);
+          if (matchingSeats.length >= 2) {
+            bookingSeatsToCreate.push({
+              booking_id: bookingId,
+              seat_id: matchingSeats[0].id,
+              price: 180.00
+            });
+            bookingSeatsToCreate.push({
+              booking_id: bookingId,
+              seat_id: matchingSeats[1].id,
+              price: 180.00
+            });
+          }
         }
       }
 
@@ -432,17 +484,48 @@ const seedData = async () => {
       }
     }
 
-    // 10. Seed coupons & reviews
+    // 11. Seed coupons
     console.log('Seeding coupons, reviews, and notifications...');
     const couponsData = [
-      { id: '70000000-0000-0000-0000-000000000001', coupon_code: 'WELCOME50', discount_type: 'percentage', discount_value: 50.00, minimum_amount: 200.00, usage_limit: 500, expiry_date: '2027-01-01', status: 'active' },
-      { id: '70000000-0000-0000-0000-000000000002', coupon_code: 'FLAT100', discount_type: 'flat', discount_value: 100.00, minimum_amount: 400.00, usage_limit: 200, expiry_date: '2027-01-01', status: 'active' },
-      { id: '70000000-0000-0000-0000-000000000003', coupon_code: 'GOLDEN20', discount_type: 'percentage', discount_value: 20.00, minimum_amount: 150.00, usage_limit: 1000, expiry_date: '2027-01-01', status: 'active' }
+      { id: '70000000-0000-0000-0000-000000000001', coupon_code: 'WELCOME50', discount_type: 'percentage', discount_value: 50.00, minimum_amount: 200.00, usage_limit: 500, expiry_date: '2027-01-01', status: 'active', start_date: '2026-01-01' },
+      { id: '70000000-0000-0000-0000-000000000002', coupon_code: 'FLAT100', discount_type: 'flat', discount_value: 100.00, minimum_amount: 400.00, usage_limit: 200, expiry_date: '2027-01-01', status: 'active', start_date: '2026-01-01' },
+      { 
+        id: '70000000-0000-0000-0000-000000000003', 
+        coupon_code: 'EARLYBIRD', 
+        discount_type: 'percentage', 
+        discount_value: 20.00, 
+        minimum_amount: 150.00, 
+        usage_limit: 1000, 
+        expiry_date: '2027-01-01', 
+        status: 'active', 
+        start_date: '2026-01-01',
+        event_id: 'e0000000-0000-0000-0000-000000000001', // Linked to Rahman tour
+        applicable_categories: ['VIP Pass', 'VIP Zone'],
+        group_discount_size: 1
+      },
+      {
+        id: '70000000-0000-0000-0000-000000000004',
+        coupon_code: 'GROUP3',
+        discount_type: 'percentage',
+        discount_value: 15.00,
+        minimum_amount: 100.00,
+        usage_limit: 500,
+        expiry_date: '2027-01-01',
+        status: 'active',
+        start_date: '2026-01-01',
+        group_discount_size: 3 // Min 3 tickets
+      }
     ];
     for (const c of couponsData) {
-      await Coupon.findOrCreate({ where: { coupon_code: c.coupon_code }, defaults: c });
+      const existing = await Coupon.findOne({ where: { coupon_code: c.coupon_code } });
+      if (!existing) {
+        await Coupon.create(c);
+      } else {
+        await existing.update(c);
+      }
     }
 
+    // Seed Reviews
     const reviewCount = await Review.count();
     if (reviewCount < 40) {
       const reviewsToCreate = [];
@@ -457,6 +540,7 @@ const seedData = async () => {
       await Review.bulkCreate(reviewsToCreate);
     }
 
+    // Seed Notifications
     const notifCount = await Notification.count();
     if (notifCount < 15) {
       const notificationsToCreate = [];
@@ -472,7 +556,7 @@ const seedData = async () => {
       await Notification.bulkCreate(notificationsToCreate);
     }
 
-    console.log('MASSIVE ENTERPRISE-GRADE DETERMINISTIC DEMO SEED COMPLETED SUCCESSFULLY!');
+    console.log('ENTERPRISE DEMO SEED WITH DETAILED EVENTS COMPLETED SUCCESSFULLY!');
     process.exit(0);
   } catch (err) {
     console.error('Error during data seeding:', err);

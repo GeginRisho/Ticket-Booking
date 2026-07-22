@@ -10,6 +10,11 @@ export const register = async (userData) => {
  return response.data;
 };
 
+export const registerOrganizer = async (organizerData) => {
+ const response = await api.post('/auth/register-organizer', organizerData);
+ return response.data;
+};
+
 export const logout = async (refreshToken) => {
  const response = await api.post('/auth/logout', { refreshToken });
  return response.data;

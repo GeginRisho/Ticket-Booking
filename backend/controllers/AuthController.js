@@ -14,6 +14,19 @@ class AuthController {
     }
   }
 
+  async registerOrganizer(req, res, next) {
+    try {
+      const user = await AuthService.registerOrganizer(req.body);
+      res.status(201).json({
+        status: 'success',
+        message: 'Registration request submitted for approval',
+        data: { user }
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async login(req, res, next) {
     try {
       const { email, password } = req.body;

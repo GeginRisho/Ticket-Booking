@@ -16,6 +16,9 @@ const bookingRoutes = require('./routes/bookingRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const venueRoutes = require('./routes/venueRoutes');
+const organizerRoutes = require('./routes/organizerRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const globalErrorHandler = require('./middlewares/errorMiddleware');
 const AppError = require('./utils/appError');
 require('dotenv').config();
@@ -65,6 +68,9 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api', uploadRoutes);
+app.use('/api/venues', venueRoutes);
+app.use('/api/organizer', organizerRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

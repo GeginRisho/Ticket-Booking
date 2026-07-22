@@ -123,11 +123,13 @@ class BookingService {
     });
   }
 
-  async createEventBooking(userId, { event_ticket_id, quantity, coupon_code }) {
+  async createEventBooking(userId, { event_ticket_id, quantity, coupon_code, seat_ids }) {
     const qty = parseInt(quantity, 10);
     if (isNaN(qty) || qty <= 0) {
       throw new AppError('Quantity must be a positive integer', 400);
     }
+
+    const { Event } = require('../models');
 
     return await sequelize.transaction(async (t) => {
       // Fetch EventTicket with write lock to prevent race conditions on ticket counts
@@ -144,13 +146,55 @@ class BookingService {
         throw new AppError(`Not enough tickets available. Only ${eventTicket.available_quantity} remaining.`, 400);
       }
 
+      const event = await Event.findByPk(eventTicket.event_id, { transaction: t });
+      if (!event) {
+        throw new AppError('Event not found', 404);
+      }
+
+      // Check Seating reservation constraints if applicable
+      if (event.has_reserved_seating) {
+        if (!seat_ids || !Array.isArray(seat_ids) || seat_ids.length === 0) {
+          throw new AppError('Seats selection is required for this event', 400);
+        }
+        if (seat_ids.length !== qty) {
+          throw new AppError('Number of selected seats must match the ticket quantity', 400);
+        }
+
+        // Aggregate booked/locked seats
+        const siblingTickets = await EventTicket.findAll({ where: { event_id: event.id }, transaction: t });
+        const ticketIds = siblingTickets.map(st => st.id);
+
+        const existingBookings = await Booking.findAll({
+          where: {
+            event_ticket_id: ticketIds,
+            booking_status: ['pending', 'confirmed', 'completed']
+          },
+          transaction: t
+        });
+
+        const bookedSeats = [];
+        existingBookings.forEach(eb => {
+          if (eb.booked_seats) {
+            const seatsArr = typeof eb.booked_seats === 'string' ? JSON.parse(eb.booked_seats) : eb.booked_seats;
+            if (Array.isArray(seatsArr)) {
+              bookedSeats.push(...seatsArr);
+            }
+          }
+        });
+
+        const doubleBooked = seat_ids.filter(s => bookedSeats.includes(s));
+        if (doubleBooked.length > 0) {
+          throw new AppError(`The following seats are already reserved or locked: ${doubleBooked.join(', ')}`, 400);
+        }
+      }
+
       // Calculate totals
       let subTotal = parseFloat(eventTicket.price) * qty;
       let discount = 0;
       let couponResult = null;
 
       if (coupon_code) {
-        couponResult = await CouponService.validateCoupon(coupon_code, subTotal);
+        couponResult = await CouponService.validateCoupon(coupon_code, subTotal, event.id, eventTicket.ticket_type, qty);
         discount = couponResult.discount_amount;
       }
 
@@ -173,15 +217,39 @@ class BookingService {
         total_amount: parseFloat(totalAmount.toFixed(2)),
         discount: parseFloat(discount.toFixed(2)),
         booking_status: 'pending',
-        payment_status: 'pending'
+        payment_status: 'pending',
+        booked_seats: seat_ids || null
       }, { transaction: t });
 
-      // Create notification
+      // Create customer notification
       await NotificationService.createNotification(userId, {
         title: 'Event Booking Initiated',
         message: `Your booking ${bookingNumber} for ${qty} ticket(s) is pending payment.`,
         type: 'booking'
       });
+
+      // Notify Event Organizer
+      if (event.organizer_id) {
+        await NotificationService.createNotification(event.organizer_id, {
+          title: 'New Event Booking',
+          message: `A new booking ${bookingNumber} has been initiated for "${event.title}". Quantity: ${qty} x ${eventTicket.ticket_type}.`,
+          type: 'new_booking'
+        }).catch(console.error);
+
+        if (eventTicket.available_quantity === 0) {
+          await NotificationService.createNotification(event.organizer_id, {
+            title: 'Category Sold Out',
+            message: `Ticket category "${eventTicket.ticket_type}" for "${event.title}" is now sold out!`,
+            type: 'sold_out'
+          }).catch(console.error);
+        } else if (eventTicket.available_quantity < 10) {
+          await NotificationService.createNotification(event.organizer_id, {
+            title: 'Low Ticket Availability',
+            message: `Only ${eventTicket.available_quantity} ticket(s) remaining for "${eventTicket.ticket_type}" in event "${event.title}".`,
+            type: 'low_availability'
+          }).catch(console.error);
+        }
+      }
 
       return booking;
     });

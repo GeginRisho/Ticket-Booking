@@ -53,6 +53,22 @@ const Coupon = sequelize.define('Coupon', {
     validate: {
       isIn: [['active', 'inactive']]
     }
+  },
+  event_id: {
+    type: DataTypes.UUID,
+    allowNull: true
+  },
+  applicable_categories: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  group_discount_size: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  start_date: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'coupons',

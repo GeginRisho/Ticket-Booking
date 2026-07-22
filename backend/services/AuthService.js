@@ -57,6 +57,93 @@ class AuthService {
     return this._formatUserResponse(userWithAssoc);
   }
 
+  async registerOrganizer(data) {
+    const {
+      fullName,
+      companyName,
+      email,
+      phone,
+      cityId,
+      address,
+      gstNumber,
+      panNumber,
+      businessLicense,
+      password,
+      companyLogo,
+      organizerPhoto,
+      businessDetails,
+      bankDetails,
+      socialMediaLinks
+    } = data;
+
+    // Check if email or phone already exists
+    const existingEmail = await UserRepository.findByEmail(email);
+    if (existingEmail) {
+      throw new AppError('Email is already registered', 400);
+    }
+
+    const existingPhone = await UserRepository.findByPhone(phone);
+    if (existingPhone) {
+      throw new AppError('Phone number is already registered', 400);
+    }
+
+    // Resolve Role - Event Organizer
+    const role = await RoleRepository.findByName('Event Organizer');
+    if (!role) {
+      throw new AppError('Event Organizer role configuration error', 500);
+    }
+
+    // Validate City if provided
+    if (cityId) {
+      const city = await CityRepository.findById(cityId);
+      if (!city) {
+        throw new AppError('Invalid city specified', 400);
+      }
+    }
+
+    // Hash password with 12 rounds
+    const password_hash = await bcrypt.hash(password, 12);
+
+    // Create User with Event Organizer fields and pending status
+    const user = await UserRepository.create({
+      full_name: fullName,
+      email,
+      phone,
+      password_hash,
+      role_id: role.id,
+      city_id: cityId || null,
+      status: 'pending', // Starts as pending approval
+      email_verified: false,
+      phone_verified: false,
+      company_name: companyName,
+      company_logo: companyLogo || null,
+      organizer_photo: organizerPhoto || null,
+      address: address || null,
+      business_details: businessDetails || null,
+      bank_account: bankDetails || null,
+      gst_number: gstNumber,
+      pan_number: panNumber,
+      business_license: businessLicense,
+      social_media_links: socialMediaLinks || null
+    });
+
+    // Create a registration notification for admin check
+    const NotificationService = require('./NotificationService');
+    const adminUser = await UserRepository.findOne({
+      include: [{ model: Role, as: 'role', where: { role_name: 'Admin' } }]
+    });
+    if (adminUser) {
+      await NotificationService.createNotification(adminUser.id, {
+        title: 'New Organizer Pending Approval',
+        message: `Organizer "${fullName}" from "${companyName}" has registered and is pending approval.`,
+        type: 'approval'
+      }).catch(console.error);
+    }
+
+    const userWithAssoc = await UserRepository.findUserWithRole(user.id);
+    return this._formatUserResponse(userWithAssoc);
+  }
+
   async login(email, password) {
     const user = await UserRepository.findOne({
       where: { email },
@@ -66,8 +153,20 @@ class AuthService {
       ]
     });
 
-    if (!user || user.status === 'suspended') {
+    if (!user) {
       throw new AppError('Invalid email or password', 401);
+    }
+
+    if (user.status === 'pending') {
+      throw new AppError('Your account registration is pending administrator approval.', 403);
+    }
+
+    if (user.status === 'rejected') {
+      throw new AppError('Your registration request was rejected by an administrator.', 403);
+    }
+
+    if (user.status === 'suspended') {
+      throw new AppError('Your account is currently suspended.', 403);
     }
 
     // Compare Password
@@ -264,6 +363,16 @@ class AuthService {
       role: user.role ? user.role.role_name : null,
       city: user.city ? { id: user.city.id, name: user.city.city_name } : null,
       status: user.status,
+      company_name: user.company_name,
+      company_logo: user.company_logo,
+      organizer_photo: user.organizer_photo,
+      address: user.address,
+      business_details: user.business_details,
+      bank_account: user.bank_account,
+      gst_number: user.gst_number,
+      pan_number: user.pan_number,
+      business_license: user.business_license,
+      social_media_links: user.social_media_links,
       email_verified: user.email_verified,
       phone_verified: user.phone_verified,
       last_login: user.last_login,

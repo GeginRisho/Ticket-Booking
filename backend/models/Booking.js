@@ -64,6 +64,18 @@ const Booking = sequelize.define('Booking', {
   ticket_pdf: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  checked_in: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  checked_in_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  booked_seats: {
+    type: DataTypes.JSON,
+    allowNull: true
   }
 }, {
   tableName: 'bookings',

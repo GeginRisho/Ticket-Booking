@@ -53,8 +53,48 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     defaultValue: 'active',
     validate: {
-      isIn: [['active', 'inactive', 'suspended']]
+      isIn: [['active', 'inactive', 'suspended', 'pending', 'rejected']]
     }
+  },
+  company_name: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  company_logo: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  organizer_photo: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  address: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  business_details: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  bank_account: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  gst_number: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  pan_number: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  business_license: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  social_media_links: {
+    type: DataTypes.JSON,
+    allowNull: true
   },
   email_verified: {
     type: DataTypes.BOOLEAN,

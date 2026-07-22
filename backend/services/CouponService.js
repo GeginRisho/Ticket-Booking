@@ -52,15 +52,40 @@ class CouponService {
     return await CouponRepository.delete(id);
   }
 
-  async validateCoupon(couponCode, totalAmount) {
+  async validateCoupon(couponCode, totalAmount, eventId = null, categoryName = null, ticketQty = 1) {
     const coupon = await CouponRepository.findByCode(couponCode.toUpperCase());
     if (!coupon || coupon.status !== 'active') {
       throw new AppError('Invalid or inactive coupon code', 400);
     }
 
+    // Check start date
+    if (coupon.start_date && new Date(coupon.start_date) > new Date()) {
+      throw new AppError('This coupon promotion has not started yet', 400);
+    }
+
     // Check expiry
     if (new Date(coupon.expiry_date) < new Date()) {
       throw new AppError('Coupon has expired', 400);
+    }
+
+    // Check event restriction
+    if (coupon.event_id && eventId && coupon.event_id !== eventId) {
+      throw new AppError('This coupon is not applicable to the selected event', 400);
+    }
+
+    // Check applicable ticket category
+    if (coupon.applicable_categories && categoryName) {
+      const allowedCategories = typeof coupon.applicable_categories === 'string'
+        ? JSON.parse(coupon.applicable_categories)
+        : coupon.applicable_categories;
+      if (Array.isArray(allowedCategories) && allowedCategories.length > 0 && !allowedCategories.includes(categoryName)) {
+        throw new AppError(`This coupon is only applicable to categories: ${allowedCategories.join(', ')}`, 400);
+      }
+    }
+
+    // Check group discount size
+    if (coupon.group_discount_size && ticketQty < coupon.group_discount_size) {
+      throw new AppError(`This coupon requires a minimum of ${coupon.group_discount_size} tickets in the order`, 400);
     }
 
     // Check minimum amount

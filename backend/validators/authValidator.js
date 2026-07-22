@@ -116,6 +116,58 @@ const updateProfileValidator = [
   validateResult
 ];
 
+const registerOrganizerValidator = [
+  body('fullName')
+    .trim()
+    .notEmpty().withMessage('Organizer name is required')
+    .isLength({ min: 2, max: 100 }).withMessage('Organizer name must be between 2 and 100 characters'),
+  
+  body('companyName')
+    .trim()
+    .notEmpty().withMessage('Company name is required'),
+
+  body('email')
+    .trim()
+    .notEmpty().withMessage('Email is required')
+    .isEmail().withMessage('Please provide a valid email address')
+    .normalizeEmail(),
+  
+  body('phone')
+    .trim()
+    .notEmpty().withMessage('Phone number is required')
+    .matches(/^(?:\+91|91)?[6-9]\d{9}$/).withMessage('Please provide a valid 10-digit mobile number'),
+  
+  body('cityId')
+    .notEmpty().withMessage('City location is required')
+    .isUUID().withMessage('Please select a valid city'),
+
+  body('address')
+    .trim()
+    .notEmpty().withMessage('Address is required'),
+
+  body('gstNumber')
+    .trim()
+    .notEmpty().withMessage('GST number is required')
+    .matches(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/).withMessage('Please provide a valid GST number format'),
+
+  body('panNumber')
+    .trim()
+    .notEmpty().withMessage('PAN number is required')
+    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/).withMessage('Please provide a valid PAN number format'),
+
+  body('businessLicense')
+    .trim()
+    .notEmpty().withMessage('Business license number is required'),
+
+  body('password')
+    .notEmpty().withMessage('Password is required')
+    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+    .withMessage('Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character'),
+    
+  validateResult
+];
+
 module.exports = {
   registerValidator,
   loginValidator,
@@ -123,5 +175,6 @@ module.exports = {
   forgotPasswordValidator,
   resetPasswordValidator,
   changePasswordValidator,
-  updateProfileValidator
+  updateProfileValidator,
+  registerOrganizerValidator
 };

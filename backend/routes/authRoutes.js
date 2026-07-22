@@ -9,7 +9,8 @@ const {
   forgotPasswordValidator,
   resetPasswordValidator,
   changePasswordValidator,
-  updateProfileValidator
+  updateProfileValidator,
+  registerOrganizerValidator
 } = require('../validators/authValidator');
 
 const router = express.Router();
@@ -18,6 +19,7 @@ const router = express.Router();
 router.use(authLimiter);
 
 router.post('/register', registerValidator, AuthController.register);
+router.post('/register-organizer', registerOrganizerValidator, AuthController.registerOrganizer);
 router.post('/login', loginValidator, AuthController.login);
 router.post('/logout', AuthController.logout);
 router.post('/refresh-token', refreshTokenValidator, AuthController.refreshToken);

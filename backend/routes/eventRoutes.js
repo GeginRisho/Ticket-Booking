@@ -36,4 +36,8 @@ router.post('/', protect, restrictTo('Admin', 'Event Organizer'), createEventVal
 router.put('/:id', protect, restrictTo('Admin', 'Event Organizer'), updateEventValidator, EventController.updateEvent);
 router.delete('/:id', protect, restrictTo('Admin', 'Event Organizer'), validateId, EventController.deleteEvent);
 
+// Admin-only Event approval workflow routes
+router.put('/:id/approve', protect, restrictTo('Admin'), validateId, EventController.approveEvent);
+router.put('/:id/reject', protect, restrictTo('Admin'), validateId, EventController.rejectEvent);
+
 module.exports = router;

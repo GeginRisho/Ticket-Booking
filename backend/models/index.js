@@ -21,6 +21,7 @@ const Notification = require('./Notification');
 const Coupon = require('./Coupon');
 const SupportTicket = require('./SupportTicket');
 const UserRefreshToken = require('./UserRefreshToken');
+const Venue = require('./Venue');
 
 // --- Associations ---
 
@@ -48,6 +49,18 @@ Theatre.belongsTo(User, { foreignKey: 'owner_id', as: 'owner' });
 User.hasMany(Event, { foreignKey: 'organizer_id', as: 'organizedEvents' });
 Event.belongsTo(User, { foreignKey: 'organizer_id', as: 'organizer' });
 
+// Venue & City
+City.hasMany(Venue, { foreignKey: 'city_id', as: 'venues' });
+Venue.belongsTo(City, { foreignKey: 'city_id', as: 'city' });
+
+// User (Organizer) & Venue
+User.hasMany(Venue, { foreignKey: 'organizer_id', as: 'venues' });
+Venue.belongsTo(User, { foreignKey: 'organizer_id', as: 'organizer' });
+
+// Venue & Event
+Venue.hasMany(Event, { foreignKey: 'venue_id', as: 'events' });
+Event.belongsTo(Venue, { foreignKey: 'venue_id', as: 'physicalVenue' });
+
 // Theatre & Screen
 Theatre.hasMany(Screen, { foreignKey: 'theatre_id', as: 'screens', onDelete: 'CASCADE' });
 Screen.belongsTo(Theatre, { foreignKey: 'theatre_id', as: 'theatre' });
@@ -71,6 +84,14 @@ MovieCast.belongsTo(Movie, { foreignKey: 'movie_id', as: 'movie' });
 // Movie & Review
 Movie.hasMany(Review, { foreignKey: 'movie_id', as: 'reviews', onDelete: 'CASCADE' });
 Review.belongsTo(Movie, { foreignKey: 'movie_id', as: 'movie' });
+
+// Event & Review
+Event.hasMany(Review, { foreignKey: 'event_id', as: 'reviews', onDelete: 'CASCADE' });
+Review.belongsTo(Event, { foreignKey: 'event_id', as: 'event' });
+
+// Event & Coupon
+Event.hasMany(Coupon, { foreignKey: 'event_id', as: 'coupons', onDelete: 'CASCADE' });
+Coupon.belongsTo(Event, { foreignKey: 'event_id', as: 'event' });
 
 // User & Review
 User.hasMany(Review, { foreignKey: 'user_id', as: 'reviews', onDelete: 'CASCADE' });
@@ -159,5 +180,6 @@ module.exports = {
   Notification,
   Coupon,
   SupportTicket,
-  UserRefreshToken
+  UserRefreshToken,
+  Venue
 };

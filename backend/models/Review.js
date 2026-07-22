@@ -9,7 +9,11 @@ const Review = sequelize.define('Review', {
   },
   movie_id: {
     type: DataTypes.UUID,
-    allowNull: false
+    allowNull: true
+  },
+  event_id: {
+    type: DataTypes.UUID,
+    allowNull: true
   },
   user_id: {
     type: DataTypes.UUID,
@@ -34,7 +38,22 @@ const Review = sequelize.define('Review', {
     {
       unique: true,
       fields: ['movie_id', 'user_id'],
-      name: 'unique_movie_user_review'
+      name: 'unique_movie_user_review',
+      where: {
+        movie_id: {
+          [require('sequelize').Op.ne]: null
+        }
+      }
+    },
+    {
+      unique: true,
+      fields: ['event_id', 'user_id'],
+      name: 'unique_event_user_review',
+      where: {
+        event_id: {
+          [require('sequelize').Op.ne]: null
+        }
+      }
     }
   ]
 });

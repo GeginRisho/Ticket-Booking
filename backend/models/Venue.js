@@ -1,56 +1,60 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const EventTicket = sequelize.define('EventTicket', {
+const Venue = sequelize.define('Venue', {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
-  event_id: {
+  organizer_id: {
+    type: DataTypes.UUID,
+    allowNull: true // null for global/admin venues
+  },
+  city_id: {
     type: DataTypes.UUID,
     allowNull: false
   },
-  ticket_type: {
+  name: {
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
       notEmpty: true
     }
   },
-  price: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: false,
-    validate: {
-      min: 0
-    }
-  },
-  available_quantity: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    validate: {
-      min: 0
-    }
-  },
-  sales_window_start: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  sales_window_end: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  booking_limit: {
-    type: DataTypes.INTEGER,
-    allowNull: true
-  },
-  refund_policy: {
+  address: {
     type: DataTypes.TEXT,
+    allowNull: false,
+    validate: {
+      notEmpty: true
+    }
+  },
+  seating_capacity: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      min: 1
+    }
+  },
+  maps_location: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  parking_information: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  contact_number: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  gallery_images: {
+    type: DataTypes.JSON,
     allowNull: true
   }
 }, {
-  tableName: 'event_tickets',
+  tableName: 'venues',
   paranoid: true
 });
 
-module.exports = EventTicket;
+module.exports = Venue;

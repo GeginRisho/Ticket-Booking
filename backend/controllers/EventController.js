@@ -31,7 +31,15 @@ class EventController {
   // Events
   async getEvents(req, res, next) {
     try {
-      const events = await EventService.getEvents(req.query);
+      const filters = { ...req.query };
+      const userRole = req.user?.role?.role_name || req.user?.role || '';
+      
+      // If not admin/super-admin/organizer, only return active/published events
+      if (userRole !== 'Admin' && userRole !== 'Super Admin' && userRole !== 'Event Organizer') {
+        filters.status = 'published';
+      }
+      
+      const events = await EventService.getEvents(filters);
       res.status(200).json({
         status: 'success',
         results: events.length,
@@ -86,6 +94,33 @@ class EventController {
       res.status(200).json({
         status: 'success',
         message: 'Event deleted successfully'
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async approveEvent(req, res, next) {
+    try {
+      const event = await EventService.approveEvent(req.params.id);
+      res.status(200).json({
+        status: 'success',
+        message: 'Event approved successfully',
+        data: { event }
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async rejectEvent(req, res, next) {
+    try {
+      const { reason } = req.body;
+      const event = await EventService.rejectEvent(req.params.id, reason);
+      res.status(200).json({
+        status: 'success',
+        message: 'Event rejected successfully',
+        data: { event }
       });
     } catch (err) {
       next(err);

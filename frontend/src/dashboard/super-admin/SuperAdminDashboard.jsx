@@ -90,6 +90,7 @@ const SuperAdminDashboard = () => {
   // Platform Config States
   const [bookingFee, setBookingFee] = useState('20');
   const [convenienceFee, setConvenienceFee] = useState('10');
+  const [organizerCommission, setOrganizerCommission] = useState('15');
   const [gstRate, setGstRate] = useState('18');
   const [currency, setCurrency] = useState('INR (₹)');
   const [maintenanceMode, setMaintenanceMode] = useState(false);
@@ -292,6 +293,7 @@ const SuperAdminDashboard = () => {
             <div className="space-y-4">
               <Input label="Platform Booking Fee (₹)" value={bookingFee} onChange={e => setBookingFee(e.target.value)} />
               <Input label="Convenience Fee (%)" value={convenienceFee} onChange={e => setConvenienceFee(e.target.value)} />
+              <Input label="Event Organizer Commission Rate (%)" value={organizerCommission} onChange={e => setOrganizerCommission(e.target.value)} />
               <Input label="GST Rate (%)" value={gstRate} onChange={e => setGstRate(e.target.value)} />
               <Input label="Primary Currency Symbol" value={currency} onChange={e => setCurrency(e.target.value)} />
               

@@ -45,6 +45,10 @@ const bookEventValidator = [
     .optional()
     .trim(),
 
+  body('seat_ids')
+    .optional()
+    .isArray().withMessage('seat_ids must be an array of seat identifiers'),
+
   validateResult
 ];
 

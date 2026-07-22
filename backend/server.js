@@ -10,7 +10,11 @@ const startServer = async () => {
     console.log('✅ PostgreSQL Database connection established successfully.');
 
     // Create all tables if they don't exist
-    await sequelize.sync();
+    if (process.env.NODE_ENV === 'development') {
+      await sequelize.sync({ alter: true });
+    } else {
+      await sequelize.sync();
+    }
     console.log('✅ Database tables synchronized.');
 
     // Automatically check and run the seeder script if tables are empty

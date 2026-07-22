@@ -29,7 +29,38 @@ class EventService {
     if (!event) {
       throw new AppError('Event not found', 404);
     }
-    return event;
+
+    // Retrieve all booked/locked seats for this event
+    const { Booking } = require('../models');
+    const ticketIds = event.tickets?.map(t => t.id) || [];
+    const bookings = await Booking.findAll({
+      where: {
+        event_ticket_id: ticketIds,
+        booking_status: ['pending', 'confirmed', 'completed']
+      }
+    });
+
+    const bookedSeatsList = [];
+    bookings.forEach(b => {
+      if (b.booked_seats) {
+        const seatsArr = typeof b.booked_seats === 'string' ? JSON.parse(b.booked_seats) : b.booked_seats;
+        if (Array.isArray(seatsArr)) {
+          bookedSeatsList.push(...seatsArr);
+        }
+      }
+    });
+
+    const eventJson = event.toJSON ? event.toJSON() : event;
+    eventJson.booked_seats = bookedSeatsList;
+    if (!eventJson.refund_policy_details) {
+      eventJson.refund_policy_details = {
+        cancellation_deadline: 24,
+        refund_percentage: 100,
+        non_refundable: false,
+        automatic_refund: true
+      };
+    }
+    return eventJson;
   }
 
   async createEvent(data, user) {
@@ -46,11 +77,32 @@ class EventService {
     }
 
     const payload = { ...data };
-    if (user.role.role_name === 'Event Organizer') {
+    if (!payload.refund_policy_details) {
+      payload.refund_policy_details = {
+        cancellation_deadline: 24,
+        refund_percentage: 100,
+        non_refundable: false,
+        automatic_refund: true
+      };
+    } else {
+      payload.refund_policy_details = {
+        cancellation_deadline: payload.refund_policy_details.cancellation_deadline ?? 24,
+        refund_percentage: payload.refund_policy_details.refund_percentage ?? 100,
+        non_refundable: payload.refund_policy_details.non_refundable ?? false,
+        automatic_refund: payload.refund_policy_details.automatic_refund ?? true
+      };
+    }
+
+    const roleName = user.role?.role_name || user.role;
+    if (roleName === 'Event Organizer') {
       payload.organizer_id = user.id;
-    } else if (user.role.role_name === 'Admin') {
-      // Admin can assign organizer or leave null
+      // Organizers can only submit events as 'draft' or 'pending_approval'
+      if (payload.status !== 'pending_approval') {
+        payload.status = 'draft';
+      }
+    } else if (roleName === 'Admin' || roleName === 'Super Admin') {
       payload.organizer_id = payload.organizer_id || null;
+      payload.status = payload.status || 'approved';
     } else {
       throw new AppError('Access denied', 403);
     }
@@ -65,7 +117,9 @@ class EventService {
           event_id: event.id,
           ticket_type: ticket.ticket_type,
           price: ticket.price,
-          available_quantity: ticket.available_quantity
+          available_quantity: ticket.available_quantity,
+          booking_limit: ticket.booking_limit || 10,
+          refund_policy: ticket.refund_policy || 'Refundable up to 24h prior'
         }));
         await EventTicketRepository.bulkCreateTickets(ticketPayloads, { transaction });
       }
@@ -84,9 +138,33 @@ class EventService {
       throw new AppError('Event not found', 404);
     }
 
+    if (data.refund_policy_details) {
+      data.refund_policy_details = {
+        cancellation_deadline: data.refund_policy_details.cancellation_deadline ?? 24,
+        refund_percentage: data.refund_policy_details.refund_percentage ?? 100,
+        non_refundable: data.refund_policy_details.non_refundable ?? false,
+        automatic_refund: data.refund_policy_details.automatic_refund ?? true
+      };
+    }
+
     // Authorization check
-    if (user.role.role_name === 'Event Organizer' && event.organizer_id !== user.id) {
-      throw new AppError('You do not organize this event', 403);
+    const roleName = user.role?.role_name || user.role;
+    if (roleName === 'Event Organizer') {
+      if (event.organizer_id !== user.id) {
+        throw new AppError('You do not organize this event', 403);
+      }
+      
+      // Control state transitions for organizers
+      if (data.status) {
+        const allowedTransitions = ['draft', 'pending_approval', 'archived'];
+        if (event.status === 'approved' && data.status === 'published') {
+          allowedTransitions.push('published');
+        }
+        if (!allowedTransitions.includes(data.status)) {
+          // Disallow unauthorized state changes
+          delete data.status;
+        }
+      }
     }
 
     // If city or category are modified, check existence
@@ -135,7 +213,9 @@ class EventService {
           event_id: id,
           ticket_type: ticket.ticket_type,
           price: ticket.price,
-          available_quantity: ticket.available_quantity
+          available_quantity: ticket.available_quantity,
+          booking_limit: ticket.booking_limit || 10,
+          refund_policy: ticket.refund_policy || 'Refundable up to 24h prior'
         }));
         await EventTicketRepository.bulkCreateTickets(ticketPayloads, { transaction });
 
@@ -162,6 +242,48 @@ class EventService {
     }
 
     return await EventRepository.delete(id);
+  }
+
+  async approveEvent(id) {
+    const event = await EventRepository.findById(id);
+    if (!event) {
+      throw new AppError('Event not found', 404);
+    }
+
+    await EventRepository.update(id, { status: 'approved' });
+
+    // Send notification
+    if (event.organizer_id) {
+      const NotificationService = require('./NotificationService');
+      await NotificationService.createNotification(event.organizer_id, {
+        title: 'Event Approved',
+        message: `Your event "${event.title}" has been approved! You can now publish it to make it live.`,
+        type: 'event_approved'
+      }).catch(console.error);
+    }
+
+    return await EventRepository.findDetailWithTickets(id);
+  }
+
+  async rejectEvent(id, reason) {
+    const event = await EventRepository.findById(id);
+    if (!event) {
+      throw new AppError('Event not found', 404);
+    }
+
+    await EventRepository.update(id, { status: 'draft' });
+
+    // Send notification
+    if (event.organizer_id) {
+      const NotificationService = require('./NotificationService');
+      await NotificationService.createNotification(event.organizer_id, {
+        title: 'Event Rejected',
+        message: `Your event "${event.title}" was not approved. Reason: ${reason || 'Does not meet requirements'}`,
+        type: 'event_rejected'
+      }).catch(console.error);
+    }
+
+    return await EventRepository.findDetailWithTickets(id);
   }
 }
 

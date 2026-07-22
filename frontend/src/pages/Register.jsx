@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiCheck, FiX, FiLoader } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
+import { registerOrganizer } from '../services/authService';
 import { CITIES } from '../utils/constants';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
@@ -10,13 +11,25 @@ import Button from '../components/ui/Button';
 import toast from 'react-hot-toast';
 
 const Register = () => {
+  const [activeRegTab, setActiveRegTab] = useState('customer'); // 'customer' or 'organizer'
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
     password: '',
     confirmPassword: '',
-    cityId: CITIES[0]?.id || ''
+    cityId: CITIES[0]?.id || '',
+    // Organizer Fields
+    companyName: '',
+    address: '',
+    gstNumber: '',
+    panNumber: '',
+    businessLicense: '',
+    companyLogo: '',
+    organizerPhoto: '',
+    businessDetails: '',
+    bankDetails: '',
+    socialMediaLinks: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inlineErrors, setInlineErrors] = useState({});
@@ -26,6 +39,11 @@ const Register = () => {
   const phoneRef = useRef(null);
   const passwordRef = useRef(null);
   const confirmPasswordRef = useRef(null);
+  const companyNameRef = useRef(null);
+  const gstRef = useRef(null);
+  const panRef = useRef(null);
+  const addressRef = useRef(null);
+  const licenseRef = useRef(null);
 
   const navigate = useNavigate();
   const { register, isAuthenticated, user } = useAuth();
@@ -65,7 +83,7 @@ const Register = () => {
   const validateForm = () => {
     const errors = {};
     if (!formData.fullName.trim()) {
-      errors.fullName = 'Full name is required';
+      errors.fullName = activeRegTab === 'customer' ? 'Full name is required' : 'Organizer name is required';
     }
     if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = 'Please provide a valid email address';
@@ -78,11 +96,30 @@ const Register = () => {
       errors.cityId = 'Please select a valid city.';
     }
     if (!isPasswordValid) {
-      errors.password = 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.';
+      errors.password = 'Password does not meet the complexity requirements.';
     }
     if (formData.password !== formData.confirmPassword) {
       errors.confirmPassword = 'Passwords do not match';
     }
+
+    if (activeRegTab === 'organizer') {
+      if (!formData.companyName.trim()) {
+        errors.companyName = 'Company name is required';
+      }
+      if (!formData.address.trim()) {
+        errors.address = 'Address is required';
+      }
+      if (!formData.gstNumber.trim() || !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(formData.gstNumber.toUpperCase())) {
+        errors.gstNumber = 'Please provide a valid 15-digit GST number format';
+      }
+      if (!formData.panNumber.trim() || !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber.toUpperCase())) {
+        errors.panNumber = 'Please enter a valid 10-character PAN card number';
+      }
+      if (!formData.businessLicense.trim()) {
+        errors.businessLicense = 'Business license number is required';
+      }
+    }
+
     return errors;
   };
 
@@ -102,20 +139,47 @@ const Register = () => {
       else if (firstErrKey === 'phone' && phoneRef.current) phoneRef.current.focus();
       else if (firstErrKey === 'password' && passwordRef.current) passwordRef.current.focus();
       else if (firstErrKey === 'confirmPassword' && confirmPasswordRef.current) confirmPasswordRef.current.focus();
+      else if (firstErrKey === 'companyName' && companyNameRef.current) companyNameRef.current.focus();
+      else if (firstErrKey === 'gstNumber' && gstRef.current) gstRef.current.focus();
+      else if (firstErrKey === 'panNumber' && panRef.current) panRef.current.focus();
+      else if (firstErrKey === 'address' && addressRef.current) addressRef.current.focus();
+      else if (firstErrKey === 'businessLicense' && licenseRef.current) licenseRef.current.focus();
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await register({
-        full_name: formData.fullName.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.trim(),
-        password: formData.password,
-        city_id: formData.cityId
-      });
-      toast.success('Account created successfully. Please sign in.');
-      navigate('/login');
+      if (activeRegTab === 'customer') {
+        await register({
+          full_name: formData.fullName.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          password: formData.password,
+          city_id: formData.cityId
+        });
+        toast.success('Account created successfully. Please sign in.');
+        navigate('/login');
+      } else {
+        await registerOrganizer({
+          fullName: formData.fullName.trim(),
+          companyName: formData.companyName.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          cityId: formData.cityId,
+          address: formData.address.trim(),
+          gstNumber: formData.gstNumber.trim().toUpperCase(),
+          panNumber: formData.panNumber.trim().toUpperCase(),
+          businessLicense: formData.businessLicense.trim(),
+          password: formData.password,
+          companyLogo: formData.companyLogo.trim(),
+          organizerPhoto: formData.organizerPhoto.trim(),
+          businessDetails: formData.businessDetails.trim(),
+          bankDetails: formData.bankDetails.trim(),
+          socialMediaLinks: formData.socialMediaLinks.trim()
+        });
+        toast.success('Organizer registration submitted! Pending administrator approval.');
+        navigate('/login');
+      }
     } catch (err) {
       const serverMsg = err.response?.data?.message || err.message || '';
       let userFriendlyMsg = 'Registration failed. Please check your information.';
@@ -124,7 +188,7 @@ const Register = () => {
         userFriendlyMsg = 'Please select a valid city.';
         setInlineErrors(prev => ({ ...prev, cityId: userFriendlyMsg }));
       } else if (serverMsg.toLowerCase().includes('password')) {
-        userFriendlyMsg = 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.';
+        userFriendlyMsg = 'Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character.';
         setInlineErrors(prev => ({ ...prev, password: userFriendlyMsg }));
       } else if (serverMsg.toLowerCase().includes('phone')) {
         userFriendlyMsg = 'Please enter a valid 10-digit Indian mobile number.';
@@ -152,7 +216,7 @@ const Register = () => {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-[520px] z-10"
+        className="w-full max-w-[650px] z-10"
       >
         <Card className="p-6 sm:p-8 shadow-md bg-white border border-gray-200 rounded-3xl">
           <div className="text-center mb-6">
@@ -160,91 +224,253 @@ const Register = () => {
               Ticket<span className="text-gray-900">Show</span>
             </Link>
             <h1 className="text-2xl font-black text-gray-900 tracking-tight">Create Account</h1>
-            <p className="text-xs text-gray-500 font-semibold mt-1">Join TicketShow to browse movies and reserve seats</p>
+            <p className="text-xs text-gray-500 font-semibold mt-1">Join TicketShow to book seats or publish massive events</p>
+          </div>
+
+          {/* Registration Tab Switcher */}
+          <div className="flex border-b border-gray-200 mb-6 bg-gray-50 p-1 rounded-2xl">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveRegTab('customer');
+                setInlineErrors({});
+              }}
+              className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${
+                activeRegTab === 'customer' ? 'bg-amber-400 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              Customer Signup
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveRegTab('organizer');
+                setInlineErrors({});
+              }}
+              className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${
+                activeRegTab === 'organizer' ? 'bg-amber-400 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              Event Organizer Signup
+            </button>
           </div>
 
           <form onSubmit={handleRegister} className="space-y-4" noValidate>
-            <div>
-              <Input
-                ref={nameRef}
-                label="Full Name"
-                placeholder="John Doe"
-                value={formData.fullName}
-                onChange={e => {
-                  setFormData({ ...formData, fullName: e.target.value });
-                  if (inlineErrors.fullName) setInlineErrors({ ...inlineErrors, fullName: null });
-                }}
-                className={`min-h-[44px] ${inlineErrors.fullName ? 'border-red-500 bg-red-50/20' : ''}`}
-                aria-label="Full Name"
-                required
-              />
-              {inlineErrors.fullName && (
-                <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.fullName}</p>
-              )}
+            {/* Common Fields */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Input
+                  ref={nameRef}
+                  label={activeRegTab === 'customer' ? 'Full Name' : 'Organizer Contact Name'}
+                  placeholder="John Doe"
+                  value={formData.fullName}
+                  onChange={e => {
+                    setFormData({ ...formData, fullName: e.target.value });
+                    if (inlineErrors.fullName) setInlineErrors({ ...inlineErrors, fullName: null });
+                  }}
+                  className={`min-h-[44px] ${inlineErrors.fullName ? 'border-red-500 bg-red-50/20' : ''}`}
+                  required
+                />
+                {inlineErrors.fullName && (
+                  <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.fullName}</p>
+                )}
+              </div>
+
+              <div>
+                <Input
+                  ref={emailRef}
+                  label="Email Address"
+                  type="email"
+                  placeholder="john@doe.com"
+                  value={formData.email}
+                  onChange={e => {
+                    setFormData({ ...formData, email: e.target.value });
+                    if (inlineErrors.email) setInlineErrors({ ...inlineErrors, email: null });
+                  }}
+                  className={`min-h-[44px] ${inlineErrors.email ? 'border-red-500 bg-red-50/20' : ''}`}
+                  required
+                />
+                {inlineErrors.email && (
+                  <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.email}</p>
+                )}
+              </div>
             </div>
 
-            <div>
-              <Input
-                ref={emailRef}
-                label="Email Address"
-                type="email"
-                placeholder="john@doe.com"
-                value={formData.email}
-                onChange={e => {
-                  setFormData({ ...formData, email: e.target.value });
-                  if (inlineErrors.email) setInlineErrors({ ...inlineErrors, email: null });
-                }}
-                className={`min-h-[44px] ${inlineErrors.email ? 'border-red-500 bg-red-50/20' : ''}`}
-                aria-label="Email Address"
-                required
-              />
-              {inlineErrors.email && (
-                <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.email}</p>
-              )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Input
+                  ref={phoneRef}
+                  label="Phone Number"
+                  placeholder="+91 9876543210"
+                  value={formData.phone}
+                  onChange={e => {
+                    setFormData({ ...formData, phone: e.target.value });
+                    if (inlineErrors.phone) setInlineErrors({ ...inlineErrors, phone: null });
+                  }}
+                  className={`min-h-[44px] ${inlineErrors.phone ? 'border-red-500 bg-red-50/20' : ''}`}
+                  required
+                />
+                {inlineErrors.phone && (
+                  <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.phone}</p>
+                )}
+              </div>
+
+              <div className="flex flex-col text-left">
+                <label htmlFor="citySelect" className="block text-xs font-extrabold text-gray-500 uppercase mb-1">
+                  City Location
+                </label>
+                <select
+                  id="citySelect"
+                  value={formData.cityId}
+                  onChange={e => {
+                    setFormData({ ...formData, cityId: e.target.value });
+                    if (inlineErrors.cityId) setInlineErrors({ ...inlineErrors, cityId: null });
+                  }}
+                  className={`w-full min-h-[44px] px-4 py-2.5 rounded-2xl border ${inlineErrors.cityId ? 'border-red-500 bg-red-50/20' : 'border-gray-200 bg-gray-50'} text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white text-sm font-semibold transition-colors cursor-pointer`}
+                >
+                  {CITIES.map(c => (
+                    <option key={c.id} value={c.id}>{c.city_name} ({c.state})</option>
+                  ))}
+                </select>
+                {inlineErrors.cityId && (
+                  <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.cityId}</p>
+                )}
+              </div>
             </div>
 
-            <div>
-              <Input
-                ref={phoneRef}
-                label="Phone Number (Indian Mobile)"
-                placeholder="+91 9876543210"
-                value={formData.phone}
-                onChange={e => {
-                  setFormData({ ...formData, phone: e.target.value });
-                  if (inlineErrors.phone) setInlineErrors({ ...inlineErrors, phone: null });
-                }}
-                className={`min-h-[44px] ${inlineErrors.phone ? 'border-red-500 bg-red-50/20' : ''}`}
-                aria-label="Phone Number"
-                required
-              />
-              {inlineErrors.phone && (
-                <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.phone}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col text-left">
-              <label htmlFor="citySelect" className="block text-xs font-extrabold text-gray-500 uppercase mb-1">
-                City Location
-              </label>
-              <select
-                id="citySelect"
-                value={formData.cityId}
-                onChange={e => {
-                  setFormData({ ...formData, cityId: e.target.value });
-                  if (inlineErrors.cityId) setInlineErrors({ ...inlineErrors, cityId: null });
-                }}
-                className={`w-full min-h-[44px] px-4 py-2.5 rounded-2xl border ${inlineErrors.cityId ? 'border-red-500 bg-red-50/20' : 'border-gray-200 bg-gray-50'} text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white text-sm font-semibold transition-colors cursor-pointer`}
-                aria-label="Select City"
+            {/* Organizer Specific Fields */}
+            {activeRegTab === 'organizer' && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="space-y-4 pt-2 border-t border-gray-100"
               >
-                {CITIES.map(c => (
-                  <option key={c.id} value={c.id}>{c.city_name} ({c.state})</option>
-                ))}
-              </select>
-              {inlineErrors.cityId && (
-                <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.cityId}</p>
-              )}
-            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      ref={companyNameRef}
+                      label="Company / Brand Name"
+                      placeholder="Showbiz Entertainment Pvt Ltd"
+                      value={formData.companyName}
+                      onChange={e => setFormData({ ...formData, companyName: e.target.value })}
+                      required
+                    />
+                    {inlineErrors.companyName && (
+                      <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.companyName}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Input
+                      ref={licenseRef}
+                      label="Business License Number"
+                      placeholder="LIC-9048-22A"
+                      value={formData.businessLicense}
+                      onChange={e => setFormData({ ...formData, businessLicense: e.target.value })}
+                      required
+                    />
+                    {inlineErrors.businessLicense && (
+                      <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.businessLicense}</p>
+                    )}
+                  </div>
+                </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      ref={gstRef}
+                      label="GST Number"
+                      placeholder="27AABCU9603R1ZN"
+                      value={formData.gstNumber}
+                      onChange={e => setFormData({ ...formData, gstNumber: e.target.value })}
+                      required
+                    />
+                    {inlineErrors.gstNumber && (
+                      <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.gstNumber}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Input
+                      ref={panRef}
+                      label="PAN Number"
+                      placeholder="AABCU9603R"
+                      value={formData.panNumber}
+                      onChange={e => setFormData({ ...formData, panNumber: e.target.value })}
+                      required
+                    />
+                    {inlineErrors.panNumber && (
+                      <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.panNumber}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-extrabold text-gray-500 uppercase mb-1">Office Address</label>
+                  <textarea
+                    ref={addressRef}
+                    rows="2"
+                    placeholder="Penthouse A, Skyline Hub, Tech Park..."
+                    value={formData.address}
+                    onChange={e => setFormData({ ...formData, address: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white text-sm font-semibold transition-all resize-none"
+                    required
+                  />
+                  {inlineErrors.address && (
+                    <p className="text-xs text-red-600 font-semibold mt-1">{inlineErrors.address}</p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      label="Company Logo URL (Optional)"
+                      placeholder="https://brand.com/logo.png"
+                      value={formData.companyLogo}
+                      onChange={e => setFormData({ ...formData, companyLogo: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      label="Organizer Photo URL (Optional)"
+                      placeholder="https://brand.com/photo.png"
+                      value={formData.organizerPhoto}
+                      onChange={e => setFormData({ ...formData, organizerPhoto: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      label="Bank Account details (Optional)"
+                      placeholder="HDFC Bank - 501002239401"
+                      value={formData.bankDetails}
+                      onChange={e => setFormData({ ...formData, bankDetails: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      label="Social Media links (Optional)"
+                      placeholder="https://linkedin.com/in/organizer"
+                      value={formData.socialMediaLinks}
+                      onChange={e => setFormData({ ...formData, socialMediaLinks: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-extrabold text-gray-500 uppercase mb-1">Company / Brand Details (Optional)</label>
+                  <textarea
+                    rows="2"
+                    placeholder="Brief description of your entertainment group/agency..."
+                    value={formData.businessDetails}
+                    onChange={e => setFormData({ ...formData, businessDetails: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white text-sm font-semibold transition-all resize-none"
+                  />
+                </div>
+              </motion.div>
+            )}
+
+            {/* Password Fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Input
@@ -258,7 +484,6 @@ const Register = () => {
                     if (inlineErrors.password) setInlineErrors({ ...inlineErrors, password: null });
                   }}
                   className={`min-h-[44px] ${inlineErrors.password ? 'border-red-500 bg-red-50/20' : ''}`}
-                  aria-label="Password"
                   required
                 />
               </div>
@@ -275,7 +500,6 @@ const Register = () => {
                     if (inlineErrors.confirmPassword) setInlineErrors({ ...inlineErrors, confirmPassword: null });
                   }}
                   className={`min-h-[44px] ${inlineErrors.confirmPassword ? 'border-red-500 bg-red-50/20' : ''}`}
-                  aria-label="Confirm Password"
                   required
                 />
                 {inlineErrors.confirmPassword && (
@@ -284,7 +508,7 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Live Password Rules Feedback Checklist */}
+            {/* Password checklist */}
             <div className="p-3.5 bg-gray-50/80 border border-gray-200 rounded-2xl text-left space-y-1.5 mt-2">
               <p className="text-[11px] font-extrabold uppercase text-gray-500 tracking-wider mb-1">
                 Password Requirements
@@ -312,15 +536,14 @@ const Register = () => {
               variant="primary"
               className="w-full min-h-[44px] py-3.5 font-black rounded-2xl bg-amber-400 hover:bg-amber-500 text-gray-900 shadow-sm mt-4 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-amber-500"
               disabled={isSubmitting}
-              aria-label="Create Account"
             >
               {isSubmitting ? (
                 <>
                   <FiLoader size={18} className="animate-spin text-gray-900" />
-                  <span>Creating Account...</span>
+                  <span>Submitting Request...</span>
                 </>
               ) : (
-                'Create Account'
+                activeRegTab === 'customer' ? 'Create Account' : 'Register Organizer Account'
               )}
             </Button>
           </form>
