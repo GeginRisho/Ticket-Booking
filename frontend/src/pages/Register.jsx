@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiCheck, FiX, FiLoader } from 'react-icons/fi';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, normalizeRole } from '../context/AuthContext';
 import { registerOrganizer } from '../services/authService';
 import { CITIES } from '../utils/constants';
 import Card from '../components/ui/Card';
@@ -65,10 +65,7 @@ const Register = () => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      const rawRole = user.role?.role_name || user.role || 'Customer';
-      let roleStr = rawRole;
-      if (rawRole === 'Owner') roleStr = 'Theatre Owner';
-      if (rawRole === 'Organizer') roleStr = 'Event Organizer';
+      const roleStr = normalizeRole(user.role);
 
       let redirectPath = '/dashboard';
       if (roleStr === 'Super Admin') {

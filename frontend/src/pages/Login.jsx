@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, normalizeRole } from '../context/AuthContext';
 import { getMe } from '../services/authService';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
@@ -30,10 +30,7 @@ const Login = () => {
         return;
       }
 
-      const rawRole = user.role?.role_name || user.role || 'Customer';
-      let roleStr = rawRole;
-      if (rawRole === 'Owner') roleStr = 'Theatre Owner';
-      if (rawRole === 'Organizer') roleStr = 'Event Organizer';
+      const roleStr = normalizeRole(user.role);
 
       let redirectPath = '/';
       if (roleStr === 'Super Admin') {
@@ -57,10 +54,7 @@ const Login = () => {
       
       const userData = res.user || res.data?.user || res.data;
       const accessToken = res.token || res.data?.accessToken || res.accessToken;
-      const rawRole = res.role || userData?.role?.role_name || userData?.role || 'Customer';
-      let roleStr = rawRole;
-      if (rawRole === 'Owner') roleStr = 'Theatre Owner';
-      if (rawRole === 'Organizer') roleStr = 'Event Organizer';
+      const roleStr = normalizeRole(res.role || userData?.role);
 
       // Save token, user, role to localStorage
       if (accessToken) {
@@ -84,7 +78,7 @@ const Login = () => {
         if (freshUserObj) {
           localStorage.setItem('user', JSON.stringify(freshUserObj));
           setUser(freshUserObj);
-          const freshRole = freshUserObj.role?.role_name || freshUserObj.role;
+          const freshRole = normalizeRole(freshUserObj.role);
           if (freshRole) {
             localStorage.setItem('role', freshRole);
             setRole(freshRole);

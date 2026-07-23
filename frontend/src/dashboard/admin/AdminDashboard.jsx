@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   FiUsers, FiFilm, FiCalendar, FiDollarSign, FiPlusSquare, 
   FiPercent, FiCreditCard, FiTrendingUp, FiActivity, FiUser, 
-  FiEye, FiTrash2, FiPlus, FiSettings, FiInfo, FiGrid, FiList,
+  FiEye, FiTrash2, FiPlus, FiSettings, FiInfo, FiGrid, FiList, FiLayout,
   FiFileText, FiCheckCircle, FiXCircle, FiSliders, FiFilter, FiDownload, FiSearch, FiRefreshCw, FiCheckSquare
 } from 'react-icons/fi';
 import { 

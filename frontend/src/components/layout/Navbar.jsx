@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiSearch, FiMenu, FiX, FiUser, FiLogOut, FiHeart, FiBell, FiMapPin, FiSettings } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils/cn';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, normalizeRole } from '../../context/AuthContext';
 import { CITIES } from '../../utils/constants';
 import toast from 'react-hot-toast';
 
@@ -147,8 +147,7 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const rawRole = user?.role?.role_name || user?.role;
-  const userRole = rawRole === 'Owner' ? 'Theatre Owner' : (rawRole === 'Organizer' ? 'Event Organizer' : rawRole);
+  const userRole = normalizeRole(user?.role);
 
   const dashboardPath = userRole === 'Super Admin'
     ? '/super-admin/dashboard'

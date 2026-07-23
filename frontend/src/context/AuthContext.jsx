@@ -4,6 +4,18 @@ import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
 
+export const normalizeRole = (r) => {
+  if (!r) return 'Customer';
+  const name = typeof r === 'object' ? (r.role_name || r.name) : r;
+  if (!name) return 'Customer';
+  const clean = name.toLowerCase().replace(/[\s_]+/g, '');
+  if (clean === 'superadmin') return 'Super Admin';
+  if (clean === 'admin') return 'Admin';
+  if (clean === 'theatreowner' || clean === 'owner') return 'Theatre Owner';
+  if (clean === 'eventorganizer' || clean === 'organizer') return 'Event Organizer';
+  return 'Customer';
+};
+
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
@@ -16,7 +28,7 @@ export const AuthProvider = ({ children }) => {
     }
   });
   const [token, setToken] = useState(localStorage.getItem('token'));
-  const [role, setRole] = useState(localStorage.getItem('role'));
+  const [role, setRole] = useState(() => normalizeRole(localStorage.getItem('role')));
   const [isAuthenticated, setIsAuthenticated] = useState(!!token);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -31,9 +43,10 @@ export const AuthProvider = ({ children }) => {
           if (userObj) {
             localStorage.setItem('user', JSON.stringify(userObj));
             const roleStr = userObj.role?.role_name || userObj.role;
-            if (roleStr) {
-              localStorage.setItem('role', roleStr);
-              setRole(roleStr);
+            const normalized = normalizeRole(roleStr);
+            if (normalized) {
+              localStorage.setItem('role', normalized);
+              setRole(normalized);
             }
           }
         } catch (error) {
@@ -74,9 +87,10 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(userObj));
         setUser(userObj);
       }
-      if (roleStr) {
-        localStorage.setItem('role', roleStr);
-        setRole(roleStr);
+      const normalized = normalizeRole(roleStr);
+      if (normalized) {
+        localStorage.setItem('role', normalized);
+        setRole(normalized);
       }
       
       setIsAuthenticated(true);
@@ -120,10 +134,10 @@ export const AuthProvider = ({ children }) => {
     setUser(newUserData);
     if (newUserData) {
       localStorage.setItem('user', JSON.stringify(newUserData));
-      const roleStr = newUserData.role?.role_name || newUserData.role;
-      if (roleStr) {
-        localStorage.setItem('role', roleStr);
-        setRole(roleStr);
+      const normalized = normalizeRole(roleStr);
+      if (normalized) {
+        localStorage.setItem('role', normalized);
+        setRole(normalized);
       }
     }
   };
