@@ -8,8 +8,6 @@ module.exports = {
       WHERE a.id > b.id
         AND LOWER(TRIM(a.state)) = LOWER(TRIM(b.state))
         AND LOWER(TRIM(a.city_name)) = LOWER(TRIM(b.city_name))
-        AND a.deleted_at IS NULL
-        AND b.deleted_at IS NULL
     `);
 
     const [results] = await queryInterface.sequelize.query(`
