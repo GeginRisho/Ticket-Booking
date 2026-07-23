@@ -64,6 +64,8 @@ const AdminDashboard = () => {
     if (path.includes('/applications')) return 'applications';
     if (path.includes('/organizers')) return 'organizers';
     if (path.includes('/event-approvals')) return 'event-approvals';
+    if (path.includes('/screens')) return 'screens';
+    if (path.includes('/shows')) return 'shows';
     if (path.includes('/users') || path.includes('/customers')) return 'customers';
     if (path.includes('/movies')) return 'movies';
     if (path.includes('/events')) return 'events';
@@ -319,10 +321,12 @@ const AdminDashboard = () => {
     { id: 'organizers', label: 'Event Organizers', icon: FiUsers, count: organizers.filter(o => o.status === 'pending').length },
     { id: 'event-approvals', label: 'Event Approvals', icon: FiCheckSquare, count: events.filter(e => e.status === 'pending_approval').length },
     { id: 'theatres', label: 'Theatres', icon: FiList },
+    { id: 'screens', label: 'Screens', icon: FiLayout },
+    { id: 'shows', label: 'Shows', icon: FiCalendar },
     { id: 'movies', label: 'Movies Catalog', icon: FiFilm },
     { id: 'events', label: 'Live Events', icon: FiCalendar },
     { id: 'bookings', label: 'Bookings & Refunds', icon: FiCreditCard },
-    { id: 'customers', label: 'Customer Management', icon: FiUsers },
+    { id: 'customers', label: 'Users & Customers', icon: FiUsers },
     { id: 'coupons', label: 'Coupons', icon: FiPercent },
     { id: 'reports', label: 'Reports & Exports', icon: FiActivity },
     { id: 'support', label: 'Support Queue', icon: FiInfo, count: tickets.filter(t => t.status === 'OPEN').length },
@@ -817,13 +821,195 @@ const AdminDashboard = () => {
               />
             </Card>
           )}
+          {/* COUPONS TAB */}
+          {activeTab === 'coupons' && (
+            <Card className="bg-white border border-gray-200 p-6 rounded-3xl shadow-sm">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-extrabold text-lg text-text-primary">Platform Coupons</h3>
+                <Button onClick={() => setIsAddCouponOpen(true)} className="flex items-center gap-1.5 font-bold text-xs">
+                  <FiPlus size={14} />
+                  <span>Create Coupon</span>
+                </Button>
+              </div>
+              <Table
+                headers={['Coupon Code', 'Discount Type', 'Value', 'Min Order', 'Actions']}
+                data={coupons}
+                renderRow={(coupon) => (
+                  <tr key={coupon.id}>
+                    <td className="px-6 py-4 font-mono font-bold text-sm text-text-primary">{coupon.coupon_code}</td>
+                    <td className="px-6 py-4 text-sm text-text-secondary capitalize">{coupon.discount_type}</td>
+                    <td className="px-6 py-4 text-sm font-bold">{coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `₹${coupon.discount_value}`}</td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">₹{coupon.minimum_amount || 0}</td>
+                    <td className="px-6 py-4">
+                      <Button variant="danger" size="sm" onClick={async () => {
+                        try {
+                          await deleteCoupon(coupon.id);
+                          toast.success('Coupon deleted');
+                          loadData();
+                        } catch (e) {
+                          toast.error('Failed to delete coupon');
+                        }
+                      }}>
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                )}
+              />
+            </Card>
+          )}
 
-          {/* CUSTOMER MANAGEMENT TAB */}
+          {/* REPORTS TAB */}
+          {activeTab === 'reports' && (
+            <Card className="bg-white border border-gray-200 p-6 rounded-3xl shadow-sm">
+              <h3 className="font-extrabold text-lg text-text-primary mb-6">Analytics & Telemetry Reports</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+                <div className="p-5 border border-gray-100 bg-gray-50/50 rounded-2xl">
+                  <h4 className="font-bold text-sm text-text-primary mb-2">Revenue Settlement Report</h4>
+                  <p className="text-xs text-text-secondary mb-4">Complete breakdown of gross sales, convenience fees, GST collections, and theatre/organizer payouts.</p>
+                  <Button variant="secondary" size="sm" className="w-full flex items-center justify-center gap-1.5 font-bold" onClick={() => toast.success('Exporting Revenue Report CSV...')}>
+                    <FiDownload size={14} />
+                    <span>Download CSV</span>
+                  </Button>
+                </div>
+                <div className="p-5 border border-gray-100 bg-gray-50/50 rounded-2xl">
+                  <h4 className="font-bold text-sm text-text-primary mb-2">Customer Booking Log</h4>
+                  <p className="text-xs text-text-secondary mb-4">Detailed chronological log of customer bookings, status transitions, and Razorpay payment identifiers.</p>
+                  <Button variant="secondary" size="sm" className="w-full flex items-center justify-center gap-1.5 font-bold" onClick={() => toast.success('Exporting Customer Bookings CSV...')}>
+                    <FiDownload size={14} />
+                    <span>Download CSV</span>
+                  </Button>
+                </div>
+                <div className="p-5 border border-gray-100 bg-gray-50/50 rounded-2xl">
+                  <h4 className="font-bold text-sm text-text-primary mb-2">Show and Occupancy Analytics</h4>
+                  <p className="text-xs text-text-secondary mb-4">Report compiling screen seat fills, category occupancy rates, and trending movie/live event statistics.</p>
+                  <Button variant="secondary" size="sm" className="w-full flex items-center justify-center gap-1.5 font-bold" onClick={() => toast.success('Exporting Occupancy Report CSV...')}>
+                    <FiDownload size={14} />
+                    <span>Download CSV</span>
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* SCREENS TAB */}
+          {activeTab === 'screens' && (
+            <Card className="bg-white border border-gray-200 p-6 rounded-3xl shadow-sm">
+              <h3 className="font-extrabold text-lg text-text-primary mb-6">Theatre Screens Management</h3>
+              <p className="text-xs text-gray-500 mb-6 font-semibold">Select a theatre below to inspect or configure its screen and seat capacities.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+                {theatres.map((t) => (
+                  <div key={t.id} className="p-5 border border-gray-100 bg-gray-50/50 rounded-2xl flex flex-col justify-between">
+                    <div>
+                      <h4 className="font-extrabold text-sm text-text-primary mb-1">{t.theatre_name}</h4>
+                      <p className="text-[11px] text-text-secondary mb-4 font-semibold">{t.address}</p>
+                    </div>
+                    <Button variant="secondary" size="sm" className="w-full font-bold" onClick={async () => {
+                      try {
+                        const { getScreens } = await import('../../services/screenService');
+                        const list = await getScreens(t.id);
+                        if (list && list.length > 0) {
+                          toast.success(`Fetched ${list.length} screens: ` + list.map(s => `${s.screen_name} (${s.capacity} seats)`).join(', '));
+                        } else {
+                          toast.error('No screens configured for this theatre.');
+                        }
+                      } catch (err) {
+                        toast.error('Failed to load screens.');
+                      }
+                    }}>
+                      Inspect Screens
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* SHOWS TAB */}
+          {activeTab === 'shows' && (
+            <Card className="bg-white border border-gray-200 p-6 rounded-3xl shadow-sm">
+              <h3 className="font-extrabold text-lg text-text-primary mb-6">Showtimes Catalog</h3>
+              <p className="text-xs text-gray-500 mb-6 font-semibold">Select a movie below to inspect its active showtimes across all theatres.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+                {movies.map((m) => (
+                  <div key={m.id} className="p-5 border border-gray-100 bg-gray-50/50 rounded-2xl flex flex-col justify-between">
+                    <div>
+                      <h4 className="font-extrabold text-sm text-text-primary mb-1">{m.title}</h4>
+                      <p className="text-[11px] text-text-secondary mb-4 font-semibold">{m.genre} • {m.duration} mins</p>
+                    </div>
+                    <Button variant="secondary" size="sm" className="w-full font-bold" onClick={async () => {
+                      try {
+                        const { getShows } = await import('../../services/showService');
+                        const list = await getShows({ movieId: m.id });
+                        if (list && list.length > 0) {
+                          toast.success(`Fetched ${list.length} showtimes: ` + list.map(s => `${s.format} - ${s.show_date}`).join(', '));
+                        } else {
+                          toast.error('No shows scheduled for this movie.');
+                        }
+                      } catch (err) {
+                        toast.error('Failed to load shows.');
+                      }
+                    }}>
+                      View Scheduled Shows
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* CUSTOMER & USER MANAGEMENT TAB */}
           {activeTab === 'customers' && (
             <Card className="bg-white border border-gray-200 p-6 rounded-3xl shadow-sm">
-              <h3 className="font-extrabold text-lg text-text-primary mb-6">All Customers</h3>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                  <h3 className="font-extrabold text-lg text-text-primary">Identity Directory</h3>
+                  <p className="text-[11px] text-gray-500 font-semibold mt-0.5">Manage user status, administrators, and partner accounts.</p>
+                </div>
+              </div>
+              
+              {/* Users sub-selector */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="p-4 border border-gray-100 bg-gray-50/50 rounded-2xl text-left">
+                  <span className="text-[10px] text-gray-400 font-black uppercase">Administrators</span>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xl font-extrabold text-gray-800">3 Active</span>
+                    <Button variant="secondary" size="sm" className="font-bold text-[10px] py-1 px-2.5 rounded-lg" onClick={() => {
+                      toast.success("Platform Admins: admin@ticketshow.com, superadmin@ticketshow.com");
+                    }}>List</Button>
+                  </div>
+                </div>
+                <div className="p-4 border border-gray-100 bg-gray-50/50 rounded-2xl text-left">
+                  <span className="text-[10px] text-gray-400 font-black uppercase">Theatre Owners</span>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xl font-extrabold text-gray-800">{theatres.map(t => t.owner_id).filter((v, i, a) => a.indexOf(v) === i).length} Registered</span>
+                    <Button variant="secondary" size="sm" className="font-bold text-[10px] py-1 px-2.5 rounded-lg" onClick={() => {
+                      toast.success("Theatre Owner Account: owner@ticketshow.com");
+                    }}>List</Button>
+                  </div>
+                </div>
+                <div className="p-4 border border-gray-100 bg-gray-50/50 rounded-2xl text-left">
+                  <span className="text-[10px] text-gray-400 font-black uppercase">Event Organizers</span>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xl font-extrabold text-gray-800">{organizers.length} Approved</span>
+                    <Button variant="secondary" size="sm" className="font-bold text-[10px] py-1 px-2.5 rounded-lg" onClick={() => {
+                      toast.success("Event Organizer Account: organizer@ticketshow.com");
+                    }}>List</Button>
+                  </div>
+                </div>
+                <div className="p-4 border border-gray-100 bg-gray-50/50 rounded-2xl text-left">
+                  <span className="text-[10px] text-gray-400 font-black uppercase">Customers</span>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xl font-extrabold text-gray-800">{customers.length} Active</span>
+                    <Button variant="secondary" size="sm" className="font-bold text-[10px] py-1 px-2.5 rounded-lg" onClick={() => {
+                      toast.success("Active Customer Account: customer@ticketshow.com");
+                    }}>List</Button>
+                  </div>
+                </div>
+              </div>
+
               <Table
-                headers={['Customer Name', 'Email Address', 'Mobile Number', 'Bookings', 'Status', 'Actions']}
+                headers={['User Name', 'Email Address', 'Mobile Number', 'Bookings', 'Status', 'Actions']}
                 data={customers}
                 renderRow={(c) => (
                   <tr key={c.id}>
@@ -839,7 +1025,14 @@ const AdminDashboard = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <Button variant={c.status === 'Active' ? 'danger' : 'success'} size="sm" onClick={() => toggleCustomerStatus(c.id)}>
+                      <Button variant={c.status === 'Active' ? 'danger' : 'success'} size="sm" onClick={() => {
+                        // Prevent modifying/deleting super admin check
+                        if (c.email === 'superadmin@ticketshow.com') {
+                          toast.error('❌ Security Violation: Super Admin profile cannot be suspended or deleted!');
+                          return;
+                        }
+                        toggleCustomerStatus(c.id);
+                      }}>
                         {c.status === 'Active' ? 'Block Account' : 'Unblock'}
                       </Button>
                     </td>

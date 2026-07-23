@@ -13,7 +13,25 @@ const Role = sequelize.define('Role', {
     unique: true,
     validate: {
       notEmpty: true,
-      isIn: [['Admin', 'Customer', 'Theatre Owner', 'Event Organizer', 'Super Admin']]
+      isIn: [['Admin', 'Customer', 'Theatre Owner', 'Event Organizer', 'Super Admin', 'admin', 'customer', 'theatre_owner', 'event_organizer', 'super_admin']]
+    },
+    get() {
+      const rawValue = this.getDataValue('role_name');
+      if (!rawValue) return null;
+      // Map database snake_case back to capitalized/spaced format for code compatibility
+      const mapping = {
+        'admin': 'Admin',
+        'super_admin': 'Super Admin',
+        'theatre_owner': 'Theatre Owner',
+        'event_organizer': 'Event Organizer',
+        'customer': 'Customer'
+      };
+      return mapping[rawValue.toLowerCase()] || rawValue;
+    },
+    set(val) {
+      if (val) {
+        this.setDataValue('role_name', val.toLowerCase().replace(/\s+/g, '_'));
+      }
     }
   }
 }, {

@@ -130,7 +130,15 @@ class AuthService {
     // Create a registration notification for admin check
     const NotificationService = require('./NotificationService');
     const adminUser = await UserRepository.findOne({
-      include: [{ model: Role, as: 'role', where: { role_name: 'Admin' } }]
+      include: [{
+        model: Role,
+        as: 'role',
+        where: {
+          role_name: {
+            [Op.in]: ['Admin', 'admin']
+          }
+        }
+      }]
     });
     if (adminUser) {
       await NotificationService.createNotification(adminUser.id, {

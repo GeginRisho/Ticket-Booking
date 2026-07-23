@@ -55,7 +55,12 @@ const restrictTo = (...roles) => {
       userRole = req.user.role;
     }
 
-    if (userRole === 'Super Admin' || roles.includes(userRole)) {
+    // Normalize inputs to support both capitalized and snake_case checks safely
+    const normalizeRole = (r) => r ? r.toLowerCase().replace(/[\s_]+/g, '') : '';
+    const normalizedUserRole = normalizeRole(userRole);
+    const normalizedAllowedRoles = roles.map(normalizeRole);
+
+    if (normalizedUserRole === 'superadmin' || normalizedAllowedRoles.includes(normalizedUserRole)) {
       return next();
     }
 

@@ -8,7 +8,14 @@ class AdminController {
     try {
       const { status } = req.query;
       
-      const role = await Role.findOne({ where: { role_name: 'Event Organizer' } });
+      const { Op } = require('sequelize');
+      const role = await Role.findOne({
+        where: {
+          role_name: {
+            [Op.in]: ['Event Organizer', 'event_organizer']
+          }
+        }
+      });
       if (!role) {
         throw new AppError('Event Organizer role not configured', 500);
       }
@@ -49,7 +56,7 @@ class AdminController {
 
       // Check if role is organizer
       const role = await Role.findByPk(organizer.role_id);
-      if (!role || role.role_name !== 'Event Organizer') {
+      if (!role || (role.role_name !== 'Event Organizer' && role.role_name !== 'event_organizer')) {
         throw new AppError('User is not an Event Organizer', 400);
       }
 
