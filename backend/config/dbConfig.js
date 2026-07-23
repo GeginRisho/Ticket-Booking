@@ -10,7 +10,7 @@ module.exports = {
     dialect: 'postgres',
     logging: console.log,
     define: {
-      underscored: true,
+      underscored: false,
       timestamps: true,
       paranoid: true
     }
@@ -35,7 +35,7 @@ module.exports = {
       }
     },
     define: {
-      underscored: true,
+      underscored: false,
       timestamps: true,
       paranoid: true
     }
@@ -54,7 +54,7 @@ module.exports = {
       idle: 10000
     },
     define: {
-      underscored: true,
+      underscored: false,
       timestamps: true,
       paranoid: true
     }

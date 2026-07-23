@@ -8,7 +8,7 @@ let sequelize;
 const config = dbConfig[env] || {};
 
 const globalDefineOptions = {
-  underscored: true,
+  underscored: false,
   timestamps: true,
   paranoid: true
 };

@@ -45,15 +45,15 @@ module.exports = {
           allowNull: false,
           unique: true
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -86,15 +86,15 @@ module.exports = {
           defaultValue: 'active',
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -171,15 +171,15 @@ module.exports = {
           type: Sequelize.DATE,
           allowNull: true
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -213,11 +213,11 @@ module.exports = {
           type: Sequelize.DATE,
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         }
@@ -278,15 +278,15 @@ module.exports = {
           defaultValue: 'coming_soon',
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -324,15 +324,15 @@ module.exports = {
           type: Sequelize.STRING,
           allowNull: true
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -401,15 +401,15 @@ module.exports = {
           defaultValue: 'pending_approval',
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -451,15 +451,15 @@ module.exports = {
           type: Sequelize.INTEGER,
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -497,15 +497,15 @@ module.exports = {
           type: Sequelize.DECIMAL(10, 2),
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -566,15 +566,15 @@ module.exports = {
           defaultValue: 'active',
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -595,15 +595,15 @@ module.exports = {
           allowNull: false,
           unique: true
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -678,15 +678,15 @@ module.exports = {
           defaultValue: 'active',
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -724,15 +724,15 @@ module.exports = {
           type: Sequelize.INTEGER,
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -815,15 +815,15 @@ module.exports = {
           type: Sequelize.STRING,
           allowNull: true
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -863,15 +863,15 @@ module.exports = {
           type: Sequelize.DECIMAL(10, 2),
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -923,15 +923,15 @@ module.exports = {
           type: Sequelize.DATE,
           allowNull: true
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -970,15 +970,15 @@ module.exports = {
           defaultValue: 'pending',
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -1024,15 +1024,15 @@ module.exports = {
           onDelete: 'CASCADE',
           onUpdate: 'CASCADE'
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -1076,15 +1076,15 @@ module.exports = {
           type: Sequelize.TEXT,
           allowNull: true
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -1128,15 +1128,15 @@ module.exports = {
           defaultValue: false,
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -1183,15 +1183,15 @@ module.exports = {
           defaultValue: 'active',
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }
@@ -1230,15 +1230,15 @@ module.exports = {
           defaultValue: 'open',
           allowNull: false
         },
-        created_at: {
+        createdAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        updated_at: {
+        updatedAt: {
           type: Sequelize.DATE,
           allowNull: false
         },
-        deleted_at: {
+        deletedAt: {
           type: Sequelize.DATE,
           allowNull: true
         }

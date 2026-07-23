@@ -16,33 +16,62 @@ module.exports = {
       const tableName = row.table_name;
       const columns = await queryInterface.describeTable(tableName);
 
-      // Check and add created_at
-      if (!columns.created_at) {
-        console.log(`Adding created_at column to table: ${tableName}`);
-        await queryInterface.addColumn(tableName, 'created_at', {
-          type: Sequelize.DATE,
-          allowNull: false,
-          defaultValue: Sequelize.literal('NOW()')
-        });
-      }
-
-      // Check and add updated_at
-      if (!columns.updated_at) {
-        console.log(`Adding updated_at column to table: ${tableName}`);
-        await queryInterface.addColumn(tableName, 'updated_at', {
-          type: Sequelize.DATE,
-          allowNull: false,
-          defaultValue: Sequelize.literal('NOW()')
-        });
-      }
-
-      // Check and add deleted_at (except user_refresh_tokens)
-      if (tableName !== 'user_refresh_tokens' && !columns.deleted_at) {
-        console.log(`Adding deleted_at column to table: ${tableName}`);
-        await queryInterface.addColumn(tableName, 'deleted_at', {
+      // Check and add createdAt
+      if (!columns.createdAt) {
+        console.log(`Adding createdAt column to table: ${tableName}`);
+        await queryInterface.addColumn(tableName, 'createdAt', {
           type: Sequelize.DATE,
           allowNull: true
         });
+
+        // Copy data from created_at if it exists
+        if (columns.created_at) {
+          await queryInterface.sequelize.query(`UPDATE "${tableName}" SET "createdAt" = "created_at"`);
+        } else {
+          await queryInterface.sequelize.query(`UPDATE "${tableName}" SET "createdAt" = NOW()`);
+        }
+
+        // Set to non-nullable
+        await queryInterface.changeColumn(tableName, 'createdAt', {
+          type: Sequelize.DATE,
+          allowNull: false
+        });
+      }
+
+      // Check and add updatedAt
+      if (!columns.updatedAt) {
+        console.log(`Adding updatedAt column to table: ${tableName}`);
+        await queryInterface.addColumn(tableName, 'updatedAt', {
+          type: Sequelize.DATE,
+          allowNull: true
+        });
+
+        // Copy data from updated_at if it exists
+        if (columns.updated_at) {
+          await queryInterface.sequelize.query(`UPDATE "${tableName}" SET "updatedAt" = "updated_at"`);
+        } else {
+          await queryInterface.sequelize.query(`UPDATE "${tableName}" SET "updatedAt" = NOW()`);
+        }
+
+        // Set to non-nullable
+        await queryInterface.changeColumn(tableName, 'updatedAt', {
+          type: Sequelize.DATE,
+          allowNull: false
+        });
+      }
+
+      // Check and add deletedAt (except user_refresh_tokens)
+      if (tableName !== 'user_refresh_tokens' && !columns.deletedAt) {
+        console.log(`Adding deletedAt column to table: ${tableName}`);
+        await queryInterface.addColumn(tableName, 'deletedAt', {
+          type: Sequelize.DATE,
+          allowNull: true
+        });
+
+        // Copy data from deleted_at if it exists
+        if (columns.deleted_at) {
+          await queryInterface.sequelize.query(`UPDATE "${tableName}" SET "deletedAt" = "deleted_at"`);
+        }
       }
     }
   },

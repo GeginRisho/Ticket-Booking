@@ -376,8 +376,8 @@ class AuthService {
       email_verified: user.email_verified,
       phone_verified: user.phone_verified,
       last_login: user.last_login,
-      created_at: user.created_at,
-      updated_at: user.updated_at
+      created_at: user.createdAt,
+      updated_at: user.updatedAt
     };
   }
 }
