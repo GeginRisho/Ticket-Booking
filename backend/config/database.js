@@ -5,10 +5,22 @@ require("dotenv").config();
 const env = process.env.NODE_ENV || "development";
 
 let sequelize;
-const config = dbConfig[env];
+const config = dbConfig[env] || {};
 
-if (config && config.use_env_variable && process.env[config.use_env_variable]) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+const globalDefineOptions = {
+  underscored: true,
+  timestamps: true,
+  paranoid: true
+};
+
+if (config.use_env_variable && process.env[config.use_env_variable]) {
+  sequelize = new Sequelize(process.env[config.use_env_variable], {
+    ...config,
+    define: {
+      ...globalDefineOptions,
+      ...config.define
+    }
+  });
 } else if (process.env.DATABASE_URL) {
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: "postgres",
@@ -20,18 +32,20 @@ if (config && config.use_env_variable && process.env[config.use_env_variable]) {
         rejectUnauthorized: false,
       },
     },
-    define: {
-      underscored: true,
-      timestamps: true,
-      paranoid: true
-    }
+    define: globalDefineOptions
   });
 } else {
   sequelize = new Sequelize(
     config.database,
     config.username,
     config.password,
-    config
+    {
+      ...config,
+      define: {
+        ...globalDefineOptions,
+        ...config.define
+      }
+    }
   );
 }
 
