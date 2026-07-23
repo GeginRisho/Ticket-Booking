@@ -17,18 +17,21 @@ const EventsPage = () => {
   const [selectedState, setSelectedState] = useState(localStorage.getItem('selectedState') || '');
   const [selectedCityName, setSelectedCityName] = useState(() => {
     const cityId = localStorage.getItem('selectedCity') || '';
-    const cityObj = CITIES.find(c => c.id === cityId);
+    const listToSearch = JSON.parse(sessionStorage.getItem('cached_cities_list') || 'null') || CITIES;
+    const cityObj = listToSearch.find(c => c.id === cityId);
     return cityObj ? cityObj.city_name : '';
   });
 
   useEffect(() => {
     const handleLocationChange = () => {
       const cityId = localStorage.getItem('selectedCity') || '';
-      const cityObj = CITIES.find(c => c.id === cityId);
+      const listToSearch = JSON.parse(sessionStorage.getItem('cached_cities_list') || 'null') || CITIES;
+      const cityObj = listToSearch.find(c => c.id === cityId);
       setSelectedCityName(cityObj ? cityObj.city_name : '');
       setSelectedState(localStorage.getItem('selectedState') || '');
     };
     window.addEventListener('locationChanged', handleLocationChange);
+    handleLocationChange();
     return () => window.removeEventListener('locationChanged', handleLocationChange);
   }, []);
 

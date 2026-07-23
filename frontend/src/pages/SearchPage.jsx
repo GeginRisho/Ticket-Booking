@@ -17,6 +17,7 @@ const SearchPage = () => {
   const [movies, setMovies] = useState([]);
   const [events, setEvents] = useState([]);
   const [theatres, setTheatres] = useState([]);
+  const [citiesList, setCitiesList] = useState(CITIES);
 
   const loadData = async () => {
     try {
@@ -28,6 +29,12 @@ const SearchPage = () => {
       setMovies(Array.isArray(moviesRes) ? moviesRes : []);
       setEvents(Array.isArray(eventsRes) ? eventsRes : []);
       setTheatres(Array.isArray(theatresRes) ? theatresRes : []);
+      
+      const { getCachedCities } = await import('../services/locationService');
+      const list = await getCachedCities();
+      if (list && list.length > 0) {
+        setCitiesList(list);
+      }
     } catch (err) {
       console.error('Failed to load search catalogs', err);
     } finally {
@@ -61,7 +68,7 @@ const SearchPage = () => {
   const filteredTheatres = !queryClean ? [] : theatres.filter(t => {
     const nameMatch = (t.theatre_name || '').toLowerCase().includes(queryClean);
     const addrMatch = (t.address || '').toLowerCase().includes(queryClean);
-    const cityName = CITIES.find(c => c.id === t.city_id)?.city_name || '';
+    const cityName = citiesList.find(c => c.id === t.city_id)?.city_name || '';
     const cityMatch = cityName.toLowerCase().includes(queryClean);
     return nameMatch || addrMatch || cityMatch;
   });
@@ -205,7 +212,7 @@ const SearchPage = () => {
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {filteredTheatres.map(theatre => {
-                      const cityName = CITIES.find(c => c.id === theatre.city_id)?.city_name || '';
+                      const cityName = citiesList.find(c => c.id === theatre.city_id)?.city_name || '';
                       return (
                         <Card key={theatre.id} className="p-5 flex justify-between items-center gap-4">
                           <div>

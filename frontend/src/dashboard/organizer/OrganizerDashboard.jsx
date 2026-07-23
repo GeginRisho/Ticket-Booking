@@ -105,9 +105,12 @@ const OrganizerDashboard = () => {
     ]
   });
 
+  const [citiesList, setCitiesList] = useState(CITIES);
   const [editingVenue, setEditingVenue] = useState(null);
   const [venueForm, setVenueForm] = useState({
-    name: '', address: '', city_id: CITIES[0]?.id || '', seating_capacity: 500,
+    name: '', address: '', city_id: CITIES[0]?.id || '',
+    city_name: '', state: 'Maharashtra',
+    seating_capacity: 500,
     maps_location: '', parking_information: 'Available', contact_number: '', gallery_images: ''
   });
 
@@ -197,6 +200,16 @@ const OrganizerDashboard = () => {
   const loadData = async () => {
     setLoading(true);
     try {
+      try {
+        const { getCachedCities } = await import('../../services/locationService');
+        const listCities = await getCachedCities();
+        if (listCities && listCities.length > 0) {
+          setCitiesList(listCities);
+        }
+      } catch (err) {
+        console.error('Failed to load cities in Organizer Dashboard:', err);
+      }
+
       const [eventsData, venuesData, bookingsData, catsData, statsData] = await Promise.all([
         getEvents({ status: 'all' }).catch(() => []),
         getVenues().catch(() => []),
@@ -383,16 +396,26 @@ const OrganizerDashboard = () => {
       const payload = {
         ...venueForm,
         seating_capacity: parseInt(venueForm.seating_capacity, 10) || 500,
-        gallery_images: venueForm.gallery_images.split(',').map(g => g.trim()).filter(Boolean)
+        gallery_images: typeof venueForm.gallery_images === 'string' ? venueForm.gallery_images.split(',').map(g => g.trim()).filter(Boolean) : (venueForm.gallery_images || [])
       };
+
+      if (payload.city_id === 'other') {
+        if (!payload.city_name || !payload.state) {
+          return toast.error('Please enter a custom city name and select a state');
+        }
+      }
 
       if (editingVenue) {
         await updateVenue(editingVenue.id, payload);
-        toast.success('Venue updated');
+        toast.success('Venue details updated successfully');
       } else {
         await createVenue(payload);
-        toast.success('Venue created successfully');
+        toast.success('New venue registered successfully!');
       }
+
+      const { clearLocationCache } = await import('../../services/locationService');
+      clearLocationCache();
+      window.dispatchEvent(new Event('locationChanged'));
 
       setIsVenueModalOpen(false);
       setEditingVenue(null);
@@ -1812,13 +1835,42 @@ const OrganizerDashboard = () => {
               <select
                 value={venueForm.city_id}
                 onChange={e => setVenueForm({...venueForm, city_id: e.target.value})}
-                className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-gray-50 text-gray-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white"
+                className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-gray-50 text-gray-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white cursor-pointer mb-2"
                 required
               >
-                {CITIES.map(c => (
-                  <option key={c.id} value={c.id}>{c.city_name}</option>
+                {citiesList.map(c => (
+                  <option key={c.id} value={c.id}>{c.city_name} ({c.state})</option>
                 ))}
+                <option value="other">Other (Add Custom City)...</option>
               </select>
+
+              {venueForm.city_id === 'other' && (
+                <div className="p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl space-y-3 mt-1">
+                  <div className="flex flex-col">
+                    <label className="text-[10px] font-black text-amber-800 uppercase mb-1">Custom State</label>
+                    <select 
+                      value={venueForm.state}
+                      onChange={e => setVenueForm({...venueForm, state: e.target.value})}
+                      className="px-3 py-2 rounded-xl border border-amber-200 bg-white text-gray-800 focus:outline-none text-xs font-semibold"
+                    >
+                      {[
+                        'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 
+                        'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 
+                        'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 
+                        'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi', 'Puducherry', 
+                        'Chandigarh', 'Jammu & Kashmir', 'Ladakh'
+                      ].map(st => <option key={st} value={st}>{st}</option>)}
+                    </select>
+                  </div>
+                  <Input 
+                    label="Custom City Name" 
+                    value={venueForm.city_name} 
+                    onChange={e => setVenueForm({...venueForm, city_name: e.target.value})} 
+                    placeholder="e.g. Kozhikode"
+                    className="bg-white border-amber-200"
+                  />
+                </div>
+              )}
             </div>
             <Input label="Seating capacity" type="number" value={venueForm.seating_capacity} onChange={e => setVenueForm({...venueForm, seating_capacity: e.target.value})} required />
           </div>

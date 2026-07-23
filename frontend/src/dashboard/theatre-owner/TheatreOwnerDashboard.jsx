@@ -238,8 +238,11 @@ const TheatreOwnerDashboard = () => {
   const [editingShow, setEditingShow] = useState(null);
   const [editingMovie, setEditingMovie] = useState(null);
 
+  const [citiesList, setCitiesList] = useState(CITIES);
+
   const [theatreForm, setTheatreForm] = useState({
     theatre_name: '', address: '', city_id: CITIES[0]?.id || '',
+    city_name: '', state: 'Maharashtra',
     facilities: 'Parking, Food Court, Dolby Atmos',
     phone: '', email: '', latitude: '19.076090', longitude: '72.877726',
     description: '', amenities: ['Parking', 'Food Court'], status: 'Open'
@@ -526,6 +529,16 @@ const TheatreOwnerDashboard = () => {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
+      try {
+        const { getCachedCities } = await import('../../services/locationService');
+        const listCities = await getCachedCities();
+        if (listCities && listCities.length > 0) {
+          setCitiesList(listCities);
+        }
+      } catch (err) {
+        console.error('Failed to load cities in Dashboard:', err);
+      }
+
       // 1. Get theatres
       const theatresRes = await getTheatres();
       const list = Array.isArray(theatresRes) ? theatresRes : [];
@@ -582,9 +595,20 @@ const TheatreOwnerDashboard = () => {
   const handleTheatreSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createTheatre(theatreForm);
-      toast.success('Theatre listing created successfully!');
+      const payload = { ...theatreForm };
+      if (payload.city_id === 'other') {
+        if (!payload.city_name || !payload.state) {
+          return toast.error('Please enter a custom city name and select a state');
+        }
+      }
+      await createTheatre(payload);
+      toast.success('Theatre listing registered successfully!');
       setIsAddTheatreOpen(false);
+      
+      const { clearLocationCache } = await import('../../services/locationService');
+      clearLocationCache();
+      window.dispatchEvent(new Event('locationChanged'));
+      
       loadDashboardData();
     } catch (err) {
       toast.error('Failed to create theatre');
@@ -940,10 +964,39 @@ const TheatreOwnerDashboard = () => {
                 <select 
                   value={theatreForm.city_id}
                   onChange={e => setTheatreForm({...theatreForm, city_id: e.target.value})}
-                  className="px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:bg-white text-sm font-semibold"
+                  className="px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:bg-white text-sm font-semibold cursor-pointer mb-2"
                 >
-                  {CITIES.map(c => <option key={c.id} value={c.id}>{c.city_name}</option>)}
+                  {citiesList.map(c => <option key={c.id} value={c.id}>{c.city_name} ({c.state})</option>)}
+                  <option value="other">Other (Add Custom City)...</option>
                 </select>
+
+                {theatreForm.city_id === 'other' && (
+                  <div className="p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl space-y-3 mt-1">
+                    <div className="flex flex-col">
+                      <label className="text-[10px] font-black text-amber-800 uppercase mb-1">Custom State</label>
+                      <select 
+                        value={theatreForm.state}
+                        onChange={e => setTheatreForm({...theatreForm, state: e.target.value})}
+                        className="px-3 py-2 rounded-xl border border-amber-200 bg-white text-gray-800 focus:outline-none text-xs font-semibold"
+                      >
+                        {[
+                          'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 
+                          'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 
+                          'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 
+                          'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi', 'Puducherry', 
+                          'Chandigarh', 'Jammu & Kashmir', 'Ladakh'
+                        ].map(st => <option key={st} value={st}>{st}</option>)}
+                      </select>
+                    </div>
+                    <Input 
+                      label="Custom City Name" 
+                      value={theatreForm.city_name} 
+                      onChange={e => setTheatreForm({...theatreForm, city_name: e.target.value})} 
+                      placeholder="e.g. Kozhikode"
+                      className="bg-white border-amber-200"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -2649,10 +2702,10 @@ const TheatreOwnerDashboard = () => {
                 <div className="flex flex-col text-left">
                   <label className="block text-xs font-extrabold text-gray-500 uppercase mb-1">City Location</label>
                   <select
-                    defaultValue={CITIES[0]?.id || ''}
+                    defaultValue={citiesList[0]?.id || ''}
                     className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:border-amber-400 focus:bg-white text-sm font-semibold transition-colors cursor-pointer"
                   >
-                    {CITIES.map(c => (
+                    {citiesList.map(c => (
                       <option key={c.id} value={c.id}>{c.city_name} ({c.state})</option>
                     ))}
                   </select>

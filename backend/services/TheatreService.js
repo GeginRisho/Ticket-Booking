@@ -17,13 +17,18 @@ class TheatreService {
   }
 
   async createTheatre(data, user) {
-    // Verify city exists
-    const city = await City.findByPk(data.city_id);
+    const LocationService = require('./LocationService');
+    const city = await LocationService.resolveOrCreateCity({
+      city_id: data.city_id,
+      city_name: data.city_name || data.city,
+      state: data.state
+    });
     if (!city) {
-      throw new AppError('Specified city does not exist', 404);
+      throw new AppError('Specified city/location is invalid or incomplete', 400);
     }
 
     const payload = { ...data };
+    payload.city_id = city.id;
 
     if (user.role.role_name === 'Theatre Owner') {
       payload.owner_id = user.id;
@@ -49,11 +54,17 @@ class TheatreService {
     }
 
     // City check if city is being updated
-    if (data.city_id) {
-      const city = await City.findByPk(data.city_id);
+    if (data.city_id || data.city_name || data.city || data.state) {
+      const LocationService = require('./LocationService');
+      const city = await LocationService.resolveOrCreateCity({
+        city_id: data.city_id || theatre.city_id,
+        city_name: data.city_name || data.city,
+        state: data.state
+      });
       if (!city) {
-        throw new AppError('Specified city does not exist', 404);
+        throw new AppError('Specified city/location is invalid or incomplete', 400);
       }
+      data.city_id = city.id;
     }
 
     // Protect status modification for Theatre Owners

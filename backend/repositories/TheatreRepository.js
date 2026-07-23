@@ -1,5 +1,6 @@
 const BaseRepository = require('./BaseRepository');
-const { Theatre } = require('../models');
+const { Theatre, City } = require('../models');
+const { Op } = require('sequelize');
 
 class TheatreRepository extends BaseRepository {
   constructor() {
@@ -19,7 +20,8 @@ class TheatreRepository extends BaseRepository {
     return await this.findAll({
       where,
       include: [{
-        association: 'city',
+        model: City,
+        as: 'city',
         where: Object.keys(cityWhere).length > 0 ? cityWhere : undefined,
         required: Object.keys(cityWhere).length > 0
       }],

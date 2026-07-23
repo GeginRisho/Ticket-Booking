@@ -20,6 +20,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const venueRoutes = require('./routes/venueRoutes');
 const organizerRoutes = require('./routes/organizerRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const cityRoutes = require('./routes/cityRoutes');
 const globalErrorHandler = require('./middlewares/errorMiddleware');
 const AppError = require('./utils/appError');
 require('dotenv').config();
@@ -61,6 +62,7 @@ app.use(cookieParser());
 // --- API Routes ---
 app.use('/api/auth', authRoutes);
 app.use('/api', reviewRoutes);
+app.use('/api', cityRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/theatres', theatreRoutes);
 app.use('/api', screenRoutes);

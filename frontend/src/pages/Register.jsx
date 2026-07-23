@@ -12,6 +12,21 @@ import toast from 'react-hot-toast';
 
 const Register = () => {
   const [activeRegTab, setActiveRegTab] = useState('customer'); // 'customer' or 'organizer'
+  const [citiesList, setCitiesList] = useState(CITIES);
+  
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const { getCachedCities } = await import('../services/locationService');
+        const list = await getCachedCities();
+        if (list && list.length > 0) {
+          setCitiesList(list);
+          setFormData(prev => ({ ...prev, cityId: list[0].id }));
+        }
+      } catch (err) {}
+    };
+    loadCities();
+  }, []);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -328,7 +343,7 @@ const Register = () => {
                   }}
                   className={`w-full min-h-[44px] px-4 py-2.5 rounded-2xl border ${inlineErrors.cityId ? 'border-red-500 bg-red-50/20' : 'border-gray-200 bg-gray-50'} text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white text-sm font-semibold transition-colors cursor-pointer`}
                 >
-                  {CITIES.map(c => (
+                  {citiesList.map(c => (
                     <option key={c.id} value={c.id}>{c.city_name} ({c.state})</option>
                   ))}
                 </select>

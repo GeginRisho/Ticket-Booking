@@ -40,11 +40,17 @@ class VenueService {
   async createVenue(data, user) {
     const { name, address, city_id, seating_capacity, maps_location, parking_information, contact_number, gallery_images } = data;
     
-    // Verify city exists
-    const city = await City.findByPk(city_id);
+    const LocationService = require('./LocationService');
+    const city = await LocationService.resolveOrCreateCity({
+      city_id,
+      city_name: data.city_name || data.city,
+      state: data.state
+    });
     if (!city) {
       throw new AppError('City not found', 404);
     }
+    
+    const finalCityId = city.id;
     
     const userRole = user.role?.role_name || user.role;
     const organizer_id = userRole === 'Event Organizer' ? user.id : (data.organizer_id || null);
@@ -52,7 +58,7 @@ class VenueService {
     return await Venue.create({
       name,
       address,
-      city_id,
+      city_id: finalCityId,
       seating_capacity,
       maps_location,
       parking_information,
@@ -73,11 +79,17 @@ class VenueService {
       throw new AppError('You do not have permission to modify this venue', 403);
     }
     
-    if (data.city_id) {
-      const city = await City.findByPk(data.city_id);
+    if (data.city_id || data.city_name || data.city || data.state) {
+      const LocationService = require('./LocationService');
+      const city = await LocationService.resolveOrCreateCity({
+        city_id: data.city_id || venue.city_id,
+        city_name: data.city_name || data.city,
+        state: data.state
+      });
       if (!city) {
         throw new AppError('City not found', 404);
       }
+      data.city_id = city.id;
     }
 
     await venue.update(data);

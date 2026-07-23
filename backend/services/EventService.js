@@ -64,11 +64,16 @@ class EventService {
   }
 
   async createEvent(data, user) {
-    // Check city
-    const city = await City.findByPk(data.city_id);
+    const LocationService = require('./LocationService');
+    const city = await LocationService.resolveOrCreateCity({
+      city_id: data.city_id,
+      city_name: data.city_name || data.city,
+      state: data.state
+    });
     if (!city) {
       throw new AppError('City not found', 404);
     }
+    data.city_id = city.id;
 
     // Check category
     const category = await EventCategoryRepository.findById(data.category_id);
@@ -167,12 +172,17 @@ class EventService {
       }
     }
 
-    // If city or category are modified, check existence
-    if (data.city_id) {
-      const city = await City.findByPk(data.city_id);
+    if (data.city_id || data.city_name || data.city || data.state) {
+      const LocationService = require('./LocationService');
+      const city = await LocationService.resolveOrCreateCity({
+        city_id: data.city_id || event.city_id,
+        city_name: data.city_name || data.city,
+        state: data.state
+      });
       if (!city) {
         throw new AppError('City not found', 404);
       }
+      data.city_id = city.id;
     }
     if (data.category_id) {
       const category = await EventCategoryRepository.findById(data.category_id);

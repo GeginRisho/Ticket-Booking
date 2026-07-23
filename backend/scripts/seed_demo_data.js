@@ -34,7 +34,42 @@ const seedData = async () => {
       { id: 'a4444444-4444-4444-4444-444444444444', city_name: 'Chennai', state: 'Tamil Nadu', country: 'India', status: 'active' },
       { id: 'a5555555-5555-5555-5555-555555555555', city_name: 'Hyderabad', state: 'Telangana', country: 'India', status: 'active' },
       { id: 'a6666666-6666-6666-6666-666666666666', city_name: 'Kolkata', state: 'West Bengal', country: 'India', status: 'active' },
-      { id: 'a7777777-7777-7777-7777-777777777777', city_name: 'Pune', state: 'Maharashtra', country: 'India', status: 'active' }
+      { id: 'a7777777-7777-7777-7777-777777777777', city_name: 'Pune', state: 'Maharashtra', country: 'India', status: 'active' },
+      
+      // Kerala & Andhra Pradesh
+      { id: 'b7777777-7777-7777-7777-777777777777', city_name: 'Kochi', state: 'Kerala', country: 'India', status: 'active' },
+      { id: 'b8888888-8888-8888-8888-888888888888', city_name: 'Trivandrum', state: 'Kerala', country: 'India', status: 'active' },
+      { id: 'c1111111-2222-3333-4444-555555555555', city_name: 'Visakhapatnam', state: 'Andhra Pradesh', country: 'India', status: 'active' },
+
+      // All remaining states and UTs in India (36 total states and UTs supported)
+      { id: 'c0000001-0000-0000-0000-000000000001', city_name: 'Itanagar', state: 'Arunachal Pradesh', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000002', city_name: 'Guwahati', state: 'Assam', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000003', city_name: 'Patna', state: 'Bihar', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000004', city_name: 'Raipur', state: 'Chhattisgarh', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000005', city_name: 'Panaji', state: 'Goa', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000006', city_name: 'Ahmedabad', state: 'Gujarat', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000007', city_name: 'Gurgaon', state: 'Haryana', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000008', city_name: 'Shimla', state: 'Himachal Pradesh', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000009', city_name: 'Ranchi', state: 'Jharkhand', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000010', city_name: 'Bhopal', state: 'Madhya Pradesh', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000011', city_name: 'Imphal', state: 'Manipur', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000012', city_name: 'Shillong', state: 'Meghalaya', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000013', city_name: 'Aizawl', state: 'Mizoram', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000014', city_name: 'Kohima', state: 'Nagaland', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000015', city_name: 'Bhubaneswar', state: 'Odisha', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000016', city_name: 'Amritsar', state: 'Punjab', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000017', city_name: 'Jaipur', state: 'Rajasthan', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000018', city_name: 'Gangtok', state: 'Sikkim', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000019', city_name: 'Agartala', state: 'Tripura', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000020', city_name: 'Lucknow', state: 'Uttar Pradesh', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000021', city_name: 'Dehradun', state: 'Uttarakhand', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000022', city_name: 'Port Blair', state: 'Andaman & Nicobar Islands', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000023', city_name: 'Chandigarh', state: 'Chandigarh', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000024', city_name: 'Silvassa', state: 'Dadra & Nagar Haveli and Daman & Diu', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000025', city_name: 'Srinagar', state: 'Jammu & Kashmir', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000026', city_name: 'Leh', state: 'Ladakh', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000027', city_name: 'Kavaratti', state: 'Lakshadweep', country: 'India', status: 'active' },
+      { id: 'c0000001-0000-0000-0000-000000000028', city_name: 'Puducherry', state: 'Puducherry', country: 'India', status: 'active' }
     ];
     for (const c of cityList) {
       await City.findOrCreate({ where: { id: c.id }, defaults: c });
@@ -100,12 +135,27 @@ const seedData = async () => {
 
     // 4. Seed Physical Venues
     console.log('Seeding physical venues...');
-    const demoVenues = [
-      { id: '01111111-1111-1111-1111-111111111111', organizer_id: '40000000-4000-4000-4000-400000000000', city_id: 'a3333333-3333-3333-3333-333333333333', name: 'Skyline Symphony Hall', address: 'Tech Park Zone 2, Bangalore', seating_capacity: 500, maps_location: 'https://maps.google.com/?q=Bangalore+Symphony+Hall', parking_information: 'Valet parking available', contact_number: '+919988776655', gallery_images: ['https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500'] },
-      { id: '02222222-2222-2222-2222-222222222222', organizer_id: '40000000-4000-4000-4000-400000000000', city_id: 'a1111111-1111-1111-1111-111111111111', name: 'Nippon Exhibition Center', address: 'Bandra Reclamation, Mumbai', seating_capacity: 1000, maps_location: 'https://maps.google.com/?q=Mumbai+Exhibition+Center', parking_information: 'Paid public parking available', contact_number: '+919988776644', gallery_images: ['https://images.unsplash.com/photo-1533928298208-27ff66555d8d?w=500'] }
-    ];
-    for (const v of demoVenues) {
-      await Venue.findOrCreate({ where: { id: v.id }, defaults: v });
+    const demoVenues = [];
+    for (let i = 0; i < cityList.length; i++) {
+      const cityObj = cityList[i];
+      const venueId = `00000000-0000-0000-0000-${(i + 1).toString().padStart(12, '0')}`;
+      const v = {
+        id: venueId,
+        organizer_id: '40000000-4000-4000-4000-400000000000',
+        city_id: cityObj.id,
+        name: `${cityObj.city_name} Convention Center`,
+        address: `Convention Boulevard, ${cityObj.city_name}`,
+        seating_capacity: 500 + (i * 50),
+        maps_location: `https://maps.google.com/?q=${cityObj.city_name}+Convention+Center`,
+        parking_information: 'Valet & self parking available',
+        contact_number: `+9199887766${i.toString().padStart(2, '0')}`,
+        gallery_images: ['https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500']
+      };
+      const [venue, created] = await Venue.findOrCreate({ where: { id: v.id }, defaults: v });
+      if (!created) {
+        await venue.update(v);
+      }
+      demoVenues.push(venue);
     }
 
     // 5. Seed Event Categories
@@ -119,8 +169,8 @@ const seedData = async () => {
       await EventCategory.findOrCreate({ where: { id: cat.id }, defaults: cat });
     }
 
-    // 6. Seed exactly 30 Events
-    console.log('Seeding 30 Events...');
+    // 6. Seed exactly 45 Events
+    console.log('Seeding 45 Events...');
     const eventTitles = [
       'A.R. Rahman Symphony Tour', 'Sunburn Arena DJ Snake', 'Zakir Khan Comedy Special', 'Vir Das Mind Fool Tour',
       'Mughal-E-Azam The Musical', 'Shakespeare Hamlet Live Play', 'IPL T20 Wankhede Match', 'Pro Kabaddi Tournament',
@@ -165,17 +215,17 @@ const seedData = async () => {
     };
 
     const seededEvents = [];
-    for (let e = 1; e <= 30; e++) {
+    for (let e = 1; e <= 45; e++) {
       const cityObj = cityList[e % cityList.length];
       const eventId = `e0000000-0000-0000-0000-${e.toString().padStart(12, '0')}`;
-      const venueObj = demoVenues[e % demoVenues.length];
+      const venueObj = demoVenues.find(v => v.city_id === cityObj.id) || demoVenues[0];
 
       const eData = {
         id: eventId,
         organizer_id: '40000000-4000-4000-4000-400000000000',
         category_id: categoryIds[e % categoryIds.length],
-        title: eventTitles[e - 1] || `Premium Event Tour ${e}`,
-        description: `This is the epic description for ${eventTitles[e - 1] || 'Premium Event'}. Experience premium setups and absolute live engagement.`,
+        title: eventTitles[(e - 1) % eventTitles.length] || `Premium Event Tour ${e}`,
+        description: `This is the epic description for ${eventTitles[(e - 1) % eventTitles.length] || 'Premium Event'}. Experience premium setups and absolute live engagement.`,
         venue: venueObj.name,
         venue_id: venueObj.id,
         city_id: cityObj.id,
@@ -272,11 +322,11 @@ const seedData = async () => {
       await MovieCast.findOrCreate({ where: { movie_id, actor_name: cast1.actor_name }, defaults: cast1 });
     }
 
-    // 8. Seed exactly 25 Theatres
-    console.log('Seeding 25 Theatres...');
+    // 8. Seed exactly 45 Theatres
+    console.log('Seeding 45 Theatres...');
     const theatrePrefixes = ['PVR Cinema', 'Inox Multiplex', 'Cinemax', 'Carnival Cinemas', 'Miraj Cinemas'];
     const seededTheatres = [];
-    for (let t = 1; t <= 25; t++) {
+    for (let t = 1; t <= 45; t++) {
       const cityObj = cityList[t % cityList.length];
       const theatreId = `d0000000-0000-0000-0000-${t.toString().padStart(12, '0')}`;
       const descObj = JSON.stringify({

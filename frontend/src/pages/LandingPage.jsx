@@ -26,6 +26,7 @@ const LandingPage = () => {
   useDocumentTitle('Book Movie & Event Tickets Online', 'Discover latest movies, reserve cinema seats, book live events, and download digital tickets instantly with TicketShow.');
 
   const navigate = useNavigate();
+  const [citiesList, setCitiesList] = useState(CITIES);
   const [selectedCity, setSelectedCity] = useState(
     localStorage.getItem('selectedCity') || CITIES[0]?.id || ''
   );
@@ -63,9 +64,30 @@ const LandingPage = () => {
   };
 
   useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const { getCachedCities } = await import('../services/locationService');
+        const list = await getCachedCities();
+        if (list && list.length > 0) {
+          setCitiesList(list);
+          const currentId = localStorage.getItem('selectedCity') || list[0]?.id;
+          const currentObj = list.find(c => c.id === currentId);
+          if (currentObj) {
+            setSelectedCityName(currentObj.city_name);
+            setSelectedState(currentObj.state);
+            fetchData(currentObj.state, currentObj.city_name);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load cities in LandingPage:', err);
+      }
+    };
+    loadCities();
+
     const handleLocationChange = () => {
       const cityId = localStorage.getItem('selectedCity') || '';
-      const cityObj = CITIES.find(c => c.id === cityId);
+      const listToSearch = JSON.parse(sessionStorage.getItem('cached_cities_list') || 'null') || CITIES;
+      const cityObj = listToSearch.find(c => c.id === cityId);
       const cityName = cityObj ? cityObj.city_name : '';
       const stateName = localStorage.getItem('selectedState') || '';
       
@@ -78,7 +100,9 @@ const LandingPage = () => {
     window.addEventListener('locationChanged', handleLocationChange);
     
     // Initial fetch
-    fetchData(selectedState, selectedCityName);
+    const initCityId = localStorage.getItem('selectedCity') || CITIES[0]?.id;
+    const initCityObj = CITIES.find(c => c.id === initCityId);
+    fetchData(localStorage.getItem('selectedState') || initCityObj?.state || '', initCityObj?.city_name || '');
 
     return () => window.removeEventListener('locationChanged', handleLocationChange);
   }, []);
@@ -96,7 +120,7 @@ const LandingPage = () => {
     navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
   };
 
-  const currentCityName = CITIES.find(c => c.id === selectedCity)?.city_name || 'Mumbai';
+  const currentCityName = citiesList.find(c => c.id === selectedCity)?.city_name || 'Mumbai';
 
   // Filters for movie categories
   const nowShowingMovies = movies.filter(m => m.status === 'now_showing');

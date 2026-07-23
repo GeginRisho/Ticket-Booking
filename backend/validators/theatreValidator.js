@@ -12,7 +12,11 @@ const validateResult = (req, res, next) => {
 
 const createTheatreValidator = [
   body('city_id')
-    .matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/).withMessage('city_id must be a valid UUID v4'),
+    .custom(val => {
+      if (val === 'other') return true;
+      if (/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(val)) return true;
+      throw new Error('city_id must be a valid UUID v4 or "other"');
+    }),
 
   body('theatre_name')
     .trim()
@@ -54,7 +58,11 @@ const updateTheatreValidator = [
 
   body('city_id')
     .optional()
-    .matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/).withMessage('city_id must be a valid UUID v4'),
+    .custom(val => {
+      if (val === 'other') return true;
+      if (/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(val)) return true;
+      throw new Error('city_id must be a valid UUID v4 or "other"');
+    }),
 
   body('theatre_name')
     .optional()

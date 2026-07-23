@@ -37,6 +37,8 @@ const Navbar = () => {
     ];
   };
 
+  const [citiesList, setCitiesList] = useState(CITIES);
+
   const [selectedCity, setSelectedCity] = useState(
     localStorage.getItem('selectedCity') || CITIES[0]?.id || ''
   );
@@ -45,15 +47,54 @@ const Navbar = () => {
     localStorage.getItem('selectedState') || CITIES.find(c => c.id === (localStorage.getItem('selectedCity') || CITIES[0]?.id))?.state || 'Maharashtra'
   );
 
-  const statesList = Array.from(new Set(CITIES.map(c => c.state))).sort();
-  const filteredCities = CITIES.filter(c => c.state === selectedState);
+  const statesList = Array.from(new Set(citiesList.map(c => c.state))).sort();
+  const filteredCities = citiesList.filter(c => c.state === selectedState);
 
   useEffect(() => {
+    // Seed initial local storage if empty
+    if (!localStorage.getItem('selectedCity')) {
+      localStorage.setItem('selectedCity', CITIES[0]?.id || '');
+    }
+    if (!localStorage.getItem('selectedState')) {
+      localStorage.setItem('selectedState', CITIES.find(c => c.id === (CITIES[0]?.id))?.state || 'Maharashtra');
+    }
+
+    const loadCities = async () => {
+      try {
+        const { getCachedCities } = await import('../../services/locationService');
+        const list = await getCachedCities();
+        if (list && list.length > 0) {
+          setCitiesList(list);
+          
+          // Re-sync states and cities based on loaded cities
+          const currentCityId = localStorage.getItem('selectedCity') || list[0]?.id;
+          const currentCityObj = list.find(c => c.id === currentCityId);
+          if (currentCityObj) {
+            setSelectedCity(currentCityId);
+            setSelectedState(currentCityObj.state);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load cities in Navbar:', err);
+      }
+    };
+    loadCities();
+
+    // Listen for custom clearLocationCache event if other components clear it
+    const handleLocationRefresh = () => {
+      loadCities();
+    };
+    window.addEventListener('locationChanged', handleLocationRefresh);
+    
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('locationChanged', handleLocationRefresh);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -67,7 +108,7 @@ const Navbar = () => {
     localStorage.setItem('selectedState', stateName);
 
     // Find first city in this state
-    const firstCity = CITIES.find(c => c.state === stateName);
+    const firstCity = citiesList.find(c => c.state === stateName);
     if (firstCity) {
       setSelectedCity(firstCity.id);
       localStorage.setItem('selectedCity', firstCity.id);
@@ -82,7 +123,7 @@ const Navbar = () => {
     localStorage.setItem('selectedCity', cityId);
     
     // Auto-sync state if city changed
-    const cityObj = CITIES.find(c => c.id === cityId);
+    const cityObj = citiesList.find(c => c.id === cityId);
     if (cityObj) {
       setSelectedState(cityObj.state);
       localStorage.setItem('selectedState', cityObj.state);
